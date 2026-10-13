@@ -1,4 +1,14 @@
-# Nero Engine
+# Nero Engine Group
+
+Nero Engine Group Ltd (company 16521432) runs two separate services.
+
+## Nero Lens, for business brokers (https://neroengine.com/lens)
+Nero Lens turns a business-for-sale listing into a short data film, made only from public data (population and drive times, reviews, published prices, visitor numbers, search demand), in the broker's own colours and logo. The pack is the film, a vertical version, a 30-second ad and a Buyer Data Sheet, delivered within 48 hours. It helps brokers sell listings faster and win more instructions. Never trading figures. UK and US brokers.
+- [Nero Lens](https://neroengine.com/lens)
+- [Nero Lens FAQ](https://neroengine.com/lens-faq)
+- [Contact Nero Lens](https://neroengine.com/lens-contact)
+
+# Nero Engine for trades (https://neroengine.com/trades)
 
 > Nero Engine (Nero Engine Group Ltd, company 16521432) builds websites and AI call answering for UK trade businesses on a monthly subscription. £299 a month for the full system, no setup fee, no contract, live inside a week, full refund if not happy after the first 30 days.
 
@@ -18,6 +28,7 @@
 - Demo line: 07915 904711. Tell it your trade and it answers as that trade's business.
 
 ## Key pages
+- [Trades home](https://neroengine.com/trades)
 - [How it works](https://neroengine.com/start)
 - [Pricing](https://neroengine.com/pricing)
 - [Trades we serve](https://neroengine.com/trades-we-serve)
