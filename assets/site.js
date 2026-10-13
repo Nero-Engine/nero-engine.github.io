@@ -96,3 +96,26 @@ const CHAT=document.body.dataset.chat;
 if(CHAT){const go=()=>loadWidget(CHAT);let fired=false;const once=()=>{if(fired)return;fired=true;go()};
   ['scroll','pointerdown','keydown'].forEach(ev=>addEventListener(ev,once,{once:true,passive:true}));setTimeout(once,6000)}
 })();
+
+/* Email chooser (13-10-2026): a mailto link does nothing when the visitor has no mail app set up
+   (Gmail or Outlook in the browser), so every email button opens a small choice of
+   Gmail, Outlook, their own email app, or copy the address. Each opens a ready-made email. */
+(()=>{
+const q=(h)=>{const u=new URL(h.replace(/&amp;/g,'&'));const p=u.searchParams;return{to:decodeURIComponent(u.pathname),su:p.get('subject')||'',bd:p.get('body')||'',raw:h}};
+let box;
+const make=()=>{box=document.createElement('div');box.className='mpick';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Send us an email');
+box.innerHTML='<div class="mp-card"><button class="mp-x" aria-label="Close">×</button><p class="mp-h">Send us an email</p><p class="mp-to"></p><div class="mp-opts"><a class="mp-o" data-k="gmail" target="_blank" rel="noopener">Gmail</a><a class="mp-o" data-k="outlook" target="_blank" rel="noopener">Outlook</a><a class="mp-o" data-k="app">Your email app</a><button class="mp-o" data-k="copy" type="button">Copy the address</button></div><p class="mp-note">A ready-made email opens with everything filled in.</p></div>';
+document.body.appendChild(box);
+box.addEventListener('click',e=>{if(e.target===box||e.target.closest('.mp-x'))close()});
+addEventListener('keydown',e=>{if(e.key==='Escape')close()})};
+const close=()=>{if(box)box.classList.remove('on')};
+const open=(m)=>{if(!box)make();const E=encodeURIComponent;
+box.querySelector('.mp-to').textContent=m.to;
+box.querySelector('[data-k=gmail]').href='https://mail.google.com/mail/?view=cm&fs=1&to='+E(m.to)+'&su='+E(m.su)+'&body='+E(m.bd);
+box.querySelector('[data-k=outlook]').href='https://outlook.office.com/mail/deeplink/compose?to='+E(m.to)+'&subject='+E(m.su)+'&body='+E(m.bd);
+box.querySelector('[data-k=app]').href=m.raw;
+const c=box.querySelector('[data-k=copy]');c.textContent='Copy the address';
+c.onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(m.to):Promise.reject()).then(()=>{c.textContent='Copied: '+m.to}).catch(()=>{c.textContent=m.to})};
+box.classList.add('on');box.querySelector('[data-k=gmail]').focus()};
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="mailto:"]');if(!a||(box&&box.contains(a)))return;e.preventDefault();open(q(a.getAttribute('href')))});
+})();

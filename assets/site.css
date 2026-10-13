@@ -646,3 +646,15 @@ body[data-chat] .wa svg{width:27px;height:27px}
 .lfaq summary::after{content:"+";color:var(--red);font-size:24px;line-height:1}
 .lfaq details[open] summary::after{content:"−"}
 .lfaq p{color:var(--mute);margin-top:12px;font-size:16px}
+/* email chooser (13-10-2026) */
+.mpick{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.66);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.mpick.on{display:flex}
+.mp-card{position:relative;width:100%;max-width:420px;border-radius:var(--r);background:var(--panel2);border:1px solid var(--line2);padding:30px 26px 22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.mp-x{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--mute);font-size:28px;cursor:pointer;line-height:1}
+.mp-h{font-weight:700;font-size:22px;letter-spacing:-.02em}
+.mp-to{color:var(--mute);margin:4px 0 20px;font-size:15px}
+.mp-opts{display:grid;gap:10px}
+.mp-o{display:flex;align-items:center;justify-content:center;height:52px;border-radius:999px;font-weight:700;font-size:16px;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line2);cursor:pointer;font-family:inherit;transition:background .2s,border-color .2s}
+.mp-o:hover,.mp-o:focus-visible{background:rgba(232,0,16,.14);border-color:rgba(232,0,16,.6);outline:none}
+.mp-o[data-k=gmail]{background:var(--red);border-color:var(--red);color:#fff}
+.mp-note{margin-top:14px;font-size:13px;color:var(--dim);text-align:center}
