@@ -658,3 +658,7 @@ body[data-chat] .wa svg{width:27px;height:27px}
 .mp-o:hover,.mp-o:focus-visible{background:rgba(232,0,16,.14);border-color:rgba(232,0,16,.6);outline:none}
 .mp-o[data-k=gmail]{background:var(--red);border-color:var(--red);color:#fff}
 .mp-note{margin-top:14px;font-size:13px;color:var(--dim);text-align:center}
+
+/* affiliate disclosure box (29-10-2026) */
+.aff-disc{max-width:720px;margin:0;padding:14px 18px;border:1px solid var(--line2);border-left:3px solid var(--red);border-radius:12px;background:var(--panel);font-size:16px;line-height:1.5;color:var(--text)}
+.prose code{font-size:.9em}
