@@ -662,3 +662,24 @@ body[data-chat] .wa svg{width:27px;height:27px}
 /* affiliate disclosure box (29-10-2026) */
 .aff-disc{max-width:720px;margin:0;padding:14px 18px;border:1px solid var(--line2);border-left:3px solid var(--red);border-radius:12px;background:var(--panel);font-size:16px;line-height:1.5;color:var(--text)}
 .prose code{font-size:.9em}
+
+/* ---------- Nero Scan pages and three-card front door (30-10-2026) ---------- */
+.gcards.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:860px){.gcards.g3{grid-template-columns:1fr}}
+.shero{padding-bottom:clamp(30px,4vw,50px)}
+.shero h1{max-width:14ch}
+.shero .lead{max-width:60ch}
+.sfilm{margin:0;border-radius:var(--r);overflow:hidden;background:#000;border:1px solid var(--line2);box-shadow:0 30px 120px -40px var(--redglow)}
+.sfilm video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
+.sgets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sgets figure{margin:0;border-radius:var(--r);overflow:hidden;background:var(--panel);border:1px solid var(--line)}
+.sgets img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:#000}
+.sgets figcaption{padding:22px 24px 26px}
+.sgets h3{margin:0 0 8px}.sgets p{color:var(--mute);font-size:16px}
+.slang{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.slang span{padding:10px 18px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);font-weight:600;font-size:16px}
+.slang span.on{border-color:rgba(232,0,16,.6);color:#fff}
+.slang span.more{color:var(--mute);font-weight:500}
+.sdisc{display:inline-block;margin-top:14px;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+@media (max-width:980px){.sgets{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.sgets{grid-template-columns:1fr}}
