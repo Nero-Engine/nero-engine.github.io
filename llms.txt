@@ -13,6 +13,7 @@ Nero Scan turns a patient's own CBCT scan (a 3D dental x-ray) into a short cinem
 - [Nero Scan](https://neroengine.com/scan)
 - [Nero Scan FAQ](https://neroengine.com/scan-faq)
 - [Contact Nero Scan](https://neroengine.com/scan-contact)
+- [Nero Scan en español](https://neroengine.com/es/scan), [preguntas frecuentes](https://neroengine.com/es/scan-faq), [contacto](https://neroengine.com/es/scan-contact)
 
 # Nero Engine for trades (https://neroengine.com/trades)
 
