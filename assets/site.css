@@ -686,3 +686,13 @@ body[data-chat] .wa svg{width:27px;height:27px}
 /* ES / EN language switch in the top menu (Nero Scan, 31-10-2026) */
 .lsw{display:inline-flex;align-items:center;margin-right:10px;padding:7px 12px;border-radius:999px;border:1px solid var(--line2);font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--dim)}
 .lsw:hover{color:#fff;border-color:rgba(232,0,16,.6)}
+
+/* Group link row in every footer (SEO fix 8) */
+.gnav{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:32px;padding-top:20px;border-top:1px solid var(--line);font-size:14px}
+.gnav a{color:var(--dim)}
+.gnav a:hover{color:var(--text)}
+.ghub{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.ghub h2{font-size:clamp(22px,2.2vw,28px);margin:0 0 10px}
+.ghub p{color:var(--dim);margin:0 0 12px}
+.ghub a.more{color:var(--text);text-decoration:underline}
+@media(max-width:860px){.ghub{grid-template-columns:1fr}}

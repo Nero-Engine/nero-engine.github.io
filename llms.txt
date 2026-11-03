@@ -4,12 +4,22 @@ Nero Engine Group Ltd (company 16521432) runs three separate services.
 
 ## Nero Lens, for business brokers (https://neroengine.com/lens)
 Nero Lens turns a business-for-sale listing into a short data film, made only from public data (population and drive times, reviews, published prices, visitor numbers, search demand), in the broker's own colours and logo. The pack is the film, a vertical version, a 30-second ad and a Buyer Data Sheet, delivered within 48 hours. It helps brokers sell listings faster and win more instructions. Never trading figures. UK and US brokers.
+- What the broker sends: the link to the listing. A brochure, photos or anything the broker most wants buyers to know are optional.
+- What comes back, within 48 hours: the data film, a vertical version, a 30-second ad and a Buyer Data Sheet, in the broker's own colours. Nothing goes anywhere until the broker approves it.
+- Data: public sources only, with every number's source on screen and in the Buyer Data Sheet. Never turnover, profit or any trading figures. Confidential listings are left unnamed.
 - [Nero Lens](https://neroengine.com/lens)
 - [Nero Lens FAQ](https://neroengine.com/lens-faq)
 - [Contact Nero Lens](https://neroengine.com/lens-contact)
 
 ## Nero Scan, for dental and jaw clinics (https://neroengine.com/scan)
 Nero Scan turns a patient's own CBCT scan (a 3D dental x-ray) into a short cinematic 3D film: the patient's skull and jaw as glowing x-ray glass, with the diagnosis and treatment from the clinic's own report labelled and the jaw moving. White label, in the clinic's brand colours and logo, in the patient's language, sent to the patient's phone. For CBCT scan centres, TMJ clinics, orthodontists and implant clinics in the UK, the US and Latin America. Every film says it is not medical advice.
+- What the clinic sends: the DICOM export of the CBCT scan, anonymised (no name, date of birth or patient number), and the clinic's report or diagnosis with the name taken off. Logo and brand colours too.
+- What comes back: the film in 4K, a wide version for the consultation screen and a vertical version for the patient's phone, white label, in English or Spanish (more languages on request). Nothing goes to a patient until the clinic approves it.
+- Price: a custom quote, based on how many films the clinic would like each month. Email hello@neroengine.com.
+- Privacy: only the bone and teeth are rebuilt in 3D, with no face, skin or photos. The scan is kept for 30 days after delivery so changes can be made, then deleted. A data processing agreement (UK and EU clinics) or a business associate agreement (US clinics) can be put in place before the first scan.
+- Who makes it: Nero Engine Group Ltd, a company registered in England and Wales (company number 16521432), run by Adam Pearce.
+- Sample film: a 1 minute 42 second film made from a real 874-slice CBCT scan, on the Nero Scan page.
+- En español: Nero Scan convierte la tomografía CBCT de un paciente en un video 3D con la marca de su clínica, en español o inglés. Se cotiza a medida: escriba a hello@neroengine.com.
 - [Nero Scan](https://neroengine.com/scan)
 - [Nero Scan FAQ](https://neroengine.com/scan-faq)
 - [Contact Nero Scan](https://neroengine.com/scan-contact)
