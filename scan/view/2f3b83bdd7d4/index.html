@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Your scan in 3D · Dental Scanning Services</title>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="https://unpkg.com/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
+<style>
+  :root { --red:#E80010; --ink:#f4f4f4; --dim:#9a9a9a; --panel:rgba(8,12,18,.86); --gold:#ffc83a; --acc:#e8f956; --pur:#cbe113; --blu:#e8f956; --lav:#eef4f6; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; background:#01040a; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif; overflow:hidden; overscroll-behavior:none; }
+  #c { position:fixed; inset:0; width:100vw; height:100dvh; touch-action:none; display:block; }
+  .top { position:fixed; top:0; left:0; right:0; padding:calc(env(safe-area-inset-top) + 12px) 16px 8px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+  .brand { display:flex; align-items:center; gap:7px; font-family:Montserrat,sans-serif; font-weight:700; letter-spacing:.16em; font-size:11px; color:var(--lav); }
+  .brand img { height:42px; width:auto; display:block; filter:drop-shadow(0 0 8px rgba(232,249,86,.25)); }
+  .brand small { font-weight:600; letter-spacing:.1em; font-size:8px; color:#a9b4bb; display:block; margin-top:1px; }
+  .lang { pointer-events:auto; font-size:11px; font-weight:700; padding:5px 9px; margin-left:8px; background:rgba(255,255,255,.08); color:var(--lav); letter-spacing:.06em; }
+  .tr { display:flex; align-items:center; }
+  .hint { font-size:11px; color:var(--dim); }
+  .dock { position:fixed; left:0; right:0; bottom:0; padding:10px 12px calc(env(safe-area-inset-bottom) + 10px); display:flex; flex-direction:column; gap:7px; background:linear-gradient(transparent, rgba(0,0,0,.7) 30%); }
+  .row { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+  .row::-webkit-scrollbar { display:none; }
+  #looks button { font-size:13px; padding:8px 11px; }
+  button { font:inherit; border:0; border-radius:999px; padding:9px 13px; background:var(--panel); color:var(--ink); font-size:14px; font-weight:600; white-space:nowrap; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); cursor:pointer; }
+  button:disabled { opacity:.35; }
+  button.on { background:var(--ink); color:#000; }
+  button.layer { font-size:13px; padding:7px 11px; font-weight:500; }
+  button.layer.on { background:#2b2d33; color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--ink); }
+  button.layer.gold.on { box-shadow:inset 0 0 0 1.5px var(--gold); color:var(--gold); }
+  .big { flex:1; font-size:15px; padding:12px 14px; }
+  .problem { background:linear-gradient(100deg, var(--pur), var(--blu)); color:#fff; }
+  .ar { background:var(--ink); color:#000; }
+  .card { position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top) + 62px); background:var(--panel); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:16px; padding:14px 16px 12px; display:none; max-height:44vh; overflow:auto; }
+  .card h3 { font-family:Montserrat,sans-serif; margin:0 0 2px; font-size:17px; color:#fff; padding-right:28px; }
+  .card .sub { font-size:12px; color:var(--acc); font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
+  .card p { margin:0 0 6px; font-size:14px; line-height:1.45; color:#d4d4d4; }
+  .card p b { color:#fff; }
+  .card .x { position:absolute; top:6px; right:6px; background:none; padding:8px 10px; color:var(--dim); }
+  .card .acts { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .card .acts button { font-size:13px; padding:8px 12px; background:#2b2d33; }
+  .steps { display:none; }
+  .steps.on { display:flex; }
+  .steps button { flex:1; }
+  .count { font-size:12px; color:var(--dim); align-self:center; padding:0 6px; }
+  .foot { font-size:10px; color:#777; text-align:center; letter-spacing:.06em; font-family:Montserrat,sans-serif; }
+  .foot a { color:var(--acc); text-decoration:none; }
+  #load { position:fixed; inset:0; display:flex; flex-direction:column; gap:16px; align-items:center; justify-content:center; color:var(--dim); font-size:14px; pointer-events:none; background:#01040a; font-family:Montserrat,sans-serif; }
+  #load img { width:110px; animation:hp 2.2s ease-in-out infinite; }
+  #mv { position:fixed; width:2px; height:2px; left:0; bottom:0; opacity:0; pointer-events:none; }
+  .card.min #cp, .card.min #cacts { display:none; }
+  .card.min h3 { font-size:15px; }
+  .card.min h3::after { content:attr(data-more); font-size:12px; color:var(--dim); font-weight:500; }
+  #hs { position:fixed; inset:0; pointer-events:none; }
+  .hsp { position:absolute; left:0; top:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; pointer-events:auto; cursor:pointer; will-change:transform; }
+  .hsp i { width:5px; height:5px; border-radius:50%; background:#e8f956; box-shadow:0 0 6px 2px rgba(232,249,86,.5); animation:hp 2.6s ease-in-out infinite; }
+  @keyframes hp { 0%,100% { opacity:.35 } 50% { opacity:.8 } }
+  .tag { position:fixed; font-size:11px; font-weight:700; letter-spacing:.05em; padding:3px 7px; border-radius:6px; background:rgba(0,0,0,.6); pointer-events:none; transform:translate(-50%,-140%); white-space:nowrap; display:none; }
+  #tagA { left:50%; transform:translate(-50%,-100%); text-align:center; color:#ddd; border:1px solid rgba(255,255,255,.18); line-height:1.35; padding:4px 9px; }
+  #tagA b { color:#e8f956; }
+  #tagA span { font-weight:600; letter-spacing:.02em; color:#eee; font-size:12px; text-transform:none; }
+  .lab { font-size:12px; letter-spacing:.04em; text-transform:uppercase; }
+  .card p.exl { font-size:12px; color:#e8f956; margin-top:4px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  #qrbox { position:fixed; right:22px; top:50%; transform:translateY(-50%); background:#fff; color:#0b0f16; border-radius:14px; padding:12px 12px 10px; display:none; text-align:center; font:700 12px/1.3 Montserrat,sans-serif; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.45); }
+  #qrbox svg { display:block; width:132px; height:132px; margin:0 auto 7px; }
+  @media (min-width: 1000px) and (hover: hover) { #qrbox.on { display:block; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="load"><img src="logo.png" alt=""><span data-t="load">Cargando tu tomografía…</span></div>
+<div id="hs"></div>
+<model-viewer id="mv" loading="eager" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"></model-viewer>
+<div class="tag" id="tagA"></div>
+<div class="tag lab" id="lab0"></div><div class="tag lab" id="lab1"></div>
+
+<div class="top"><div class="brand"><img src="logo.png" alt="Dental Scanning Services"></div><div class="tr"><div class="hint" id="hint" data-t="hint">Girá · pellizcá · tocá cualquier parte</div><button class="lang" id="lang">EN</button></div></div>
+
+<div class="card" id="card"><button class="x" id="cardx">✕</button><button class="x" id="cardm" style="right:40px">–</button><div class="sub" id="csub"></div><h3 id="ct"></h3><div id="cp"></div><div class="acts" id="cacts"></div></div>
+
+<div class="dock">
+  <div class="row" id="looks">
+    <button data-look="bone" data-t="bone">Real bone</button>
+    <button data-look="xray" data-t="xray">X-ray</button>
+    <button data-look="ghost" class="on" data-t="ghost">Ghost</button>
+    <button id="reset" style="margin-left:auto" data-t="reset">Reset</button>
+  </div>
+  <div class="row" id="layers">
+    <button class="layer on" data-layer="teeth" data-t="l_teeth">Teeth</button>
+    <button class="layer on" data-layer="canal" data-t="l_canal">Nerve canal</button>
+    <button class="layer gold" data-layer="nervemap" data-t="l_nervemap">Nerve map</button>
+    <button class="layer" data-layer="sinus" data-t="l_sinus">Sinuses</button>
+    <button class="layer on" data-layer="skull" data-t="l_skull">Upper skull</button>
+    <button class="layer" data-layer="ear" data-t="l_ear">Ears</button>
+    <button class="layer" data-layer="muscle" data-t="l_muscle">Muscles</button>
+    <button class="layer" data-layer="airway" data-t="l_airway">Airway</button>
+    <button class="layer on" data-layer="dots" data-t="l_dots">Tap points</button>
+  </div>
+  <div class="row" id="main">
+    <button class="big problem" id="pbtn" data-t="pbtn">Show my problem</button>
+    <button class="big ar" id="arbtn" data-t="arbtn">See it on my table</button>
+  </div>
+  <div class="row steps" id="steps">
+    <button class="big" id="sprev" data-t="back">Back</button><span class="count" id="scount"></span><button class="big problem" id="snext">Next</button><button class="big" id="sexit" data-t="exit">Exit</button><button class="big ar" id="sar" style="flex:0 0 auto" data-t="ar">AR</button>
+  </div>
+  <div class="foot" id="foot"><span data-t="foot"></span> · <a id="wa" href="https://www.dentalscanningservices.co.uk/" target="_blank" rel="noopener">dentalscanningservices.co.uk</a></div>
+</div>
+
+<div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your table</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+// ---------- counter: small notes to our own server (never inside the email). ?r= is the recipient code from the email link ----------
+const LISTING = 'scan-dental-scanning-services-mobile-scanning-service-ltd', TRACK = 'https://nero-scan-watch.nerolabs.workers.dev/t';
+const QS = new URLSearchParams(location.search), RCPT = (QS.get('r') || 'none').slice(0, 24);
+const MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+function beacon(e, x = '') { try { const b = JSON.stringify({ l: LISTING, r: RCPT, e, x: String(x).slice(0, 80) }); if (!(navigator.sendBeacon && navigator.sendBeacon(TRACK, b))) fetch(TRACK, { method: 'POST', body: b, keepalive: true, mode: 'cors' }); } catch (err) {} }
+const T0 = performance.now(); let sentTime = 0, TAPPING = 0;
+addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { const sec = Math.round((performance.now() - T0) / 1000); if (sec - sentTime >= 5) { sentTime = sec; beacon('time', sec); } } });
+// the QR: this same page (same recipient code), marked as a phone scan
+function qrSVG(el) { if (!window.qrcode || !el) return; const u = new URL(location.href); u.searchParams.set('v', 'qr'); const q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+
+// ================= BRAND and LANGUAGE =================
+// White label: the page carries the clinic's own name, logo, colours and contact line (colours and logo in the CSS and HTML above).
+// Every visible string exists in Spanish (default for Paraguay) and English; the EN / ES button switches them live.
+const BRAND = { name: "Dental Scanning Services", lang: 'en', wa: '' };
+let LANG = (() => { try { return BRAND.lang; } catch (e) { return BRAND.lang; } })();
+const tr = v => (v && typeof v === 'object' && !Array.isArray(v) && 'en' in v) ? (v[LANG] ?? v.en) : v;
+const T = {
+  en: { load: 'Loading your scan…', hint: 'Spin · pinch · tap anything', bone: 'Real bone', xray: 'X-ray', ghost: 'Ghost', reset: 'Reset',
+    l_teeth: 'Teeth', l_canal: 'Nerve canal', l_nervemap: 'Nerve map', l_sinus: 'Sinuses', l_skull: 'Upper skull', l_ear: 'Ears', l_muscle: 'Muscles', l_airway: 'Airway', l_dots: 'Tap points',
+    pbtn: 'Show my problem', arbtn: 'See it on my table', back: 'Back', next: 'Next', done: 'Done', exit: 'Exit', ar: 'AR',
+    foot: 'FROM YOUR OWN SCAN · PATIENT EDUCATION, NOT A DIAGNOSIS', more: '  · tap to read',
+    exag: 'EXAGGERATED TO SHOW CLEARLY', sim: 'SIMULATED MOVEMENT',
+    exl: n => `The movement is exaggerated about ${n} times so it is easy to see. The numbers above are your real ones.`,
+    tooth: k => `Tooth ${k} · from your scan`, toothName: (q, nm) => `Your ${q} ${nm}`,
+    nUp: 'Its nerve comes from the <b>superior alveolar nerves</b>, which run down past your sinus.', nLow: 'Its nerve comes from the <b>nerve canal</b> that runs through the jaw below its roots.',
+    sideL: 'your left side', sideR: 'your right side', showMap: 'Show the nerve map', hideMap: 'Hide the nerve map',
+    earMM: (l, r) => `In your scan, the top of your jaw bone sits about <b>${l} mm from your left ear canal and ${r} mm from your right</b>.`, earNone: 'Your jaw joint sits just in front of it.',
+    lang: 'ES' },
+  es: { load: 'Cargando tu tomografía…', hint: 'Girá · pellizcá · tocá cualquier parte', bone: 'Hueso real', xray: 'Rayos X', ghost: 'Fantasma', reset: 'Reiniciar',
+    l_teeth: 'Dientes', l_canal: 'Canal del nervio', l_nervemap: 'Mapa de nervios', l_sinus: 'Senos maxilares', l_skull: 'Cráneo', l_ear: 'Oídos', l_muscle: 'Músculos', l_airway: 'Vía aérea', l_dots: 'Puntos',
+    pbtn: 'Mostrar mi problema', arbtn: 'Verlo en mi mesa', back: 'Atrás', next: 'Siguiente', done: 'Listo', exit: 'Salir', ar: 'RA',
+    foot: 'DE TU PROPIA TOMOGRAFÍA · MATERIAL EDUCATIVO, NO REEMPLAZA LA CONSULTA', more: '  · tocá para leer',
+    exag: 'EXAGERADO PARA QUE SE VEA CLARO', sim: 'MOVIMIENTO SIMULADO',
+    exl: n => `El movimiento está exagerado unas ${n} veces para que se vea fácil. Los números de arriba son los tuyos, reales.`,
+    tooth: k => `Diente ${k} · de tu tomografía`, toothName: (q, nm) => `Tu ${nm} ${q}`,
+    nUp: 'Su nervio viene de los <b>nervios alveolares superiores</b>, que bajan por la pared de tu seno maxilar.', nLow: 'Su nervio viene del <b>canal del nervio</b> que recorre la mandíbula por debajo de sus raíces.',
+    sideL: 'tu lado izquierdo', sideR: 'tu lado derecho', showMap: 'Mostrar el mapa de nervios', hideMap: 'Ocultar el mapa de nervios',
+    earMM: (l, r) => `En tu tomografía, la parte de arriba de tu mandíbula queda a unos <b>${l} mm de tu conducto auditivo izquierdo y ${r} mm del derecho</b>.`, earNone: 'Tu articulación de la mandíbula está justo delante.',
+    lang: 'EN' },
+};
+const t = (k, ...a) => { const v = (T[LANG] && T[LANG][k] !== undefined) ? T[LANG][k] : T.en[k]; return typeof v === 'function' ? v(...a) : v; };
+
+// ================= THIS PATIENT (written only from their clinician's reports) =================
+const PATIENT = {
+  source: { en: 'A sample patient scan, explained in plain words. Your own clinician makes the diagnosis.', es: 'Una tomografía de muestra, explicada en palabras simples. Tu propio profesional hace el diagnóstico.' },
+  steps: [
+    { title: { en: 'Your bite, from the side', es: 'Tu mordida, de costado' }, sub: { en: 'Step 1 · the shape of your jaws', es: 'Paso 1 · la forma de tus maxilares' },
+      text: { en: '<p>Your <b>lower jaw sits slightly ahead of your upper jaw</b>. Doctors call this a mild <b>Class III bite</b> (an underbite).</p><p>Your report measures it as −2.5°. Most people are around +2°.</p>',
+              es: '<p>Tu <b>mandíbula está un poco por delante de tu maxilar superior</b>. Los doctores lo llaman <b>Clase III esquelética</b> leve (mordida invertida).</p><p>Tu informe la mide en −2,5°. La mayoría de las personas está alrededor de +2°.</p>' },
+      view: 'sideR', glow: ['mandible'],
+      anim: { type: 'protrude', mm: 2.5, x: 3.5, typical: { en: 'Typical', es: 'Típica' }, you: { en: 'You', es: 'Vos' },
+              t1: { en: 'A typical lower jaw', es: 'Una mandíbula típica' }, t2: { en: 'Yours sits further forward', es: 'La tuya está más adelante' } } },
+    { title: { en: 'Your front teeth', es: 'Tus dientes de adelante' }, sub: { en: 'Step 2 · how your teeth meet', es: 'Paso 2 · cómo se encuentran tus dientes' },
+      text: { en: '<p>On your <b>right side</b>, your bottom front teeth sit <b>2.6 mm in front of the top ones</b>. This is called a <b>crossbite</b>.</p><p>On the left they meet almost edge to edge. Over the years your lower front teeth have tipped back to make up for it.</p>',
+              es: '<p>En tu <b>lado derecho</b>, tus dientes inferiores de adelante quedan <b>2,6 mm por delante de los superiores</b>. Esto se llama <b>mordida cruzada</b>.</p><p>Del lado izquierdo se encuentran casi borde a borde. Con los años, tus incisivos inferiores se inclinaron hacia atrás para compensarlo.</p>' },
+      view: 'teethR', glow: ['tooth_11','tooth_12','tooth_13','tooth_41','tooth_42','tooth_43'],
+      anim: { type: 'bite', mm: 2.6, x: 3, open: 12, label: { en: 'Lower teeth land in front', es: 'Los de abajo quedan adelante' } } },
+    { title: { en: 'One side is a little longer', es: 'Un lado es un poco más largo' }, sub: { en: 'Step 3 · why your face is not quite level', es: 'Paso 3 · por qué tu cara no está del todo pareja' },
+      text: { en: '<p>The <b>right side of your lower jaw is 2.6 mm longer</b> than the left. So your <b>chin sits 4.25 mm to the left</b>, and your lower teeth centre line is 3.3 mm off.</p><p>White line: the centre of your upper teeth. Red line: the centre of your lower teeth.</p>',
+              es: '<p>El <b>lado derecho de tu mandíbula es 2,6 mm más largo</b> que el izquierdo. Por eso tu <b>mentón se desvía 4,25 mm hacia la izquierda</b>, y la línea media de tus dientes inferiores está desviada 3,3 mm.</p><p>Línea blanca: el centro de tus dientes superiores. Línea roja: el centro de tus dientes inferiores.</p>' },
+      view: 'front', glow: ['mandible'], lines: true,
+      anim: { type: 'swing', x: 4, start: { en: 'Centred', es: 'Centrada' }, you: { en: 'You', es: 'Vos' },
+              t1: { en: 'If both sides were the same length', es: 'Si los dos lados midieran lo mismo' }, t2: { en: 'Yours swings to one side', es: 'La tuya se desvía hacia un lado' } } },
+    { title: { en: 'Your jaw joints are healthy', es: 'Tus articulaciones están sanas' }, sub: { en: 'Step 4 · the joints by your ears', es: 'Paso 4 · las articulaciones junto a tus oídos' },
+      text: { en: '<p>Both joints are the <b>same size and sit evenly</b>. Your MRI showed the soft discs inside them <b>in the right place, even when you open wide</b>.</p><p>So the joint itself is not damaged. Watch it roll and slide as you open.</p>',
+              es: '<p>Las dos articulaciones tienen <b>el mismo tamaño y están parejas</b>. Tu resonancia mostró que los discos blandos que tienen adentro están <b>en su lugar, incluso cuando abrís grande</b>.</p><p>O sea, la articulación en sí no está dañada. Mirá cómo rota y se desliza cuando abrís.</p>' },
+      view: 'jointL', joints: 'ok', look: 'xray', anim: { type: 'open' } },
+    { title: { en: 'So it is your bite and muscles', es: 'Entonces son tu mordida y tus músculos' }, sub: { en: 'Step 5 · what this means', es: 'Paso 5 · qué significa esto' },
+      text: { en: '<p>Your lower face is short (64.9 mm; most men are 69.6 to 79.6 mm), so your <b>jaw closes a little too far</b>.</p><p>Together with the underbite and the longer right side, this points to your <b>bite and jaw muscles</b> working too hard, not to the joint. A <b>splint</b> props your bite open by a few millimetres so those muscles can rest.</p>',
+              es: '<p>Tu altura facial inferior es corta (64,9 mm; en la mayoría de los hombres es de 69,6 a 79,6 mm), así que tu <b>mandíbula cierra un poco de más</b>.</p><p>Junto con la mordida invertida y el lado derecho más largo, esto indica que <b>tu mordida y tus músculos de la masticación</b> trabajan de más, no la articulación. Una <b>placa (férula)</b> abre tu mordida unos milímetros para que esos músculos puedan descansar.</p>' },
+      view: 'sideL', glow: ['mandible', 'masseter_L', 'masseter_R', 'temporalis_L', 'temporalis_R'],
+      anim: { type: 'clench', x: 2, gap: 5, t1: { en: 'Clenching: the muscles work hard', es: 'Apretando: los músculos trabajan fuerte' }, t2: { en: 'A splint props your bite open', es: 'Una placa abre tu mordida' }, t3: { en: 'The muscles can rest', es: 'Los músculos pueden descansar' } } },
+  ]
+};
+
+// ================= plain explanations for every part =================
+const TOOTH = {1:['central incisor','A front tooth for biting and cutting food.'],2:['lateral incisor','A front tooth for biting and cutting food.'],3:['canine','The longest root in your mouth. It guides your jaw when you slide your teeth sideways.'],4:['first premolar','Crushes and tears food.'],5:['second premolar','Crushes and tears food.'],6:['first molar','Your biggest chewing surface. It grinds food.'],7:['second molar','Grinds food at the back of your mouth.'],8:['wisdom tooth','The last tooth to arrive, often in your late teens or twenties.']};
+const QUAD = {1:'upper right',2:'upper left',3:'lower left',4:'lower right'};
+const INFO = {
+  mandible: ['Lower jaw','Bone · from your scan', '<p>The <b>only bone in your head that moves</b>. It hinges and slides at the two jaw joints just in front of your ears.</p><p>Strong muscles on each side (the masseter at your cheek and the temporalis at your temple) close it when you chew.</p>', []],
+  skull: ['Upper jaw and skull','Bone · from your scan', '<p>Your upper teeth sit in this bone, which does not move. Your jaw joints sit in two sockets on its underside, just in front of your ears.</p>', []],
+  joint: ['Jaw joint (TMJ)','Joint', '<p>The rounded top of your lower jaw (the <b>condyle</b>) sits in a socket just in front of your ear, with a soft <b>disc</b> between them like a cushion.</p><p>When you open wide it first <b>rolls</b>, then <b>slides forward</b>. A CBCT shows the bone; only an MRI shows the disc.</p>', []],
+  canal: ['Nerve canal','Traced from your scan', '<p>A tunnel through your lower jaw. Inside runs the <b>inferior alveolar nerve</b>, which gives feeling to your lower teeth, lower lip and chin.</p><p>Dentists measure how close tooth roots are to it before taking out a tooth or placing an implant.</p>', ['nerves']],
+  sinus: ['Maxillary sinus','Air space · from your scan', '<p>An air space in your cheekbone, above your upper back teeth. Their roots often sit just under its floor, which is why <b>sinus pressure can feel like toothache</b>.</p>', []],
+  teeth: ['Your teeth','From your scan', '<p>Your scan found <b>__N__ teeth</b>, each with its own root and its own small nerve.</p><p>Tap any single tooth to see its name and what it does.</p>', ['nerves']],
+  ear: ['Ear canal','Air space · from your scan', '<p>The tunnel from the outside of your ear to your eardrum. __EARMM__</p><p>Because the joint sits so close, <b>jaw problems often show up as ear symptoms</b>: fullness, popping, clicking or ringing.</p><p>The tube that pops your ears runs from the middle ear to the back of your nose, and it is opened by a small muscle supplied by <b>the same nerve as your chewing muscles</b>. A scan cannot show that tube, so an ENT doctor or your dentist checks it.</p>', []],
+  airway: ['Your airway','Air space · from your scan', '<p>The tube you breathe through, from the back of your nose down your throat. The narrowest point matters for <b>snoring and sleep apnoea</b>, and dentists can measure it on this scan.</p>', []],
+  nose: ['Nasal passage','Air space · from your scan', '<p>The air passage behind each nostril. It warms and cleans the air before it reaches your throat.</p>', []],
+  palate: ['Roof of your mouth','From your scan', '<p>The hard palate at the front is bone. The soft palate behind it lifts when you swallow, and its vibration is a common cause of snoring.</p>', []],
+  tongue: ['Tongue','Muscle · from your scan (outline approximate)', '<p>A group of muscles. Where your tongue rests affects your bite and your breathing. It gets its feeling from the <b>lingual nerve</b>.</p>', []],
+  masseter: ['Masseter','Chewing muscle · from your scan (outline approximate)', '<p>The strongest chewing muscle, at the back of your cheek. You can feel it bulge when you clench.</p><p><b>Clenching and grinding</b> overwork it, which can cause jaw ache, tired jaws in the morning and headaches. A splint helps it relax.</p>', []],
+  temporalis: ['Temporalis','Chewing muscle · from your scan (outline approximate)', '<p>A fan shaped muscle at your temple that closes your jaw. When it is overworked it can feel like a <b>headache at the side of your head</b>.</p>', []],
+  latptery: ['Lateral pterygoid','Jaw joint muscle · from your scan (outline approximate)', '<p>A small muscle deep behind your cheekbone that <b>pulls your jaw joint forward</b> when you open. Part of it attaches to the joint and its disc, so when it is tight it can play a part in clicking.</p>', []],
+  medptery: ['Medial pterygoid','Chewing muscle · from your scan (outline approximate)', '<p>Sits on the inside of your lower jaw, mirroring the masseter outside. Together they work like a sling that lifts the jaw.</p>', []],
+  n_v1: ['Ophthalmic nerve (V1)','Illustration · average position', '<p>The top branch of your trigeminal nerve. It gives feeling to your forehead, eyes and the top of your nose.</p>', []],
+  n_mass: ['Nerve to your chewing muscle','Illustration · average position', '<p>Crosses the notch at the top of your lower jaw to reach the <b>masseter</b>, the big chewing muscle at your cheek. It is the signal that makes you bite, clench and grind.</p>', []],
+  n_dt: ['Deep temporal nerves','Illustration · average position', '<p>Run up to the <b>temporalis</b>, the fan shaped chewing muscle at your temple. When it is overworked you can feel it as a headache at the side of your head.</p>', []],
+  n_inc: ['Incisive nerve','Illustration · average position', '<p>The end of the nerve in your canal. It carries on inside the jaw to your <b>lower front teeth</b>.</p>', []],
+  n_dent: ['Tooth nerve','Illustration · average position', '<p>Every tooth has its <b>own small nerve</b> entering at the tip of its root. This is what you feel when a tooth hurts.</p>', []],
+  n_gp: ['Greater palatine nerve','Illustration · average position', '<p>Runs along the <b>roof of your mouth</b> and gives feeling to the palate and the gum behind your upper teeth.</p>', []],
+  n_v3: ['Mandibular nerve (V3)','Illustration · average position', '<p>The lowest of the three main branches of your <b>trigeminal nerve</b>, the big nerve of the face. It carries feeling from the lower face and drives the chewing muscles.</p>', []],
+  n_v2: ['Maxillary nerve (V2)','Illustration · average position', '<p>The middle branch of the trigeminal nerve. It runs along the roof of your sinus and gives feeling to your upper teeth, cheek and upper lip.</p>', []],
+  n_ling: ['Lingual nerve','Illustration · average position', '<p>Runs along the inside of your lower jaw to your <b>tongue</b>, giving it feeling. It passes close to the lower wisdom teeth.</p>', []],
+  n_ment: ['Mental nerve','Illustration · average position', '<p>Where your nerve canal comes out of the jaw, below your premolars. It gives feeling to your <b>lower lip and chin</b>.</p>', []],
+  n_at: ['Auriculotemporal nerve','Illustration · average position', '<p>Curls behind your jaw joint and up to your temple. It is one reason <b>jaw problems can be felt at the ear and the side of the head</b>.</p>', []],
+  n_bucc: ['Buccal nerve','Illustration · average position', '<p>Gives feeling to the inside of your cheek and the gum beside your lower back teeth.</p>', []],
+  n_sup: ['Superior alveolar nerves','Illustration · average position', '<p>Small branches that run down the wall of your sinus to <b>your upper teeth</b>.</p>', []],
+  n_io: ['Infraorbital nerve','Illustration · average position', '<p>Comes out just below your eye and gives feeling to your cheek, the side of your nose and your upper lip.</p>', []],
+};
+
+// Spanish cards (same keys as INFO). Medical meaning kept word for word; "canal del nervio", because a CBCT cannot see nerves.
+const TOOTH_ES = {1:['incisivo central','Un diente de adelante para morder y cortar la comida.'],2:['incisivo lateral','Un diente de adelante para morder y cortar la comida.'],3:['canino','La raíz más larga de tu boca. Guía tu mandíbula cuando deslizás los dientes hacia los costados.'],4:['primer premolar','Tritura y desgarra la comida.'],5:['segundo premolar','Tritura y desgarra la comida.'],6:['primer molar','Tu superficie de masticación más grande. Muele la comida.'],7:['segundo molar','Muele la comida en el fondo de tu boca.'],8:['muela del juicio','El último diente en salir, muchas veces al final de la adolescencia o a los veintipico.']};
+const QUAD_ES = {1:'superior derecho',2:'superior izquierdo',3:'inferior izquierdo',4:'inferior derecho'};
+const INFO_ES = {
+  mandible: ['Mandíbula','Hueso · de tu tomografía', '<p>El <b>único hueso de tu cabeza que se mueve</b>. Gira y se desliza en las dos articulaciones que están justo delante de tus oídos.</p><p>Músculos fuertes a cada lado (el masetero en tu mejilla y el temporal en tu sien) la cierran cuando masticás.</p>'],
+  skull: ['Maxilar superior y cráneo','Hueso · de tu tomografía', '<p>Tus dientes de arriba están en este hueso, que no se mueve. Tus articulaciones de la mandíbula se apoyan en dos cavidades de su parte de abajo, justo delante de tus oídos.</p>'],
+  joint: ['Articulación de la mandíbula (ATM)','Articulación', '<p>La parte redondeada de arriba de tu mandíbula (el <b>cóndilo</b>) se apoya en una cavidad justo delante de tu oído, con un <b>disco</b> blando en el medio que funciona como un almohadón.</p><p>Cuando abrís grande primero <b>rota</b> y después <b>se desliza hacia adelante</b>. Una tomografía muestra el hueso; solo una resonancia muestra el disco.</p>'],
+  canal: ['Canal del nervio','Trazado de tu tomografía', '<p>Un túnel que atraviesa tu mandíbula. Por adentro pasa el <b>nervio alveolar inferior</b>, que da sensibilidad a tus dientes de abajo, al labio inferior y al mentón.</p><p>Los dentistas miden qué tan cerca están las raíces antes de sacar un diente o poner un implante.</p>'],
+  sinus: ['Seno maxilar','Espacio de aire · de tu tomografía', '<p>Un espacio de aire dentro del pómulo, encima de tus muelas de arriba. Sus raíces muchas veces quedan justo debajo de su piso; por eso <b>la presión del seno puede sentirse como dolor de muelas</b>.</p>'],
+  teeth: ['Tus dientes','De tu tomografía', '<p>Tu tomografía encontró <b>__N__ dientes</b>, cada uno con su propia raíz y su propio nervio pequeño.</p><p>Tocá cualquier diente para ver su nombre y para qué sirve.</p>'],
+  ear: ['Conducto auditivo','Espacio de aire · de tu tomografía', '<p>El túnel que va desde afuera de tu oído hasta el tímpano. __EARMM__</p><p>Como la articulación está tan cerca, <b>los problemas de la mandíbula muchas veces se notan en el oído</b>: sensación de oído tapado, chasquidos o zumbidos.</p><p>El tubo que destapa tus oídos va del oído medio a la parte de atrás de la nariz, y lo abre un músculo pequeño que recibe <b>el mismo nervio que tus músculos de la masticación</b>. Una tomografía no puede mostrar ese tubo; lo revisa un otorrino o tu dentista.</p>'],
+  airway: ['Tu vía aérea','Espacio de aire · de tu tomografía', '<p>El tubo por el que respirás, desde la parte de atrás de la nariz hasta la garganta. El punto más angosto es importante para <b>los ronquidos y la apnea del sueño</b>, y los dentistas lo pueden medir en esta tomografía.</p>'],
+  nose: ['Fosa nasal','Espacio de aire · de tu tomografía', '<p>El pasaje de aire detrás de cada narina. Calienta y limpia el aire antes de que llegue a tu garganta.</p>'],
+  palate: ['Paladar','De tu tomografía', '<p>El paladar duro de adelante es hueso. El paladar blando de atrás se levanta cuando tragás, y su vibración es una causa común de ronquidos.</p>'],
+  tongue: ['Lengua','Músculo · de tu tomografía (contorno aproximado)', '<p>Un grupo de músculos. Dónde descansa tu lengua influye en tu mordida y en tu respiración. Recibe su sensibilidad del <b>nervio lingual</b>.</p>'],
+  masseter: ['Masetero','Músculo de la masticación · de tu tomografía (contorno aproximado)', '<p>El músculo de la masticación más fuerte, en la parte de atrás de tu mejilla. Lo sentís abultarse cuando apretás.</p><p><b>Apretar y rechinar los dientes</b> lo sobrecargan, y eso puede causar dolor de mandíbula, mandíbula cansada a la mañana y dolores de cabeza. Una placa lo ayuda a relajarse.</p>'],
+  temporalis: ['Temporal','Músculo de la masticación · de tu tomografía (contorno aproximado)', '<p>Un músculo en forma de abanico en tu sien que cierra la mandíbula. Cuando está sobrecargado se puede sentir como un <b>dolor de cabeza al costado</b>.</p>'],
+  latptery: ['Pterigoideo lateral','Músculo de la articulación · de tu tomografía (contorno aproximado)', '<p>Un músculo pequeño, profundo, detrás del pómulo, que <b>tira de tu articulación hacia adelante</b> cuando abrís. Una parte se une a la articulación y a su disco, así que cuando está tenso puede influir en los chasquidos.</p>'],
+  medptery: ['Pterigoideo medial','Músculo de la masticación · de tu tomografía (contorno aproximado)', '<p>Está del lado de adentro de tu mandíbula, como un espejo del masetero de afuera. Juntos funcionan como una hamaca que levanta la mandíbula.</p>'],
+  n_v1: ['Nervio oftálmico (V1)','Ilustración · posición promedio', '<p>La rama de arriba de tu nervio trigémino. Da sensibilidad a la frente, los ojos y la parte de arriba de la nariz.</p>'],
+  n_mass: ['Nervio de tu músculo masetero','Ilustración · posición promedio', '<p>Cruza la escotadura de arriba de tu mandíbula para llegar al <b>masetero</b>, el gran músculo de la masticación de tu mejilla. Es la señal que te hace morder, apretar y rechinar.</p>'],
+  n_dt: ['Nervios temporales profundos','Ilustración · posición promedio', '<p>Suben hasta el <b>temporal</b>, el músculo en abanico de tu sien. Cuando está sobrecargado lo podés sentir como un dolor de cabeza al costado.</p>'],
+  n_inc: ['Nervio incisivo','Ilustración · posición promedio', '<p>El final del nervio de tu canal. Sigue por dentro de la mandíbula hasta tus <b>dientes de abajo de adelante</b>.</p>'],
+  n_dent: ['Nervio del diente','Ilustración · posición promedio', '<p>Cada diente tiene <b>su propio nervio pequeño</b>, que entra por la punta de su raíz. Es lo que sentís cuando te duele un diente.</p>'],
+  n_gp: ['Nervio palatino mayor','Ilustración · posición promedio', '<p>Recorre el <b>paladar</b> y da sensibilidad al paladar y a la encía detrás de tus dientes de arriba.</p>'],
+  n_v3: ['Nervio mandibular (V3)','Ilustración · posición promedio', '<p>La más baja de las tres ramas principales de tu <b>nervio trigémino</b>, el gran nervio de la cara. Lleva la sensibilidad de la parte de abajo de la cara y mueve los músculos de la masticación.</p>'],
+  n_v2: ['Nervio maxilar (V2)','Ilustración · posición promedio', '<p>La rama del medio del trigémino. Corre por el techo de tu seno maxilar y da sensibilidad a tus dientes de arriba, la mejilla y el labio superior.</p>'],
+  n_ling: ['Nervio lingual','Ilustración · posición promedio', '<p>Va por el lado de adentro de tu mandíbula hasta tu <b>lengua</b> y le da sensibilidad. Pasa cerca de las muelas del juicio de abajo.</p>'],
+  n_ment: ['Nervio mentoniano','Ilustración · posición promedio', '<p>Donde tu canal del nervio sale de la mandíbula, debajo de los premolares. Da sensibilidad a tu <b>labio inferior y al mentón</b>.</p>'],
+  n_at: ['Nervio auriculotemporal','Ilustración · posición promedio', '<p>Pasa por detrás de tu articulación y sube hasta la sien. Es una de las razones por las que <b>los problemas de la mandíbula se pueden sentir en el oído y al costado de la cabeza</b>.</p>'],
+  n_bucc: ['Nervio bucal','Ilustración · posición promedio', '<p>Da sensibilidad al interior de tu mejilla y a la encía junto a tus muelas de abajo.</p>'],
+  n_sup: ['Nervios alveolares superiores','Ilustración · posición promedio', '<p>Ramas pequeñas que bajan por la pared de tu seno maxilar hasta <b>tus dientes de arriba</b>.</p>'],
+  n_io: ['Nervio infraorbitario','Ilustración · posición promedio', '<p>Sale justo debajo de tu ojo y da sensibilidad a la mejilla, al costado de la nariz y al labio superior.</p>'],
+};
+
+// ================= renderer =================
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.9;
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(30, 1, 0.005, 10);
+const key = new THREE.DirectionalLight(0xfff0e0, 1.7); key.position.set(0.6, 0.7, 0.9); scene.add(key);
+const rimL = new THREE.DirectionalLight(0xbcd6ff, 2.0); rimL.position.set(-0.8, 0.4, -0.9); scene.add(rimL);
+const rim2 = new THREE.DirectionalLight(0xffd2c8, 1.0); rim2.position.set(0.9, 0.1, -0.6); scene.add(rim2);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x6a6058, 0); scene.add(hemi);  // lifts the dark creases on Real bone
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.45, 0.8); composer.addPass(bloom);
+let baseBloom = 0.5, viewShift = 0, dimV = 0;  // glow eases off when zoomed in close; picture slides down below an open card
+composer.addPass(new OutputPass());
+const controls = new OrbitControls(camera, canvas);
+Object.assign(controls, { enableDamping: true, dampingFactor: 0.09, enablePan: true, screenSpacePanning: true, panSpeed: 0.9, rotateSpeed: 0.75, zoomSpeed: 0.9, minDistance: 0.07, maxDistance: 0.9 });
+controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };  // two fingers slide the model like a map, and pinch to zoom
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+// ================= materials (film engine x-ray glow) =================
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const ADD = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending };
+function glass() {
+  return new THREE.ShaderMaterial({
+    uniforms: { c: { value: new THREE.Color(0xffffff) }, rim: { value: 0.5 }, body: { value: 0.02 }, pw: { value: 2.4 }, op: { value: 1 }, heat: { value: 0 }, hot: { value: V(0,0,0) }, hot2: { value: V(0,0,0) }, hr: { value: 0.012 }, heatC: { value: new THREE.Color(0xff1020) } },
+    vertexShader: `varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.0); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
+    fragmentShader: `uniform vec3 c, heatC, hot, hot2; uniform float rim, body, pw, op, heat, hr; varying vec3 vN; varying vec3 vV; varying vec3 vW;
+      void main(){ float f = pow(clamp(1.0 - abs(dot(normalize(vN), normalize(vV))), 0.0, 1.0), pw); vec3 col = c * (body + rim * f);
+        float d = distance(vW, hot), d2 = distance(vW, hot2); col += heatC * heat * (exp(-d*d/(hr*hr)) + exp(-d2*d2/(hr*hr))) * (0.6 + 1.8 * f);
+        gl_FragColor = vec4(max(col * op, vec3(0.0)), 1.0); }`,
+    ...ADD, side: THREE.DoubleSide });
+}
+// [colour, rim, body, power] per look. X-ray = dense bone and bright teeth like a radiograph. Ghost = the film's glowing outlines.
+const LOOK = {
+  xray:  { skull:[0xdde8f5,0.30,0.075,1.6], mandible:[0xdde8f5,0.32,0.08,1.6], teeth:[0xffffff,0.35,0.22,1.4], sinus:[0x2fe8c8,0.85,0.10,1.6], ear:[0x7fd8ff,0.9,0.12,1.5], airway:[0x5ab0ff,0.7,0.06,1.6], muscle:[0xff6070,0.55,0.07,1.6], clear: 0x05080c },
+  ghost: { skull:[0x9fd0ff,0.55,0.012,2.7], mandible:[0xbfe0ff,0.65,0.016,2.5], teeth:[0xfff6ea,0.55,0.03,2.2], sinus:[0x2fffd0,0.95,0.07,1.8], ear:[0x8fe0ff,1.0,0.08,1.6], airway:[0x5ab8ff,0.8,0.04,1.8], muscle:[0xff4a60,0.7,0.05,1.8], clear: 0x030108 },
+};
+const BONE = { skull: 0xf0eadd, mandible: 0xf0eadd, teeth: 0xfaf6ee, sinus: 0x22e0c0, canal: 0xffb020, ear: 0x6fd0ff, airway: 0x4aa8ff, muscle: 0xc4424e };
+const CANAL = [0xffaa18, 0.95, 0.10, 1.5];  // real canal from the scan: amber glass in every look
+
+// ================= scene graph =================
+const root = new THREE.Group(); scene.add(root);
+const jawPivot = new THREE.Group(); root.add(jawPivot);   // lower jaw, lower teeth and canals move together
+const jawInner = new THREE.Group(); jawPivot.add(jawInner);
+const PARTS = [], byName = {};
+let look = 'ghost';
+const layers = { teeth: true, canal: true, nervemap: false, sinus: false, skull: true, dots: true, ear: false, muscle: false, airway: false };
+const groupOf = n => n.startsWith('tooth') ? 'teeth' : /^(masseter|temporalis|latptery|medptery|tongue)/.test(n) ? 'muscle' : /^(nose|airway|palate)/.test(n) ? 'airway' : n.split('_')[0];
+const isLower = n => /^tooth_[34]/.test(n) || n === 'mandible';
+
+const draco = new DRACOLoader(); draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
+const [gltf, info] = await Promise.all([ loader.loadAsync('../m/model.glb'), fetch('../m/model_info.json').then(r => r.json()) ]);
+const cL = V(...info.condyle_L.center), cR = V(...info.condyle_R.center), cMid = cL.clone().add(cR).multiplyScalar(0.5);
+jawPivot.position.copy(cMid); jawInner.position.copy(cMid).negate();
+
+const meshes = []; gltf.scene.traverse(o => { if (o.isMesh) meshes.push(o); });
+for (const o of meshes) {
+  const name = o.name || o.parent.name; let g = groupOf(name); if (g === 'nerve') g = 'canal';   // the real canal shape from the scan
+  if (!['skull','mandible','teeth','sinus','canal','ear','muscle','airway'].includes(g)) continue;
+  o.updateWorldMatrix(true, false); const geo = o.geometry.clone().applyMatrix4(o.matrixWorld); geo.computeVertexNormals(); geo.computeBoundingBox();
+  const see = ['sinus', 'ear', 'airway'].includes(g);   // air spaces show through the bone, like an x-ray overlay
+  const solid = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: BONE[g], roughness: g === 'teeth' ? 0.4 : 0.85, metalness: 0, envMapIntensity: 1.3, emissive: 0xff1020, emissiveIntensity: 0, transparent: see, opacity: see ? 0.55 : 1, depthWrite: !see, depthTest: !see }));
+  if (see) solid.renderOrder = 4;
+  const gl = new THREE.Mesh(geo, glass());
+  if (g === 'canal') { gl.material.depthTest = false; gl.renderOrder = 6; }
+  solid.userData.part = gl.userData.part = g === 'canal' ? 'canal' : name;
+  (isLower(name) || g === 'canal' ? jawInner : root).add(solid, gl);
+  const centre = new THREE.Vector3(), size = new THREE.Vector3(); geo.boundingBox.getCenter(centre); geo.boundingBox.getSize(size);
+  const p = { name, group: g, solid, glass: gl, centre, size, glow: 0, base: null };
+  PARTS.push(p); byName[name] = p;
+}
+const box = new THREE.Box3(); for (const p of PARTS) if (p.group !== 'canal') box.expandByObject(p.solid);
+const TEETH_N = PARTS.filter(p => p.group === 'teeth').length; let EAR_MM = null;
+{ // this patient's own number: how far each jaw joint sits from the ear canal
+  const gap = (ear, c) => { const p = byName[ear]; if (!p) return null; const a = p.solid.geometry.attributes.position, v = new THREE.Vector3(); let d = 1; for (let i = 0; i < a.count; i += 3) d = Math.min(d, v.fromBufferAttribute(a, i).distanceTo(c)); return Math.round(d * 1000); };
+  const gl = gap('ear_L', cL), gr = gap('ear_R', cR);
+  EAR_MM = gl && gr ? [gl, gr] : null;
+}
+const C = box.getCenter(new THREE.Vector3()), S = box.getSize(new THREE.Vector3());
+
+// ================= nerves: the real canal from the scan + a detailed general nerve map =================
+// Glowing fibres: bright in the middle, soft at the edges (not flat paint), with a pulse running along them.
+const NV = 'varying vec2 vU; varying vec3 vN; varying vec3 vV; void main(){ vU = uv; vec4 mv = modelViewMatrix * vec4(position,1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }';
+const flowMat = (col, k, rep) => new THREE.ShaderMaterial({ uniforms: { t: { value: 0 }, c: { value: new THREE.Color(col) }, k: { value: k }, rep: { value: Math.max(rep, 0.6) } },
+  vertexShader: NV,
+  fragmentShader: 'uniform float t, k, rep; uniform vec3 c; varying vec2 vU; varying vec3 vN; varying vec3 vV; void main(){ float ndv = abs(dot(normalize(vN), normalize(vV))); float core = pow(ndv, 1.3); float p = fract(vU.x * rep - t * 0.5); float g = smoothstep(0.0, 0.1, p) * smoothstep(0.45, 0.1, p); vec3 col = c * k * core * (0.6 + 0.8 * g) + vec3(1.0, 0.97, 0.9) * k * pow(ndv, 8.0) * 0.45; gl_FragColor = vec4(col, 1.0); }',
+  ...ADD });
+const haloMat = col => new THREE.ShaderMaterial({ uniforms: { c: { value: new THREE.Color(col) }, op: { value: 0.12 } }, vertexShader: NV,
+  fragmentShader: 'uniform vec3 c; uniform float op; varying vec3 vN; varying vec3 vV; void main(){ float ndv = abs(dot(normalize(vN), normalize(vV))); gl_FragColor = vec4(c * op * pow(ndv, 2.2), 1.0); }',
+  ...ADD });
+// a tube that gets thinner along its length, like a real nerve branch
+function taperTube(curve, seg, r0, r1, radial) {
+  const geo = new THREE.TubeGeometry(curve, seg, 1, radial, false);
+  const pos = geo.attributes.position, P = new THREE.Vector3(), Q = new THREE.Vector3();
+  for (let i = 0; i <= seg; i++) {
+    curve.getPointAt(i / seg, P); const r = THREE.MathUtils.lerp(r0, r1, i / seg);
+    for (let j = 0; j <= radial; j++) { const k = i * (radial + 1) + j; Q.fromBufferAttribute(pos, k).sub(P).multiplyScalar(r).add(P); pos.setXYZ(k, Q.x, Q.y, Q.z); }
+  }
+  pos.needsUpdate = true; return geo;
+}
+const NERVES = [];
+function tube(points, r0, r1, kind, keyName, parent) {
+  const curve = new THREE.CatmullRomCurve3(points.map(p => Array.isArray(p) ? V(...p) : p.clone()), false, 'centripetal');
+  const L = curve.getLength(), seg = Math.max(10, Math.ceil(L / 0.0012));
+  const core = new THREE.Mesh(taperTube(curve, seg, r0, r1, 12), flowMat(kind === 'canal' ? 0xffd34a : 0xffd27a, kind === 'canal' ? 1.3 : 0.75, L / 0.025));
+  const hal = new THREE.Mesh(taperTube(curve, seg, r0 * 3.2, r1 * 3.2, 10), haloMat(kind === 'canal' ? 0xffa000 : 0xffbb44));
+  core.userData.part = hal.userData.part = keyName; core.renderOrder = hal.renderOrder = 5;
+  (parent || root).add(core, hal); NERVES.push({ mesh: core, halo: hal, kind, key: keyName, k0: core.material.uniforms.k.value });
+  return curve;
+}
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+function bend(a, b, amt) { const d = b.clone().sub(a); const side = V(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).cross(d).normalize().multiplyScalar(d.length() * amt); return a.clone().lerp(b, 0.5).add(side); }
+// fine end branches fanning out, two levels deep
+function fan(start, dir, len, n, r, keyName, parent, depth = 2, spread = 0.7) {
+  const d0 = dir.clone().normalize(), a = Math.abs(d0.y) > 0.9 ? V(1, 0, 0) : V(0, 1, 0), u = a.clone().cross(d0).normalize(), w = d0.clone().cross(u);
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2 + rnd(), sp = spread * (0.6 + 0.5 * rnd());
+    const d = d0.clone().addScaledVector(u, Math.cos(ang) * sp).addScaledVector(w, Math.sin(ang) * sp).normalize();
+    let l = len * (0.7 + 0.5 * rnd()); const top = box.max.y - 0.003;
+    if (d.y > 0 && start.y + d.y * l > top) l = Math.max(0, (top - start.y) / d.y);   // the scan stops here: no branches into empty air
+    if (l < 0.003) continue;
+    const end = start.clone().addScaledVector(d, l);
+    tube([start, bend(start, end, 0.14), end], r, r * 0.45, 'map', keyName, parent);
+    if (depth > 1) fan(end, d, l * 0.6, 2, r * 0.5, keyName, parent, depth - 1, spread * 0.9);
+  }
+}
+const nearest = (arr, p) => arr.reduce((b, q) => q.distanceTo(p) < b.distanceTo(p) ? q : b);
+const canalEnds = {};
+for (const s of ['L', 'R']) {
+  const pts = info['nerve_path_' + s]; if (!pts || pts.length < 4) continue;
+  tube(pts, 0.00075, 0.00065, 'canal', 'canal', jawInner);   // the nerve itself, inside the real canal shape
+  const cp = pts.map(p => V(...p));
+  canalEnds[s] = { start: cp[0], mid: cp[Math.floor(cp.length / 2)], end: cp[cp.length - 1], pts: cp };
+}
+// The general map: average anatomy, placed on this patient's own landmarks (joints, canal, sinuses, every tooth root).
+const apex = (n, up) => { const p = byName[n]; return p ? p.centre.clone().add(V(0, (up ? 1 : -1) * p.size.y * 0.38, 0)) : null; };
+const NMAP = {};
+for (const s of ['L', 'R']) {
+  const sg = s === 'L' ? 1 : -1, c = s === 'L' ? cL : cR, ce = canalEnds[s]; if (!ce) continue;
+  const si = info['sinus_' + s], sinus = si ? V(...si.center) : c.clone().add(V(-sg * 0.012, 0, 0.05)), ssz = si ? V(...si.size) : V(0.03, 0.03, 0.035);
+  const ql = s === 'L' ? 3 : 4, qu = s === 'L' ? 2 : 1;
+  // trigeminal trunk and the lower branch (V3)
+  const G = V(sg * 0.022, c.y + 0.014, c.z + 0.012), FO = V(sg * 0.028, c.y - 0.002, c.z + 0.009), V3b = V(sg * 0.032, c.y - 0.017, c.z + 0.006);
+  NMAP[s] = V3b;
+  tube([G, FO, V3b], 0.0014, 0.0011, 'map', 'n_v3');
+  tube([V3b, bend(V3b, ce.start, 0.08), ce.start], 0.0010, 0.0008, 'map', 'n_v3', jawInner);
+  // lower teeth: incisive nerve to the front, then one small nerve into every root tip
+  const fr = [3, 2, 1].map(t => apex(`tooth_${ql}${t}`, false)).filter(Boolean).map(p => p.add(V(0, -0.002, 0)));
+  const inc = fr.length ? tube([ce.end, ...fr, V(sg * 0.0015, fr[fr.length - 1].y, fr[fr.length - 1].z)], 0.0006, 0.0003, 'map', 'n_inc', jawInner).getSpacedPoints(24) : [];
+  for (let t = 1; t <= 8; t++) {
+    const ap = apex(`tooth_${ql}${t}`, false); if (!ap) continue;
+    const from = t >= 4 ? nearest(ce.pts, ap) : nearest(inc.length ? inc : ce.pts, ap);
+    tube([from, bend(from, ap, 0.1), ap], 0.00042, 0.0002, 'map', 'n_dent', jawInner);
+  }
+  fan(ce.end, V(sg, 0.55, 0.6), 0.011, 3, 0.0005, 'n_ment', jawInner, 2, 0.6);   // mental nerve: lip and chin
+  // tongue, cheek, chewing muscles, ear and temple
+  const lingEnd = V(sg * 0.008, ce.end.y + 0.012, ce.end.z - 0.016);
+  tube([V3b, V(sg * 0.028, ce.mid.y + 0.006, ce.mid.z - 0.006), V(sg * 0.018, ce.end.y + 0.008, ce.end.z - 0.012), lingEnd], 0.0008, 0.0005, 'map', 'n_ling', jawInner);
+  fan(lingEnd, V(-sg * 0.3, 1, 0.35), 0.011, 3, 0.00042, 'n_ling', jawInner, 2, 0.55);
+  const buc = V(sg * 0.044, ce.end.y + 0.022, ce.end.z - 0.014);
+  tube([V(sg * 0.034, c.y - 0.012, c.z + 0.01), V(sg * 0.041, c.y - 0.022, c.z + 0.03), buc], 0.0006, 0.0004, 'map', 'n_bucc');
+  fan(buc, V(sg * 0.4, 0, 1), 0.009, 2, 0.00035, 'n_bucc', root, 2, 0.6);
+  const mass = V(sg * 0.054, c.y - 0.02, c.z + 0.02);
+  tube([FO, V(sg * 0.043, c.y - 0.005, c.z + 0.016), mass], 0.0007, 0.0005, 'map', 'n_mass');
+  fan(mass, V(sg * 0.3, -1, 0.25), 0.017, 3, 0.00045, 'n_mass', root, 2, 0.5);
+  const dt = V(sg * 0.05, c.y + 0.028, c.z + 0.02);
+  tube([FO, V(sg * 0.04, c.y + 0.008, c.z + 0.02), dt], 0.0006, 0.0004, 'map', 'n_dt');
+  fan(dt, V(sg * 0.2, 1, -0.1), 0.018, 3, 0.0004, 'n_dt', root, 2, 0.6);
+  const atTop = V(c.x + sg * 0.005, Math.min(c.y + 0.035, box.max.y - 0.004), c.z - 0.004);
+  tube([FO, V(sg * 0.038, c.y - 0.006, c.z - 0.002), V(c.x + sg * 0.006, c.y + 0.006, c.z - 0.008), atTop], 0.0006, 0.0004, 'map', 'n_at');
+  fan(atTop, V(0, 1, 0.3), 0.012, 2, 0.00035, 'n_at', root, 2, 0.6);
+  // upper branch (V2): along the sinus roof to below the eye, with the nerves to every upper tooth
+  const roof = V(sinus.x * 0.85, sinus.y + ssz.y * 0.45, sinus.z), io = V(sinus.x * 0.85, sinus.y + ssz.y * 0.35, sinus.z + ssz.z * 0.55);
+  const ppf = V(sinus.x * 0.7, roof.y, sinus.z - ssz.z * 0.55);
+  tube([G, V(sg * 0.022, G.y - 0.002, G.z + 0.015), ppf, V(roof.x, roof.y, roof.z - ssz.z * 0.3), roof, io], 0.0011, 0.0008, 'map', 'n_v2');
+  fan(io, V(sg * 0.2, -0.6, 1), 0.013, 4, 0.0005, 'n_io', root, 2, 0.8);
+  const ua = [8, 7, 6, 5, 4, 3, 2, 1].map(t => [t, apex(`tooth_${qu}${t}`, true)]).filter(x => x[1]);
+  if (ua.length > 2) {
+    const plex = ua.map(([, p]) => p.clone().add(V(sg * 0.003, 0.004, 0)));
+    const pc = tube(plex, 0.0005, 0.0003, 'map', 'n_sup').getSpacedPoints(40);
+    tube([ppf, bend(ppf, plex[0], 0.1), plex[0]], 0.0006, 0.0005, 'map', 'n_sup');   // posterior
+    const mid = plex[Math.floor(plex.length / 2)], front = plex[plex.length - 2];
+    tube([roof, bend(roof, mid, 0.1), mid], 0.0005, 0.0004, 'map', 'n_sup');          // middle
+    tube([io, bend(io, front, 0.1), front], 0.0005, 0.0004, 'map', 'n_sup');          // anterior
+    for (const [, p] of ua) { const from = nearest(pc, p); tube([from, bend(from, p, 0.1), p], 0.0004, 0.0002, 'map', 'n_dent'); }
+    const palY = Math.min(...ua.map(([, p]) => p.y)) - 0.006, gp = V(sg * 0.013, palY, ua[0][1].z);
+    tube([ppf, gp, V(sg * 0.012, palY - 0.002, ua[Math.max(0, ua.length - 4)][1].z)], 0.0006, 0.0003, 'map', 'n_gp');
+  }
+  // top branch (V1): over the eye to the forehead
+  const orb = V(sinus.x * 0.9, Math.min(sinus.y + ssz.y * 0.5 + 0.022, box.max.y - 0.01), sinus.z + ssz.z * 0.45);
+  const so = V(sinus.x * 0.72, Math.min(orb.y + 0.01, box.max.y - 0.004), sinus.z + ssz.z * 0.62);
+  tube([G, V(sg * 0.02, G.y + 0.012, G.z + 0.03), orb, so], 0.0009, 0.0006, 'map', 'n_v1');
+  fan(so, V(0, 1, 0.4), 0.012, 3, 0.0004, 'n_v1', root, 2, 0.5);
+}
+
+// ================= halos for the joints, centre lines =================
+const haloTex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d'); const gr = g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.3,'rgba(255,255,255,.45)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0,0,128,128); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+const mkHalo = pos => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, transparent: true, depthWrite: false, opacity: 0, color: 0xff1020, depthTest: false })  /* normal blend: additive glow vanished on white bone */); s.position.copy(pos); s.scale.setScalar(0.03); s.renderOrder = 9; jawInner.add(s); return s; };
+const haloL = mkHalo(cL), haloR = mkHalo(cR);
+const lineMat = col => new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0, depthTest: false });
+const midX = (a, b) => (byName[a] && byName[b]) ? (byName[a].centre.x + byName[b].centre.x) / 2 : 0;
+const upperMidX = midX('tooth_11', 'tooth_21'), lowerMidX = midX('tooth_31', 'tooth_41');
+const lineU = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(upperMidX, box.min.y - 0.01, box.max.z + 0.01), V(upperMidX, box.max.y, box.max.z + 0.01)]), lineMat(0xffffff));
+const lineD = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(lowerMidX, box.min.y - 0.01, box.max.z + 0.012), V(lowerMidX, cMid.y - 0.02, box.max.z + 0.012)]), lineMat(0xff2030));
+lineU.renderOrder = lineD.renderOrder = 10; root.add(lineU); jawInner.add(lineD);
+
+// ================= tap points: a dot on every part you can tap =================
+const hsBox = document.getElementById('hs'), HS = [];
+function addHS(label, pos, parent, tap, cond = () => true) {
+  const el = document.createElement('div'); el.className = 'hsp'; el.innerHTML = '<i></i>'; el.title = label;
+  el.addEventListener('click', e => { e.stopPropagation(); tap(); }); hsBox.appendChild(el); HS.push({ el, pos, parent, cond });
+}
+const mb = byName.mandible ? byName.mandible.solid.geometry.boundingBox : box;
+addHS('Jaw joint', cL, jawInner, () => explain('mandible', jawInner.localToWorld(cL.clone())));
+addHS('Jaw joint', cR, jawInner, () => explain('mandible', jawInner.localToWorld(cR.clone())));
+addHS('Lower jaw', V(lowerMidX, mb.min.y + 0.01, mb.max.z - 0.006), jawInner, () => explain('mandible'));
+if (byName.tooth_11 && byName.tooth_41) addHS('Teeth', byName.tooth_11.centre.clone().add(byName.tooth_41.centre).multiplyScalar(0.5).add(V(0, 0, 0.007)), root, () => explain('teeth'), () => layers.teeth);
+for (const s of ['L', 'R']) if (canalEnds[s]) addHS('Nerve canal', canalEnds[s].mid, jawInner, () => explain('canal'), () => layers.canal || layers.nervemap);
+for (const s of ['L', 'R']) if (info['sinus_' + s]) addHS('Sinus', V(...info['sinus_' + s].center), root, () => { setLayer('sinus', true); explain('sinus_' + s); });
+if (info.sinus_L) { const si = V(...info.sinus_L.center); addHS('Cheekbone', V(box.max.x - 0.008, si.y + 0.006, si.z - 0.004), root, () => explain('skull'), () => layers.skull); }
+for (const s of ['L', 'R']) if (byName['ear_' + s]) addHS('Ear canal', byName['ear_' + s].centre, root, () => { setLayer('ear', true); explain('ear_' + s); }, () => layers.ear);
+for (const s of ['L', 'R']) if (byName['masseter_' + s]) addHS('Masseter', byName['masseter_' + s].centre, root, () => explain('masseter_' + s), () => layers.muscle);
+for (const s of ['L', 'R']) if (byName['temporalis_' + s]) addHS('Temporalis', byName['temporalis_' + s].centre, root, () => explain('temporalis_' + s), () => layers.muscle);
+if (byName.airway) addHS('Airway', byName.airway.centre, root, () => explain('airway'), () => layers.airway);
+for (const s of ['L', 'R']) if (NMAP[s]) addHS('Nerves', NMAP[s], root, () => explain('n_v3'), () => layers.nervemap);
+
+// ================= looks, layers and glow =================
+let glowSet = new Set(), jointMode = null, lineShow = false; const glowCol = new THREE.Color(0xff1020);
+const visibleGroup = g => g === 'mandible' ? true : g === 'teeth' ? layers.teeth : g === 'skull' ? layers.skull : g === 'sinus' ? layers.sinus : g === 'canal' ? (layers.canal || layers.nervemap) : g === 'ear' ? layers.ear : g === 'muscle' ? layers.muscle : g === 'airway' ? layers.airway : true;
+function paint() {
+  renderer.setClearColor(look === 'bone' ? 0x0c0d10 : LOOK[look].clear, 1);
+  baseBloom = look === 'bone' ? 0.15 : look === 'xray' ? 0.3 : 0.65;
+  const b = look === 'bone'; hemi.intensity = b ? 0.75 : 0; key.intensity = b ? 1.0 : 1.7; rimL.intensity = b ? 0.7 : 2.0; rim2.intensity = b ? 0.45 : 1.0; renderer.toneMappingExposure = b ? 0.95 : 0.9;
+  for (const p of PARTS) {
+    const vis = visibleGroup(p.group) || glowSet.has(p.name), cn = p.group === 'canal';
+    p.solid.visible = vis && b && !cn; p.glass.visible = vis && (!b || cn);
+    p.base = cn ? CANAL : b ? null : (LOOK[look][p.group] || LOOK[look].skull);
+  }
+  for (const n of NERVES) { const on = n.kind === 'canal' ? (layers.canal || layers.nervemap) : layers.nervemap; n.mesh.visible = n.halo.visible = on; }
+}
+function setLook(l) { look = l; document.querySelectorAll('#looks [data-look]').forEach(b => b.classList.toggle('on', b.dataset.look === l)); paint(); }
+function setLayer(k, v) { layers[k] = v; document.querySelectorAll('#layers [data-layer]').forEach(b => b.classList.toggle('on', !!layers[b.dataset.layer])); paint(); }
+document.getElementById('looks').onclick = e => { const b = e.target.closest('[data-look]'); if (b) setLook(b.dataset.look); };
+document.getElementById('layers').onclick = e => { const b = e.target.closest('[data-layer]'); if (b) setLayer(b.dataset.layer, !layers[b.dataset.layer]); };
+
+// ================= camera moves =================
+const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+let fly = null;
+function flyTo(target, pos, dur = 1.2) { fly = { t0: performance.now(), dur: dur * 1000, a: controls.target.clone(), b: target.clone(), pa: camera.position.clone(), pb: pos.clone() }; }
+// distance that fits the whole skull on screen, whatever the phone's shape
+const fitD = (size = Math.max(S.x, S.y, S.z)) => { const v = THREE.MathUtils.degToRad(camera.fov) / 2; const h = Math.atan(Math.tan(v) * camera.aspect); return (size * 0.62) / Math.tan(Math.min(v, h)); };
+const VIEWS = {
+  home:   () => { const D = fitD(); return [C, C.clone().add(V(D * 0.33, D * 0.1, D * 0.94))]; },
+  front:  () => { const D = fitD(); return [C.clone().add(V(0, -S.y * 0.12, 0)), C.clone().add(V(0, -S.y * 0.1, D))]; },
+  sideR:  () => { const D = fitD(); return [C.clone().add(V(0, -S.y * 0.08, 0)), C.clone().add(V(-D, 0, D * 0.08))]; },
+  sideL:  () => { const D = fitD(); return [C.clone().add(V(0, -S.y * 0.08, 0)), C.clone().add(V(D, 0, D * 0.08))]; },
+  teeth:  () => { const a = byName.tooth_11, b = byName.tooth_41; const t = a && b ? a.centre.clone().add(b.centre).multiplyScalar(0.5) : C.clone(); const D = fitD(0.06); return [t, t.clone().add(V(-D * 0.5, 0.0, D * 0.87))]; },
+  teethR: () => { const a = byName.tooth_11, b = byName.tooth_41; const t = a && b ? a.centre.clone().add(b.centre).multiplyScalar(0.5) : C.clone(); const D = fitD(0.075); return [t.clone().add(V(0, -0.002, 0.017)), t.clone().add(V(-D * 0.93, D * 0.08, D * 0.36))]; },   // close, from the patient's right
+  jointL: () => { const D = fitD(0.11); return [cL.clone().add(V(0, -0.012, 0.008)), cL.clone().add(V(D * 0.97, D * 0.06, D * 0.22))]; },
+};
+function goView(v, dur) { const [t, p] = VIEWS[v](); flyTo(t, p, dur); }
+controls.target.copy(C); camera.position.copy(VIEWS.home()[1].clone().sub(C).multiplyScalar(1.5).add(C)); goView('home', 1.6);
+
+// ================= step animations: a reusable system for any patient =================
+// A step names a type plus numbers, e.g. { type:'protrude', mm:2.5, x:3.5 }. x = how many times the real amount is
+// exaggerated; anything above 1 shows "EXAGGERATED TO SHOW CLEARLY" on screen and adds a line to the card.
+// Types: open (roll then slide), protrude (jaw slides from typical to the patient's own), bite (open and close onto a
+// crossbite), swing (jaw swings from centred to the patient's off-centre position), clench (muscles squeeze, a splint
+// opens the bite, muscles rest). Directions and centre lines come from the scan itself, never assumed.
+const MM = 0.001, R2D = THREE.MathUtils.degToRad, sstep = (a, b, u) => THREE.MathUtils.smoothstep(u, a, b);
+function jawSet(p = {}, piv = jawPivot) { piv.rotation.set(p.open || 0, p.yaw || 0, 0); piv.position.set(cMid.x + (p.side || 0), cMid.y - (p.down || 0), cMid.z + (p.fwd || 0)); }
+function jawPose(open, slide) { jawSet({ open, fwd: slide, down: slide * 0.35 }); }
+// faint white copy of the lower jaw: where a typical or centred jaw would sit
+const ghostPivot = new THREE.Group(), ghostInner = new THREE.Group(); ghostPivot.add(ghostInner); ghostInner.position.copy(cMid).negate(); root.add(ghostPivot); ghostPivot.visible = false;
+const ghostMats = [];
+for (const p of PARTS) if (isLower(p.name)) { const m = glass(); m.uniforms.c.value.set(0xffffff); m.uniforms.rim.value = 0.6; m.uniforms.body.value = 0.008; m.uniforms.pw.value = 2.2; m.uniforms.op.value = 0; ghostMats.push(m); const gm = new THREE.Mesh(p.solid.geometry, m); gm.renderOrder = 8; ghostInner.add(gm); }
+// this patient's chin point and lower front tooth, in jaw space
+const chinPt = V(lowerMidX, mb.min.y + 0.012, mb.max.z - 0.004);
+const incPt = byName.tooth_41 ? byName.tooth_41.centre.clone().add(V(0, -byName.tooth_41.size.y * 0.55, byName.tooth_41.size.z * 0.5)) : chinPt.clone();
+// chewing muscles squeeze (swell a little about their own centre)
+const MUSC = PARTS.filter(p => /^(masseter|temporalis)/.test(p.name));
+function squeeze(k) { for (const p of MUSC) for (const o of [p.solid, p.glass]) { const s = 1 + 0.08 * k; o.scale.setScalar(s); o.position.copy(p.centre).multiplyScalar(1 - s); } }
+// a see-through splint shaped to the upper teeth (illustration)
+const upper = [17,16,15,14,13,12,11,21,22,23,24,25,26,27].map(t => byName['tooth_' + t]).filter(Boolean);
+const splint = (() => {
+  if (upper.length < 4) return new THREE.Mesh();
+  const pts = upper.map(p => V(p.centre.x, 0, p.centre.z)), tipY = upper.reduce((s, p) => s + p.centre.y - p.size.y * 0.5, 0) / upper.length;
+  const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), 80, 0.0042, 12, false),
+    new THREE.MeshStandardMaterial({ color: 0x8fd8ff, emissive: 0x2a8fff, emissiveIntensity: 0.6, roughness: 0.3, transparent: true, opacity: 0, depthWrite: false }));
+  m.scale.set(1, 0.38, 1); m.position.y = tipY - 0.0012; m.renderOrder = 7; root.add(m); return m;
+})();
+const boost = {};   // per part glow strength set by an animation (1 = normal)
+const ANIM = {
+  open: () => ({ dur: 4200, f: u => { const k = Math.sin(u * Math.PI); const rot = Math.min(k / 0.45, 1); const sl = Math.max(0, (k - 0.35) / 0.65); jawPose(R2D(24) * (0.55 * rot + 0.45 * k), 0.008 * sl); } }),
+  protrude: a => { const back = -(a.mm || 2.5) * MM * (a.x || 1);
+    return { dur: 5200, ghost: { fwd: back }, labels: [[a.typical || 'Typical', '#ffffff', 'ghost', -1], [a.you || 'You', '#ff5060', 'jaw', 1]],
+      phases: [[0.5, a.t1 || 'A typical lower jaw'], [1, a.t2 || 'Yours sits further forward']],
+      f: u => jawSet({ fwd: back * (1 - ease(sstep(0.18, 0.6, u))) }) }; },
+  bite: a => { const extra = (a.mm || 2.6) * MM * Math.max(0, (a.x || 1) - 1), op = R2D(a.open || 12), teeth = (a.teeth || PATIENT.steps.find(s => s.anim === a)?.glow || []);
+    return { dur: 3200, labels: [[a.label || 'Lower teeth land in front', '#ff5060', 'incisor', 1]],
+      f: u => { const k = Math.sin(u * Math.PI); jawSet({ open: op * k, fwd: extra }); const hit = 1 - sstep(0, 0.14, Math.min(u, 1 - u)); for (const n of teeth) boost[n] = 0.85 + 1.0 * hit; } }; },
+  swing: a => { const dz = chinPt.z - cMid.z, y0 = -(lowerMidX - upperMidX) / dz, y1 = y0 * (1 - (a.x || 1));   // y0 = centred, y1 = this patient, exaggerated
+    return { dur: 5200, ghost: { yaw: y0 }, labels: [[a.start || 'Centred', '#ffffff', 'ghost', -1], [a.you || 'You', '#ff5060', 'jaw', 1]],
+      phases: [[0.5, a.t1 || 'If both sides were the same length'], [1, a.t2 || 'Yours swings to one side']],
+      f: u => jawSet({ yaw: THREE.MathUtils.lerp(y0, y1, ease(sstep(0.18, 0.6, u))) }) }; },
+  clench: a => { const gap = R2D(a.gap || 5);
+    return { dur: 7600, f: u => {
+      let open = 0, sq = 0, gw = 0.4, sp = 0, ph;
+      if (u < 0.4) { const c = Math.max(0, Math.sin(u / 0.4 * Math.PI * 3)); sq = c; gw = 0.4 + 1.4 * c; open = R2D(0.8) * (1 - c); ph = a.t1; }
+      else if (u < 0.55) { const e = ease((u - 0.4) / 0.15); open = gap * e; sp = e; gw = 1 - 0.92 * e; ph = a.t2; }
+      else if (u < 0.92) { open = gap; sp = 1; gw = 0.08; ph = a.t3; }
+      else { const e = ease((u - 0.92) / 0.08); open = gap * (1 - e); sp = 1 - e; gw = 0.08 + 0.32 * e; ph = a.t3; }
+      jawSet({ open }); squeeze(sq * Math.min(a.x || 1, 2) / 2); for (const p of MUSC) boost[p.name] = gw; splint.material.opacity = 0.6 * sp; anim.phase = ph || ''; } }; },
+};
+let anim = null;
+const tagA = document.getElementById('tagA'), LABS = [document.getElementById('lab0'), document.getElementById('lab1')];
+function playAnim(spec, loop = true) {
+  stopAnim(); const a = ANIM[spec.type](Object.fromEntries(Object.entries(spec).map(([k, v]) => [k, tr(v)]))); Object.assign(a, { t0: performance.now(), loop, x: spec.x || 1, phase: '' }); anim = a;
+  if (a.ghost) { jawSet(a.ghost, ghostPivot); ghostPivot.visible = true; }
+  a.labels = a.labels || []; LABS.forEach((el, i) => { const l = a.labels[i]; el.style.display = l ? 'block' : 'none'; if (l) { el.textContent = l[0]; el.style.color = l[1]; } });
+  tagA.style.display = 'block';
+}
+function playJaw(kind) { playAnim({ type: kind }); }
+function stopAnim() {
+  anim = null; jawSet(); squeeze(0); for (const k in boost) delete boost[k]; ghostPivot.visible = false; for (const m of ghostMats) m.uniforms.op.value = 0;
+  splint.material.opacity = 0; tagA.style.display = 'none'; LABS.forEach(el => el.style.display = 'none');
+}
+const labAt = { ghost: () => ghostInner.localToWorld(chinPt.clone()), jaw: () => jawInner.localToWorld(chinPt.clone()), incisor: () => jawInner.localToWorld(incPt.clone()) };
+function animFrame(now) {
+  if (!anim) return;
+  const u = Math.max(0, (now - anim.t0) / anim.dur); anim.f(Math.min(u, 1));
+  if (u >= 1) { if (anim.loop) anim.t0 = now + 800; else { stopAnim(); return; } }   // holds the start pose for a moment, then loops
+  for (const m of ghostMats) m.uniforms.op.value += ((ghostPivot.visible ? 0.9 : 0) - m.uniforms.op.value) * 0.1;
+  const ph = anim.phases ? (anim.phases.find(p => Math.min(u, 1) <= p[0]) || anim.phases[anim.phases.length - 1])[1] : anim.phase;
+  tagA.innerHTML = (anim.x > 1 ? '<b>' + t('exag') + '</b>' : t('sim')) + (ph ? '<br><span>' + ph + '</span>' : '');
+  tagA.style.top = (document.querySelector('.dock').getBoundingClientRect().top - 6) + 'px';
+  anim.labels.forEach((l, i) => { tmp.copy(labAt[l[2]]()).project(camera); const el = LABS[i];
+    el.style.left = ((tmp.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((-tmp.y + 1) / 2 * innerHeight) + 'px';
+    el.style.transform = l[3] < 0 ? 'translate(-50%,-160%)' : 'translate(-50%,60%)'; });
+}
+
+// ================= cards =================
+const card = document.getElementById('card');
+function showCard(sub, title, html, acts = []) {
+  if (TAPPING) { TAPPING = 0; beacon('tap', title); }
+  document.getElementById('csub').textContent = sub; document.getElementById('ct').textContent = title; document.getElementById('ct').dataset.more = t('more'); document.getElementById('cp').innerHTML = html;
+  const a = document.getElementById('cacts'); a.innerHTML = '';
+  for (const k of acts) {
+    const b = document.createElement('button');
+    if (k === 'move') { b.textContent = '▶ Watch it move'; b.onclick = () => playJaw('open'); }
+    if (k === 'nerves') { const lab = () => t(layers.nervemap ? 'hideMap' : 'showMap'); b.textContent = lab(); b.onclick = () => { setLayer('nervemap', !layers.nervemap); b.textContent = lab(); }; }
+    a.appendChild(b);
+  }
+  card.style.display = 'block'; setMin(inSteps && stepMin);
+}
+// the card for a part in the chosen language, with this patient's own numbers filled in
+function card$(k) {
+  const d = (LANG === 'es' && INFO_ES[k]) || INFO[k]; if (!d) return null;
+  const html = d[2].replace('__N__', TEETH_N).replace('__EARMM__', EAR_MM ? t('earMM', EAR_MM[0], EAR_MM[1]) : t('earNone'));
+  return [d[0], d[1], html, INFO[k] ? INFO[k][3] : []];
+}
+let lastCard = null;   // re-opens the open card in the new language when EN / ES is pressed
+// in the steps, ✕ and – fold the text down to one line; tapping that line opens it again
+let stepMin = false; const cardm = document.getElementById('cardm');
+function setMin(m) { card.classList.toggle('min', m); cardm.textContent = m ? '+' : '–'; if (inSteps) stepMin = m; }
+const hideCard = () => { card.style.display = 'none'; lastCard = null; };
+document.getElementById('cardx').onclick = e => { e.stopPropagation(); if (inSteps) setMin(true); else { hideCard(); glowSet.clear(); jointMode = null; stopAnim(); } };
+cardm.onclick = e => { e.stopPropagation(); setMin(!card.classList.contains('min')); };
+card.addEventListener('click', () => { if (card.classList.contains('min')) setMin(false); });
+
+// ================= tapping =================
+const ray = new THREE.Raycaster(); let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+canvas.addEventListener('pointerup', e => { TAPPING = 1; queueMicrotask(() => { TAPPING = 0; });
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8 || performance.now() - down.t > 400) return;
+  const r = canvas.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  const targets = [...PARTS.filter(p => visibleGroup(p.group)).map(p => look === 'bone' ? p.solid : p.glass), ...NERVES.filter(n => n.mesh.visible).map(n => n.halo)];
+  const hits = ray.intersectObjects(targets, false); if (!hits.length) return;
+  let hit = hits[0];
+  if (look !== 'bone' || /^(n_|canal|ear|sinus|airway|nose)/.test(hit.object.userData.part)) {
+    const rank = h => { const k = h.object.userData.part; return k.startsWith('n_') || k === 'canal' ? 0 : /^(ear|tooth)/.test(k) ? 1 : /^(sinus|airway|nose|palate|tongue|masseter|temporalis|latptery|medptery)/.test(k) ? 2 : 3; };
+    hit = hits.slice().sort((a, b) => rank(a) - rank(b) || a.distance - b.distance)[0];
+  }
+  explain(hit.object.userData.part, hit.point);
+});
+function explain(k, point) {
+  if (inSteps) exitSteps(false);
+  lastCard = () => explain(k, point);
+  glowSet = new Set(); jointMode = null; glowCol.set(0xff1020); stopAnim();
+  if (k.startsWith('tooth_')) {
+    const q = +k[6], tn = +k[7], [nm, what] = (LANG === 'es' ? TOOTH_ES : TOOTH)[tn];
+    const nerve = q <= 2 ? t('nUp') : t('nLow');
+    glowSet.add(k); showCard(t('tooth', k.slice(6)), t('toothName', (LANG === 'es' ? QUAD_ES : QUAD)[q], nm), `<p>${what}</p><p>${nerve}</p>`, ['nerves']); return;
+  }
+  const wL = jawInner.localToWorld(cL.clone()), wR = jawInner.localToWorld(cR.clone());
+  const jp = point && (point.distanceTo(wL) < 0.016 ? 'L' : point.distanceTo(wR) < 0.016 ? 'R' : null);
+  if ((k === 'mandible' || k === 'skull') && jp) { jointMode = jp; playJaw('open'); const [jt, js, jh, ja] = card$('joint'); showCard(js + ' · ' + t(jp === 'L' ? 'sideL' : 'sideR'), jt, jh, ja); return; }
+  const g = /^(sinus|ear|masseter|temporalis|latptery|medptery)/.test(k) ? k.split('_')[0] : /^nose/.test(k) ? 'nose' : k;
+  if (g === 'teeth') for (const p of PARTS) if (p.group === 'teeth') glowSet.add(p.name);
+  const d = card$(g); if (!d) return;
+  if (g === 'mandible' || g === 'sinus') for (const p of PARTS) if (p.group === g) glowSet.add(p.name);
+  if (['ear', 'masseter', 'temporalis', 'latptery', 'medptery', 'nose'].includes(g)) for (const p of PARTS) if (p.name.startsWith(g + '_')) glowSet.add(p.name);
+  if (['airway', 'palate', 'tongue'].includes(g)) glowSet.add(g);
+  if (['masseter', 'temporalis', 'latptery', 'medptery'].includes(g)) playJaw('open');
+  if (g === 'mandible') playJaw('open');
+  if (g === 'skull') glowSet.add('skull');
+  if (g === 'canal' || g.startsWith('n_')) glowSet.add(g);
+  showCard(d[1], d[0], d[2], d[3]);
+}
+
+// ================= problem steps =================
+let inSteps = false, step = 0, savedState = null;
+const stepsRow = document.getElementById('steps'), mainRow = document.getElementById('main');
+function runStep(i) {
+  step = i; const s = PATIENT.steps[i]; lastCard = () => { stepCard(step); if (anim && s.anim) playAnim(s.anim); };
+  glowSet = new Set(s.glow || []); jointMode = s.joints || null; glowCol.set(s.joints === 'ok' ? 0x20ff70 : 0xff1020);
+  stopAnim();
+  lineShow = !!s.lines;
+  setLook(s.look || 'ghost');
+  goView(s.view, 1.4);
+  if (s.anim) setTimeout(() => { if (inSteps && step === i) playAnim(s.anim); }, 1500);
+  stepCard(i);
+}
+function stepCard(i) {
+  const s = PATIENT.steps[i];
+  const ex = s.anim && s.anim.x > 1 ? `<p class="exl">${t('exl', LANG === 'es' ? String(s.anim.x).replace('.', ',') : s.anim.x)}</p>` : '';
+  showCard(tr(s.sub), tr(s.title), tr(s.text) + ex + `<p style="font-size:11px;color:#888;margin-top:8px">${tr(PATIENT.source)}</p>`);
+  document.getElementById('scount').textContent = `${i + 1} / ${PATIENT.steps.length}`;
+  document.getElementById('sprev').disabled = i === 0; document.getElementById('snext').textContent = t(i === PATIENT.steps.length - 1 ? 'done' : 'next');
+}
+function enterSteps() { inSteps = true; savedState = { look, layers: { ...layers } }; stepsRow.classList.add('on'); mainRow.style.display = 'none'; if (look === 'bone') setLook('ghost'); runStep(0); }
+function exitSteps(goHome = true) {
+  inSteps = false; stepsRow.classList.remove('on'); mainRow.style.display = 'flex'; glowSet.clear(); jointMode = null; lineShow = false; stopAnim(); hideCard();
+  if (savedState) { Object.assign(layers, savedState.layers); setLayer('teeth', layers.teeth); setLook(savedState.look); savedState = null; }
+  if (goHome) goView('home', 1.2);
+}
+document.getElementById('pbtn').onclick = () => { beacon('steps'); enterSteps(); };
+document.getElementById('sprev').onclick = () => step > 0 && runStep(step - 1);
+document.getElementById('snext').onclick = () => step < PATIENT.steps.length - 1 ? runStep(step + 1) : exitSteps();
+document.getElementById('sexit').onclick = () => exitSteps();
+document.getElementById('reset').onclick = () => { if (inSteps) exitSteps(false); glowSet.clear(); jointMode = null; hideCard(); stopAnim(); goView('home', 1.0); };
+
+// ================= AR: put the scan on a real table =================
+// Built from what is on screen, then handed to model-viewer (iPhone Quick Look makes its USDZ from it; Android uses Scene Viewer or WebXR).
+// Quick Look cannot draw glowing edges or bloom, so the table copy is solid Real bone by default: real detail, with the
+// chosen layers and the problem glow. The see-through Ghost and X-ray copies stay as an option.
+// (08-11-2026: the camera "table mode" was removed: it felt unsteady and added nothing. A true table lock that keeps our
+// own buttons needs an App Clip on iPhone or WebXR on Android, not built yet.)
+const mv = document.getElementById('mv'); let arURL = null;
+const LOOKNAME = { bone: 'Real bone', xray: 'X-ray', ghost: 'Ghost' };
+function arMat(group, glow, lk) {
+  const m = new THREE.MeshStandardMaterial({ roughness: 0.7, metalness: 0 });
+  const set = (col, op, em, ei) => { m.color.set(col); if (op < 1) { m.transparent = true; m.opacity = op; m.depthWrite = false; } m.emissive.set(em); m.emissiveIntensity = ei; };
+  const t = group === 'teeth', b = lk === 'bone';
+  if (group === 'nerve') set(0xffd34a, 1, 0xffb020, 1);
+  else if (group === 'map') set(0xffd27a, 1, 0xffaa30, 0.8);
+  else if (group === 'canal') set(0xffb020, b ? 1 : 0.6, 0xff9a00, 0.8);
+  else if (group === 'sinus') set(0x2fe0c0, 0.5, 0x20c0a0, 0.7);
+  else if (group === 'ear' || group === 'airway') set(0x6fc8ff, 0.5, 0x3a9fff, 0.7);
+  else if (group === 'muscle') set(0xd04050, b ? 1 : 0.55, 0x801020, 0.4);
+  else if (b) { set(t ? 0xfaf6ee : 0xf0eadd, 1, 0x000000, 0); m.roughness = t ? 0.4 : 0.85; }
+  else if (lk === 'xray') set(t ? 0xffffff : 0xdfe8f5, t ? 0.8 : 0.3, t ? 0x888888 : 0x405060, 0.6);
+  else set(t ? 0xfff6ea : 0x8fc8ff, t ? 0.55 : 0.2, t ? 0x806a50 : 0x3f90ff, 0.9);
+  if (glow) { m.emissive.copy(glowCol); m.emissiveIntensity = b ? 0.75 : 0.9; if (b) m.color.lerp(glowCol, 0.35); if (m.transparent) m.opacity = Math.max(m.opacity, 0.6); }
+  return m;
+}
+async function buildAR(lk = 'bone') {
+  const g = new THREE.Group();
+  const glowing = p => glowSet.has(p.name) || (p.group === 'canal' && glowSet.has('canal'));
+  for (const p of PARTS) if (visibleGroup(p.group) || glowSet.has(p.name)) g.add(new THREE.Mesh(p.solid.geometry, arMat(p.group, glowing(p), lk)));
+  for (const n of NERVES) if (n.mesh.visible) g.add(new THREE.Mesh(n.mesh.geometry, arMat(n.kind === 'canal' ? 'nerve' : 'map', glowSet.has(n.key), lk)));
+  if (jointMode) for (const [c, side] of [[cL, 'L'], [cR, 'R']]) if (jointMode === 'ok' || jointMode === side) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.007, 24, 16), new THREE.MeshStandardMaterial({ color: glowCol, emissive: glowCol, emissiveIntensity: 1, transparent: true, opacity: 0.7 })); m.position.copy(c); g.add(m);
+  }
+  const buf = await new GLTFExporter().parseAsync(g, { binary: true });
+  if (arURL) URL.revokeObjectURL(arURL); arURL = URL.createObjectURL(new Blob([buf], { type: 'model/gltf-binary' }));
+  await new Promise((res, rej) => { mv.addEventListener('load', res, { once: true }); mv.addEventListener('error', () => rej(new Error('the model did not load')), { once: true }); mv.src = arURL; });
+}
+const ART = {
+  en: { sub: 'Augmented reality', title: 'Put your scan on a table',
+    p1: g => `Your phone's own AR puts your scan on a real table, life size, in <b>solid Real bone</b> so you can see the detail${g}. The layers you have turned on come too.`,
+    green: ', with your healthy joints glowing green', red: ', with your problem glowing red',
+    p2: "<b>In Apple's AR you walk round it instead of spinning it.</b> Drag with one finger to move it, twist two fingers to turn it, and lean in close to look inside.",
+    p3: "The “Object” tab at the top is Apple's own screen and works the same way. Our buttons and steps stay here on this page.",
+    prep: 'Getting your 3D model ready…', go: 'Place it on my table', ready: n => `Ready, in ${n}.`, phone: 'AR works on iPhone and Android phones: open this same link on your phone.', noar: "This phone can't place it in your room, but everything else on this page works. On Android, open the link in Chrome.",
+    fail: m => `Sorry, that did not work (${m}). Try again.`, alt: n => `See-through ${n} instead (less detail)`, back: 'Back to Real bone' },
+  es: { sub: 'Realidad aumentada', title: 'Poné tu tomografía sobre una mesa',
+    p1: g => `La realidad aumentada de tu celular pone tu tomografía sobre una mesa de verdad, en tamaño real, en <b>hueso real sólido</b> para que veas el detalle${g}. Las capas que tenés activadas también aparecen.`,
+    green: ', con tus articulaciones sanas brillando en verde', red: ', con tu problema brillando en rojo',
+    p2: '<b>En la realidad aumentada de Apple caminás alrededor en lugar de girarla.</b> Arrastrá con un dedo para moverla, girá dos dedos para rotarla y acercate para mirar adentro.',
+    p3: 'La pestaña “Objeto” de arriba es una pantalla propia de Apple y funciona igual. Nuestros botones y pasos quedan acá, en esta página.',
+    prep: 'Preparando tu modelo 3D…', go: 'Ponerla en mi mesa', ready: n => `Lista, en ${n}.`, phone: 'La realidad aumentada funciona en celulares iPhone y Android: abrí este mismo enlace en tu celular.', noar: 'Este celular no puede ponerla en tu habitación, pero todo lo demás de esta página funciona. En Android, abrí el enlace en Chrome.',
+    fail: m => `Perdón, no funcionó (${m}). Probá de nuevo.`, alt: n => `${n} transparente (menos detalle)`, back: 'Volver a hueso real' },
+};
+function openAR() {
+  lastCard = openAR;
+  const A = ART[LANG] || ART.en, nm = k => t(k), mob = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent), noAR = () => mob ? A.noar : A.phone;
+  const glowing = glowSet.size || jointMode;
+  showCard(A.sub, A.title,
+    `<p>${A.p1(jointMode === 'ok' ? A.green : glowing ? A.red : '')}</p><p>${A.p2}</p><p style="font-size:12px;color:#999">${A.p3}</p><p id="arst" style="color:#888;font-size:12px">${A.prep}</p>`, []);
+  setMin(false);
+  const a = document.getElementById('cacts'), st = document.getElementById('arst');
+  let lk = 'bone', busy = 0;
+  const go = document.createElement('button'); go.textContent = A.go; go.style.background = '#f4f4f4'; go.style.color = '#000'; go.disabled = true;
+  go.onclick = e => { e.stopPropagation(); beacon('ar-launch'); if (mv.canActivateAR) mv.activateAR(); else st.textContent = noAR(); };
+  a.appendChild(go);
+  const prep = async () => {
+    const me = ++busy; go.disabled = true; st.textContent = A.prep;
+    try { await buildAR(lk); if (me !== busy) return; go.disabled = false; st.textContent = A.ready(nm(lk)) + (mv.canActivateAR ? '' : ' ' + noAR()); }
+    catch (err) { if (me === busy) { st.textContent = A.fail(err.message); go.disabled = false; } }
+  };
+  if (look !== 'bone') {
+    const cur = look, alt = document.createElement('button'); alt.textContent = A.alt(nm(cur)); alt.style.fontSize = '12px'; alt.style.background = 'none'; alt.style.color = '#aaa';
+    alt.onclick = e => { e.stopPropagation(); lk = lk === 'bone' ? cur : 'bone'; alt.textContent = lk === 'bone' ? A.alt(nm(cur)) : A.back; prep(); };
+    a.appendChild(alt);
+  }
+  prep();
+}
+document.getElementById('arbtn').onclick = () => { beacon('ar-button', MOBILE ? 'phone' : 'computer'); openAR(); };
+document.getElementById('sar').onclick = () => { beacon('ar-button', (MOBILE ? 'phone' : 'computer') + ' in steps'); openAR(); };
+
+// ================= loop =================
+// language: fill every labelled button, and switch live with the EN / ES button
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.getElementById('lang').textContent = t('lang');
+  if (inSteps) document.getElementById('snext').textContent = t(step === PATIENT.steps.length - 1 ? 'done' : 'next');
+  if (card.style.display === 'block' && lastCard) { const m = card.classList.contains('min'); lastCard(); setMin(m); }
+}
+document.getElementById('lang').onclick = () => { LANG = LANG === 'es' ? 'en' : 'es'; try { localStorage.setItem('scanLang', LANG); } catch (e) {} applyLang(); };
+applyLang();
+document.getElementById('load').style.display = 'none';
+beacon('open', (MOBILE ? 'phone' : 'computer') + (QS.get('v') === 'qr' ? ' via qr' : ''));
+if (!MOBILE) { qrSVG(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
+
+setLook('ghost');   // Adam's favourite, 08-11-2026
+const clock = new THREE.Clock(), tmp = new THREE.Vector3();
+function frame() {
+  const t = clock.getElapsedTime(), now = performance.now();
+  if (fly) { const u = Math.min(1, (now - fly.t0) / fly.dur), e = ease(u); controls.target.lerpVectors(fly.a, fly.b, e); camera.position.lerpVectors(fly.pa, fly.pb, e); if (u >= 1) fly = null; }
+  controls.update();
+  // glow eases off up close, so the see-through looks stay sharp instead of milky
+  bloom.strength = baseBloom * THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) / 0.6, 0.25, 1);
+  // keep the model centred in the clear space between the open card and the buttons
+  { const H = innerHeight, cardEl = document.getElementById('card'), dockEl = document.querySelector('.dock');
+    const top = cardEl.style.display === 'block' ? cardEl.getBoundingClientRect().bottom : 40, bot = dockEl.getBoundingClientRect().top;
+    const want = Math.max(0, (top + bot) / 2 - H / 2); viewShift += (want - viewShift) * 0.12;
+    if (Math.abs(viewShift) < 0.5) camera.clearViewOffset(); else camera.setViewOffset(innerWidth, H, 0, -viewShift, innerWidth, H); }
+  const pulse = 0.65 + 0.35 * Math.sin(t * 3.2);
+  const wL = jawInner.localToWorld(cL.clone()), wR = jawInner.localToWorld(cR.clone());
+  dimV += ((glowSet.size || jointMode ? 1 : 0) - dimV) * 0.08;   // whatever is tapped stays bright, the rest dims
+  for (const p of PARTS) {
+    p.glow += ((glowSet.has(p.name) || (p.group === 'canal' && glowSet.has('canal')) ? 1 : 0) - p.glow) * 0.12;
+    const gw = p.glow * (boost[p.name] ?? 1);
+    p.solid.material.emissive.copy(glowCol); p.solid.material.emissiveIntensity = gw * 0.55 * pulse;
+    const u = p.glass.material.uniforms;
+    if (p.base) { u.c.value.set(p.base[0]).lerp(glowCol, Math.min(1, gw) * 0.85); u.rim.value = p.base[1] * (1 + 1.2 * gw * pulse); u.body.value = p.base[2] + 0.05 * gw; u.pw.value = p.base[3]; }
+    const keep = glowSet.has(p.name) || (p.group === 'canal' && glowSet.has('canal')) || (jointMode && p.name === 'mandible'), dk = 1 - (keep ? 0 : 0.62 * dimV);
+    const bz = boost[p.name], calm = bz === undefined ? 1 : 0.25 + 0.75 * Math.min(1, bz);   // an animation can calm a part right down
+    if (p.base) { u.rim.value *= dk * calm; u.body.value *= dk * calm; }
+    p.solid.material.color.set(BONE[p.group]).multiplyScalar((keep ? 1 : 1 - 0.5 * dimV) * (0.4 + 0.6 * calm));
+    const jh = p.name === 'mandible' && jointMode;
+    u.heatC.value.copy(glowCol); u.heat.value += ((jh ? 1.2 * pulse : 0) - u.heat.value) * 0.15; u.hr.value = 0.011;
+    if (jh) { u.hot.value.copy(jointMode === 'R' ? wR : wL); u.hot2.value.copy(jointMode === 'L' ? wL : wR); }
+  }
+  for (const n of NERVES) { n.mesh.material.uniforms.t.value = t; const g = glowSet.has(n.key); const hu = n.halo.material.uniforms.op; hu.value += ((g ? 0.55 : (n.kind === 'canal' ? 0.18 : 0.1)) - hu.value) * 0.15; n.mesh.material.uniforms.k.value = n.k0 * (g ? 1.3 : 1 - 0.6 * dimV); }
+  for (const [h, side] of [[haloL, 'L'], [haloR, 'R']]) { h.material.color.copy(glowCol); const want = (jointMode === 'ok' || jointMode === side) ? 0.9 * pulse : 0; h.material.opacity += (want - h.material.opacity) * 0.15; h.scale.setScalar(0.026 + 0.012 * pulse); }
+  lineU.material.opacity += ((lineShow ? 0.9 : 0) - lineU.material.opacity) * 0.1; lineD.material.opacity = lineU.material.opacity;
+  { const show = layers.dots && !inSteps;
+    for (const h of HS) {
+      const w = h.parent.localToWorld(h.pos.clone()), facing = w.clone().sub(C).normalize().dot(camera.position.clone().sub(w).normalize());
+      tmp.copy(w).project(camera);
+      const on = show && h.cond() && facing > -0.25 && Math.abs(tmp.x) < 1.02 && Math.abs(tmp.y) < 1.02;
+      h.el.style.display = on ? 'flex' : 'none';
+      if (on) h.el.style.transform = `translate(${(tmp.x + 1) / 2 * innerWidth - 14}px, ${(-tmp.y + 1) / 2 * innerHeight - 14}px)`;
+    } }
+  animFrame(now);   // step and tap animations (tapped parts keep moving on a loop)
+  composer.render();
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>
