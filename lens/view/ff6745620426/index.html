@@ -6,6 +6,12 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>1 Streamside Drive in 3D</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="1 Streamside Drive in 3D">
+<meta property="og:description" content="Spin it, tap the facts, and place it on your desk.">
+<meta property="og:site_name" content="REV Real Estate">
+<meta property="og:image" content="https://neroengine.com/lens/view/ff6745620426/poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.png?v=4ef42719">
 <link rel="apple-touch-icon" href="icon.png?v=4ef42719">
 <link rel="stylesheet" href="../_e/fonts/montserrat.css">
@@ -40,7 +46,7 @@
   addEventListener('unhandledrejection', function (e) { fail((e.reason && (e.reason.message || e.reason)) || 'load failed'); });
   setTimeout(function () { if (!loaded) fail('timeout: no 3D after 40s'); }, 40000);
   window.NV = {
-    id: C.id, rcpt: R, mobile: mobile, inapp: !!inapp, qs: qs, beacon: beacon, fail: fail,
+    id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, qs: qs, beacon: beacon, fail: fail,
     reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
     loaded: function () { if (loaded) return; loaded = 1; beacon('loaded', (Math.round((performance.now() - t0) / 100) / 10) + 's'); },
     qr: function (el) { if (!window.qrcode || !el) return; var u = new URL(location.href); u.searchParams.set('v', 'qr'); var q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
@@ -70,20 +76,28 @@
   #top .t b { display:block; font-size:15px; font-weight:700; letter-spacing:.01em; }
   #top .t span { font-size:12px; color:var(--dim); font-weight:500; }
   #top .t span em { font-style:normal; color:var(--hero); font-weight:700; }
-  #hint { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 72px); transform:translateX(-50%); font-size:12px; color:var(--dim); background:rgba(var(--bgc),.6);
+  #hint { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); font-size:12px; color:var(--dim); background:rgba(var(--bgc),.6);
           padding:5px 11px; border-radius:20px; white-space:nowrap; pointer-events:none; transition:opacity .6s; }
   #bottom { position:fixed; left:0; right:0; bottom:0; padding:10px 0 calc(env(safe-area-inset-bottom) + 8px); background:linear-gradient(rgba(var(--bgc),0), rgba(var(--bgc),.93) 28%); }
   #card { margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.1); border-radius:14px; padding:12px 14px 12px; display:none; position:relative; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
-  #card .k { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--hero); font-weight:700; padding-right:28px; }
+  #card .k { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--hero); font-weight:700; padding-right:128px; }
   #card h2 { margin:3px 0 4px; font-size:21px; font-weight:800; letter-spacing:-.01em; }
   #card h2 em { font-style:normal; color:var(--hero); }
   #card p { margin:0; font-size:13.5px; line-height:1.4; color:var(--text); }
   #card .src { margin-top:6px; font-size:12px; line-height:1.35; color:var(--muted); }
   #card .x { position:absolute; right:2px; top:2px; width:44px; height:44px; border:0; background:none; color:var(--muted2); font-size:22px; }
   #card.concept { border:1px dashed var(--hero); }
+  #cnav { position:absolute; right:44px; top:4px; display:flex; align-items:center; gap:2px; color:var(--muted2); font-size:12px; font-weight:600; }
+  #cnav button { width:38px; height:40px; border:0; background:none; color:var(--ink); font-size:24px; line-height:1; padding:0 0 3px; }
+  @media (max-width: 759px) {
+    #bottom.reading #chips, #bottom.reading .row, #bottom.reading #legal .extra { display:none; }
+    #bottom.reading #card { margin-bottom:6px; padding:10px 14px 10px; } #bottom.reading #legal { padding-top:2px; }
+    #bottom.reading #card h2 { font-size:19px; margin:2px 0 3px; } #bottom.reading #card p { font-size:13px; line-height:1.35; }
+    #bottom.reading #card .src { margin-top:4px; }
+  }
   #mini { display:flex; align-items:center; justify-content:space-between; gap:10px; width:calc(100% - 32px); margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.14); border-radius:12px; padding:9px 12px; color:var(--ink); font:700 13.5px var(--font), sans-serif; text-align:left; }
   #mini[hidden], #reset[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
-  #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; border:1px solid rgba(var(--lc),.2); background:rgba(var(--bgc),.7); color:var(--ink); font:600 12.5px var(--font), sans-serif; padding:8px 12px; border-radius:20px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 108px); z-index:4; }
   #chips { display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
   #chips::-webkit-scrollbar { display:none; }
   .chip { flex:0 0 auto; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink); font:600 13.5px var(--font), sans-serif; padding:9px 14px; border-radius:22px; }
@@ -123,6 +137,28 @@
   @media (min-width: 760px) { #arcard { align-items:center; justify-content:center; } #arcard .in { max-width:460px; margin:0; } }
   model-viewer { position:fixed; width:1px; height:1px; left:-10px; top:-10px; opacity:0; pointer-events:none; }
   @media (min-width: 760px) { #bottom { left:50%; right:auto; width:520px; transform:translateX(-50%); background:none; } #card { margin-left:16px; margin-right:16px; } }
+  #acts { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; display:flex; gap:8px; }
+  #acts button, #reset, #tourbtn { border:1px solid rgba(var(--lc),.2); background:rgba(var(--bgc),.7); color:var(--ink); font:600 12.5px var(--font), sans-serif; padding:8px 12px; border-radius:20px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; gap:6px; min-height:36px; }
+  #acts svg, #tourbtn svg { width:15px; height:15px; }
+  #askbtn { border-color:var(--hero) !important; }
+  #tourbtn { position:fixed; left:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; }
+  #tourbtn.on { background:var(--hero); color:var(--onhero); border-color:var(--hero); }
+  #tourbar { position:fixed; left:0; top:0; height:3px; width:0; background:var(--hero); z-index:6; }
+  #toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); background:var(--sky); color:var(--navy); font:700 13px var(--font), sans-serif; padding:9px 14px; border-radius:20px; z-index:12; opacity:0; pointer-events:none; transition:opacity .3s; white-space:nowrap; }
+  #toast.on { opacity:1; }
+  .sheet { position:fixed; inset:0; background:rgba(var(--scrim),.75); display:none; align-items:flex-end; z-index:11; }
+  .sheet .in { margin:0 12px calc(env(safe-area-inset-bottom) + 12px); width:100%; max-height:calc(100dvh - 40px); overflow:auto; background:var(--arbg); border-radius:16px; padding:18px 18px 14px; border:1px solid rgba(var(--lc),.1); }
+  .sheet .in { position:relative; } .sheet .x { position:absolute; right:6px; top:6px; width:44px; height:44px; border:0; background:none; color:var(--ink); font-size:26px; line-height:1; }
+  .sheet h3 { margin:0 0 4px; font-size:19px; padding-right:40px; } .sheet p { margin:0 0 10px; font-size:13px; line-height:1.45; color:var(--text2); } .sheet p.s { font-size:12px; color:var(--muted2); }
+  .sheet label { display:block; font-size:12px; font-weight:600; color:var(--dim); margin:8px 0 4px; }
+  .sheet input, .sheet textarea, .sheet select { width:100%; border:1px solid rgba(var(--lc),.2); background:rgba(var(--lc),.06); color:var(--ink); font:500 16px var(--font), sans-serif; padding:10px 12px; border-radius:10px; }
+  .sheet textarea { min-height:84px; resize:vertical; } .sheet select option { color:#111; }
+  .sheet .two { display:grid; grid-template-columns:1fr 1fr; gap:8px; } .sheet .hp { position:absolute; left:-9999px; }
+  .sheet .go { width:100%; border:0; border-radius:12px; background:var(--hero); color:var(--onhero); font:800 15px var(--font), sans-serif; padding:13px; margin-top:12px; } .sheet .go:disabled { opacity:.5; }
+  .sheet .no { width:100%; border:0; background:none; color:var(--muted2); font:600 13px var(--font), sans-serif; padding:12px 0 2px; }
+  @media (min-width: 760px) { .sheet { align-items:center; justify-content:center; } .sheet .in { max-width:460px; margin:0; } }
+  #arcopy { display:none; width:100%; border:1px solid rgba(var(--lc),.25); border-radius:12px; background:none; color:var(--ink); font:700 14px var(--font), sans-serif; padding:11px; margin:2px 0 6px; }
+  #card .src a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
   button:focus-visible, a:focus-visible { outline:2px solid var(--hero); outline-offset:2px; }
   /* the facts as a plain list: read by screen readers always, shown to everyone if the 3D view cannot load */
   #facts { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
@@ -142,18 +178,25 @@
 <div id="load"><img src="logo.png?v=5cecfe16" alt="REV Real Estate"><div class="bar"><i id="lbar"></i></div><span>Loading the 3D model</span></div>
 <div id="top"><img src="logo.png?v=5cecfe16" alt="REV Real Estate"><div class="t"><b>1 Streamside Drive</b><span>Wapiti, WY · <em>$2,980,000</em> · 5.58 acres</span></div></div>
 <div id="hint">Drag to spin · pinch to zoom</div>
+<div id="tourbar"></div>
+<button id="tourbtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg><span>Tour</span></button>
+<div id="acts">
+  <button id="askbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask</button>
+  <button id="sharebtn" aria-label="Share this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>Share</button>
+</div>
 <button id="reset" hidden>Reset view</button>
+<div id="toast" role="status"></div>
 <div id="tags" aria-hidden="true"></div>
 <div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your desk</div>
 <div id="bottom">
-  <div id="card" aria-live="polite"><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div class="src" id="cs"></div></div>
+  <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div class="src" id="cs"></div></div>
   <button id="mini" hidden><span id="minit"></span><em>Show info</em></button>
   <div id="chips"></div>
   <div class="row">
     <button id="grow" aria-pressed="false"><span><small>CONCEPT</small>Room to grow</span><span class="sw"></span></button>
     <button id="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>View on your desk</button>
   </div>
-  <div id="legal">Illustrative model made from public data. Not to scale, not a survey.</div>
+  <div id="legal">Illustrative model made from public data. Not to scale, not a survey.<span class="extra"> Preview prepared for REV Real Estate. · <a href="../_e/legal/privacy.html" target="_blank" rel="noopener">Privacy</a></span></div>
 </div>
 <div id="arcard" role="dialog" aria-modal="true" aria-labelledby="arh"><div class="in">
   <h3 id="arh">Put Streamside Drive on your desk</h3>
@@ -161,14 +204,30 @@
   <p class="s">Illustrative model made from public data. Not to scale, not a survey.</p>
   <div id="arqr"></div><p id="arst" class="s"></p>
   <button class="go" id="argo">Place it on my desk</button>
+  <button id="arcopy">Copy the link</button>
   <div id="agent"><b>Erynne Selk</b>, REV Real Estate<br><a href="mailto:erynne@revcody.com">erynne@revcody.com</a> · <a href="tel:+13072729019">307-272-9019</a></div>
   <button class="no" id="arno">Back to the 3D view</button>
 </div></div>
+<div id="ask" class="sheet" role="dialog" aria-modal="true" aria-labelledby="askh"><form class="in" id="askf" novalidate>
+  <button class="x" id="askx" type="button" aria-label="Close">×</button>
+  <h3 id="askh">Ask about Streamside Drive</h3>
+  <p>Send a question about this listing to Erynne Selk at REV Real Estate.</p>
+  <div class="two"><div><label for="qn">Your name</label><input id="qn" name="name" autocomplete="name" required maxlength="80"></div>
+  <div><label for="qr">I am a</label><select id="qr" name="role"><option value="buyer">Buyer</option><option value="seller">Business owner</option><option value="agent">Broker or agent</option><option value="other">Other</option></select></div></div>
+  <div id="qown"><label for="qe">Email</label><input id="qe" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120">
+  <label for="qp">Phone (optional)</label><input id="qp" name="phone" type="tel" autocomplete="tel" maxlength="40"></div>
+  <label for="qm">Your question</label><textarea id="qm" name="msg" required maxlength="1500"></textarea>
+  <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <p class="s" id="askst" style="margin-top:8px">This opens your own email app (or WhatsApp) with your question ready to send to Erynne Selk at REV Real Estate.</p>
+  <button class="go" id="askgo" type="submit">Send my question</button>
+  <button class="go" id="askwa" type="button" style="display:none;background:none;border:1px solid rgba(var(--lc),.25);color:var(--ink);margin-top:8px">Send on WhatsApp</button>
+  <button class="no" id="askno" type="button">Back to the 3D view</button>
+</form></div>
 <model-viewer id="mv" src="model.glb?v=6dc341f1" ios-src="model.usdz?v=e4ef1998" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor" loading="lazy" alt="1 Streamside Drive, Wapiti, Wyoming, illustrative 3D model"></model-viewer>
 <div id="nvfail" hidden><div class="in">
   <img class="logo" src="logo.png?v=5cecfe16" alt="REV Real Estate">
   <h1>1 Streamside Drive</h1><p class="sub">Wapiti, WY · <em>$2,980,000</em> · 5.58 acres</p>
-  
+  <img class="poster" src="poster.jpg?v=e50bdfd5" alt="1 Streamside Drive, Wapiti, Wyoming, illustrative 3D model">
   <div class="why">The 3D view could not start on this device or connection. The facts are below. <br>Illustrative model made from public data. Not to scale, not a survey.</div>
   <button onclick="location.reload()">Try the 3D view again</button>
 </div></div>
@@ -186,7 +245,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Everything about this listing (facts, sources, colours, effects) comes from its listing.json. Nothing about trading or income.
-const D = {"font":"Montserrat","theme":{"hero":"#f2cc6b"},"scene":{"root":"Streamside","baseParts":["ground","plinth"],"waterParts":[],"fadeParts":["trees"],"backdrop":["#0d3134","#072325","#031314"],"hemi":["#e6eef0","#2e3020"],"minDistance":0.08,"home":{"at":[0,-45,0],"dist":560,"el":0.8,"az":0.45,"fit":12},"glow":{"lerp":0.25,"base":0.12,"gain":0.4,"lumk":0.8},"tagDy":8,"az":0.45},"fx":{"cabinDots":{"type":"dots","list":"cabinList"},"wagonDots":{"type":"dots","list":"wagonList"},"tipiDots":{"type":"dots","list":"tipiList"},"rvDots":{"type":"dots","list":"rvList"},"pads":{"type":"rects","list":"rvList","rot":"rvRot","len":18,"wid":5},"fireRing":{"type":"ring","at":{"info":"fire"},"r":4.2,"tube":0.45,"y":1.0},"gate":{"type":"ring","at":{"info":"gate"},"r":5,"tube":0.6,"seg":40,"y":1.2},"west":{"type":"rimArrow","dir":-1,"z":{"info":"gate"},"zK":0.55},"east":{"type":"rimArrow","dir":1,"z":{"info":"gate"},"zK":0.55},"arcs":{"type":"arcs","from":"wagonList","to":"barnDoors","centre":{"anchor":"barn"},"k":2.8}},"hot":[{"id":"cabins","chip":"Cabins","k":"The cabins","h":"<em>10<\/em> painted cabins","p":"Furnished log-sided cabins built on site, each one painted its own color, with a covered front porch.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823) and listing photos","parts":["cabins"],"tag":"10 cabins","near":70,"dy":10,"fx":["cabinDots"]},{"id":"wagons","chip":"Covered wagons","k":"The covered wagons","h":"<em>5<\/em> covered wagons","p":"Conestoga-style wagons that sleep 4 to 6 each, set on beds of river stone under the cottonwoods.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823)","parts":["wagons"],"tag":"5 covered wagons","near":80,"el":0.85,"dy":10,"fx":["wagonDots"]},{"id":"house","chip":"Main building","k":"The main log building","h":"<em>3,800<\/em> sq ft log building","p":"Two stories. Bathrooms, laundry, the office and a communal area downstairs, the owner's residence upstairs with a big deck.","s":"Source: REV Real Estate listing on Crexi (labeled site plan and photos)","parts":["house"],"tag":"Main log building","near":62,"fx":[]},{"id":"rv","chip":"RV sites","k":"The RV sites","h":"<em>7<\/em> RV sites","p":"Four with water and electric, three with full hookups.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823)","parts":["rv"],"tag":"7 RV sites","near":70,"el":0.95,"tags":[{"at":{"mean":["rvList",[0,1,2,3]]},"dy":9,"text":"4 water and electric"},{"at":{"mean":["rvList",[4,5,6]]},"dy":9,"text":"3 full hookups"}],"dy":10,"fx":["pads","rvDots"]},{"id":"tipis","chip":"Tipis","k":"The tipis","h":"Canvas tipis","p":"Cream canvas tipis painted with elk, by the pickleball court and the bird aviary.","s":"Source: REV Real Estate listing photos on Crexi","parts":["tipis"],"tag":"Tipis","near":60,"el":0.75,"dy":10,"fx":["tipiDots"]},{"id":"barn","chip":"Pole barn","k":"The pole barn","h":"<em>3,100<\/em> sq ft pole barn","p":"Built in 2024, with five 14 ft doors.","s":"Source: REV Real Estate listing on Crexi","parts":["barn"],"tag":"3,100 sq ft · built 2024","near":62,"dy":1,"el":0.75,"fx":[]},{"id":"court","chip":"Pickleball","k":"The pickleball court","h":"Pickleball court","p":"A fenced court by the creek, ringed with river stone, with tipis behind it.","s":"Source: REV Real Estate listing photos and labeled site plan on Crexi","parts":["court"],"tag":"Pickleball court","near":55,"fx":[]},{"id":"fire","chip":"Fire pit","k":"The fire pit","h":"<em>9.4<\/em> out of 10","p":"From 191 guest reviews. Guests name the fire pit, cornhole, horseshoes, pickleball and the llamas and goats to feed.","s":"Source: Trip.com guest reviews for Eycat Lodging Company at 1 Streamside Dr, read 09-11-2026","parts":["fire"],"tag":"Fire pit","near":45,"fx":["fireRing"]},{"id":"road","chip":"Location","k":"The location","h":"<em>36<\/em> miles to Yellowstone","p":"The gate is on US 14/16/20, the road from Cody to Yellowstone's East Entrance. Cody is about 18 minutes the other way.","s":"Sources: OSRM route to the East Entrance, 36.3 miles; Valhalla drive time to Cody, 18 minutes (OpenStreetMap data, read 09-11-2026)","parts":[],"near":0,"view":{"at":[0,-30,0],"dist":520,"el":0.95,"az":0.15,"fit":8},"tags":[{"at":{"info":"gate"},"dy":10,"text":"Gate on US 14/16/20"},{"at":{"fx":"west"},"dy":9,"text":"Yellowstone · 36 miles"},{"at":{"fx":"east"},"dy":9,"text":"Cody · 18 minutes"}],"fx":["gate","west","east"]}],"grow":{"k":"Concept · an idea, not a forecast","h":"Room to <em>grow<\/em>","p":"The 2024 barn has five 14 ft doors, one for each wagon. The idea: roll the wagons inside for winter, and use the open floor for events in summer.","s":"Barn size, year and doors: REV Real Estate listing on Crexi. The uses shown are an idea only.","view":{"at":{"mid":["barn","wagons"]},"dist":330,"el":0.72,"az":0.3},"fx":["arcs"],"glowParts":["barn","wagons"],"tag":{"at":{"anchor":"barn","at":"top"},"dy":10,"text":"Concept: winter wagon barn"}},"files":{"glb":"model.glb?v=6dc341f1","info":"model_info.json?v=b714d26e"}};
+const D = {"font":"Montserrat","name":"1 Streamside Drive","contact":{"email":"erynne@revcody.com"},"checked":"09-11-2026","theme":{"hero":"#f2cc6b"},"scene":{"root":"Streamside","baseParts":["ground","plinth"],"waterParts":[],"fadeParts":["trees"],"backdrop":["#0d3134","#072325","#031314"],"hemi":["#e6eef0","#2e3020"],"minDistance":0.08,"home":{"at":[0,-45,0],"dist":560,"el":0.8,"az":0.45,"fit":12},"glow":{"lerp":0.25,"base":0.12,"gain":0.4,"lumk":0.8},"tagDy":8,"az":0.45},"fx":{"cabinDots":{"type":"dots","list":"cabinList"},"wagonDots":{"type":"dots","list":"wagonList"},"tipiDots":{"type":"dots","list":"tipiList"},"rvDots":{"type":"dots","list":"rvList"},"pads":{"type":"rects","list":"rvList","rot":"rvRot","len":18,"wid":5},"fireRing":{"type":"ring","at":{"info":"fire"},"r":4.2,"tube":0.45,"y":1.0},"gate":{"type":"ring","at":{"info":"gate"},"r":5,"tube":0.6,"seg":40,"y":1.2},"west":{"type":"rimArrow","dir":-1,"z":{"info":"gate"},"zK":0.55},"east":{"type":"rimArrow","dir":1,"z":{"info":"gate"},"zK":0.55},"arcs":{"type":"arcs","from":"wagonList","to":"barnDoors","centre":{"anchor":"barn"},"k":2.8}},"hot":[{"id":"cabins","chip":"Cabins","k":"The cabins","h":"<em>10<\/em> painted cabins","p":"Furnished log-sided cabins built on site, each one painted its own color, with a covered front porch.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823) and listing photos","parts":["cabins"],"tag":"10 cabins","near":70,"dy":10,"fx":["cabinDots"]},{"id":"wagons","chip":"Covered wagons","k":"The covered wagons","h":"<em>5<\/em> covered wagons","p":"Conestoga-style wagons that sleep 4 to 6 each, set on beds of river stone under the cottonwoods.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823)","parts":["wagons"],"tag":"5 covered wagons","near":80,"el":0.85,"dy":10,"fx":["wagonDots"]},{"id":"house","chip":"Main building","k":"The main log building","h":"<em>3,800<\/em> sq ft log building","p":"Two stories. Bathrooms, laundry, the office and a communal area downstairs, the owner's residence upstairs with a big deck.","s":"Source: REV Real Estate listing on Crexi (labeled site plan and photos)","parts":["house"],"tag":"Main log building","near":62,"fx":[]},{"id":"rv","chip":"RV sites","k":"The RV sites","h":"<em>7<\/em> RV sites","p":"Four with water and electric, three with full hookups.","s":"Source: REV Real Estate listing (Century 21 Commercial, MLS 10032823)","parts":["rv"],"tag":"7 RV sites","near":70,"el":0.95,"tags":[{"at":{"mean":["rvList",[0,1,2,3]]},"dy":9,"text":"4 water and electric"},{"at":{"mean":["rvList",[4,5,6]]},"dy":9,"text":"3 full hookups"}],"dy":10,"fx":["pads","rvDots"]},{"id":"tipis","chip":"Tipis","k":"The tipis","h":"Canvas tipis","p":"Cream canvas tipis painted with elk, by the pickleball court and the bird aviary.","s":"Source: REV Real Estate listing photos on Crexi","parts":["tipis"],"tag":"Tipis","near":60,"el":0.75,"dy":10,"fx":["tipiDots"]},{"id":"barn","chip":"Pole barn","k":"The pole barn","h":"<em>3,100<\/em> sq ft pole barn","p":"Built in 2024, with five 14 ft doors.","s":"Source: REV Real Estate listing on Crexi","parts":["barn"],"tag":"3,100 sq ft · built 2024","near":62,"dy":1,"el":0.75,"fx":[]},{"id":"court","chip":"Pickleball","k":"The pickleball court","h":"Pickleball court","p":"A fenced court by the creek, ringed with river stone, with tipis behind it.","s":"Source: REV Real Estate listing photos and labeled site plan on Crexi","parts":["court"],"tag":"Pickleball court","near":55,"fx":[]},{"id":"fire","chip":"Fire pit","k":"The fire pit","h":"<em>9.4<\/em> out of 10","p":"From 191 guest reviews. Guests name the fire pit, cornhole, horseshoes, pickleball and the llamas and goats to feed.","s":"Source: Trip.com guest reviews for Eycat Lodging Company at 1 Streamside Dr, read 09-11-2026","parts":["fire"],"tag":"Fire pit","near":45,"fx":["fireRing"]},{"id":"road","chip":"Location","k":"The location","h":"<em>36<\/em> miles to Yellowstone","p":"The gate is on US 14/16/20, the road from Cody to Yellowstone's East Entrance. Cody is about 18 minutes the other way.","s":"Sources: OSRM route to the East Entrance, 36.3 miles; Valhalla drive time to Cody, 18 minutes (OpenStreetMap data, read 09-11-2026)","parts":[],"near":0,"view":{"at":[0,-30,0],"dist":520,"el":0.95,"az":0.15,"fit":8},"tags":[{"at":{"info":"gate"},"dy":10,"text":"Gate on US 14/16/20"},{"at":{"fx":"west"},"dy":9,"text":"Yellowstone · 36 miles"},{"at":{"fx":"east"},"dy":9,"text":"Cody · 18 minutes"}],"fx":["gate","west","east"]}],"grow":{"k":"Concept · an idea, not a forecast","h":"Room to <em>grow<\/em>","p":"The 2024 barn has five 14 ft doors, one for each wagon. The idea: roll the wagons inside for winter, and use the open floor for events in summer.","s":"Barn size, year and doors: REV Real Estate listing on Crexi. The uses shown are an idea only.","view":{"at":{"mid":["barn","wagons"]},"dist":330,"el":0.72,"az":0.3},"fx":["arcs"],"glowParts":["barn","wagons"],"tag":{"at":{"anchor":"barn","at":"top"},"dy":10,"text":"Concept: winter wagon barn"}},"files":{"glb":"model.glb?v=6dc341f1","info":"model_info.json?v=b714d26e"}};
 const HOT = D.hot, GROW = D.grow, SC = D.scene, T = NV.beacon, mobile = NV.mobile;
 
 const HERO = new THREE.Color(D.theme.hero);
@@ -326,13 +385,19 @@ const chips = document.getElementById('chips'), card = document.getElementById('
 HOT.forEach(h => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = h.chip; b.dataset.id = h.id; b.setAttribute('aria-pressed', 'false');
   b.onclick = () => { if (sel && sel.id === h.id) { if (card.style.display === 'none') showCard(h); else choose(null); } else choose(h); }; chips.appendChild(b); });
 const mini = document.getElementById('mini'), resetBtn = document.getElementById('reset');
-function hideCard() { const c = growOn ? GROW : sel; card.style.display = 'none'; if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
+const bottomBox = document.getElementById('bottom');
+function hideCard() { const c = growOn ? GROW : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
 mini.onclick = () => showCard(growOn ? GROW : sel, growOn);
-function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; if (!c) { card.style.display = 'none'; return; } card.className = concept ? 'concept' : ''; card.style.display = 'block';
-  document.getElementById('ck').textContent = c.k; document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p; document.getElementById('cs').textContent = c.s; }
+function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept ? 'concept' : ''; card.style.display = 'block';
+  { const all = [...HOT, ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
+  document.getElementById('ck').textContent = c.k; document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
+  const cs = document.getElementById('cs'); cs.textContent = c.s;
+  for (const k of c.links || []) { const a = document.createElement('a'); a.href = k.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = k.t; cs.append(' · ', a); }
+  if (c.links && c.links.length && D.checked) cs.append(' · checked ' + D.checked); }
 function resetMats() { MATS.forEach(m => { m.color.copy(m.userData.c0); m.emissive.copy(m.userData.e0); m.emissiveIntensity = 1; }); }
-function choose(h) {
-  if (h) T('tap', h.id);
+function choose(h, quiet) {
+  if (h && !quiet) T('tap', h.id);
+  if (!quiet) stopTour();
   sel = h; stopSpin();
   chips.querySelectorAll('.chip').forEach(b => { const on = !!h && b.dataset.id === h.id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   if (h && growOn) setGrow(false, true);
@@ -348,20 +413,81 @@ function setGrow(on, quiet) { growOn = on; growBtn.classList.toggle('on', on); g
   if (on) { sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); showFx(GROW.fx);
     showCard(GROW, true); stopSpin(); goView(GROW.view); }
   else { resetMats(); if (!quiet) { showCard(null); goView(HOME); } } }
-growBtn.onclick = () => { if (!growOn) T('tap', 'grow'); setGrow(!growOn); };
-addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (arcard.style.display === 'flex') arcard.style.display = 'none'; else if (card.style.display === 'block') hideCard(); else if (growOn) setGrow(false); else if (sel) choose(null); } });
+growBtn.onclick = () => { stopTour(); if (!growOn) T('tap', 'grow'); setGrow(!growOn); };
+
+// ---------- guided tour: flies round the property and stops on each fact, in the film's order ----------
+const tourBtn = document.getElementById('tourbtn'), tourBar = document.getElementById('tourbar');
+const STOPS = [...HOT, ...(GROW ? ['grow'] : [])], STOP_S = 6.5;
+let tour = null;   // { i, t } while playing
+function tourGo(i) { tour.i = i; tour.t = 0; const s = STOPS[i]; if (s === 'grow') { if (sel) choose(null, true); setGrow(true); } else { choose(s, true); } }
+function startTour(how) { if (tour) return; T('tour', how); tour = { i: 0, t: 0 }; tourBtn.classList.add('on'); tourBtn.setAttribute('aria-pressed', 'true'); tourBtn.lastElementChild.textContent = 'Stop'; tourGo(0); }
+function stopTour(finished) { if (!tour) return; tour = null; tourBtn.classList.remove('on'); tourBtn.setAttribute('aria-pressed', 'false'); tourBtn.lastElementChild.textContent = 'Tour'; tourBar.style.width = '0';
+  if (finished) { if (growOn) setGrow(false); else choose(null, true); controls.autoRotate = !NV.reduced; } }
+function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (tour.i + Math.min(1, tour.t / STOP_S)) / STOPS.length) + '%';
+  if (tour.t >= STOP_S) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
+tourBtn.onclick = () => { if (tour) stopTour(); else startTour('tap'); };
+// arrows on the card: step to the next or previous fact (Room to grow is the last one)
+function step(d) { stopTour(); const n = STOPS.length, i = growOn ? n - 1 : HOT.indexOf(sel), s = STOPS[((i < 0 ? 0 : i + d) + n) % n];
+  if (s === 'grow') { T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); } else choose(s); }
+document.getElementById('cprev').onclick = () => step(-1); document.getElementById('cnext').onclick = () => step(1);
+
+// ---------- share: each share gets its own code, so a forwarded view is not mistaken for the first person ----------
+const toastEl = document.getElementById('toast'); let toastT = 0;
+function toast(m) { toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2600); }
+async function shareUrl() { const u = new URL(location.href); u.search = ''; u.hash = '';
+  try { const r = await Promise.race([fetch(NV.api + '_share', { method: 'POST', body: JSON.stringify({ l: NV.id, r: NV.rcpt }) }).then(x => x.json()), new Promise((_, no) => setTimeout(no, 2500))]); if (r && r.c) u.searchParams.set('r', r.c); } catch (e) {}
+  return u.toString(); }
+async function copyText(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { const i = document.createElement('input'); i.value = t; document.body.appendChild(i); i.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} i.remove(); return ok; } }
+document.getElementById('sharebtn').onclick = async () => { stopTour(); const url = await shareUrl();
+  if (navigator.share && mobile) { try { await navigator.share({ title: document.title, url }); T('share', 'sheet'); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  if (await copyText(url)) { T('share', 'copied'); toast('Link copied. Paste it into an email or message.'); } else prompt('Copy this link', url); };
+
+// ---------- ask about this listing ----------
+const $ = (id) => document.getElementById(id), F = { name: $('qn'), email: $('qe'), phone: $('qp'), msg: $('qm'), role: $('qr') };
+const ask = document.getElementById('ask'), askf = document.getElementById('askf'), askst = document.getElementById('askst'), askgo = document.getElementById('askgo'), askNote = askst.textContent;
+document.getElementById('askbtn').onclick = () => { stopTour(); T('tap', 'ask'); ask.style.display = 'flex'; if (sel && !F.msg.value) F.msg.placeholder = 'About ' + sel.k.toLowerCase() + '…'; setTimeout(() => F.name.focus(), 50); };
+const closeAsk = () => { ask.style.display = 'none'; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); };
+document.getElementById('askno').onclick = closeAsk; document.getElementById('askx').onclick = closeAsk;
+ask.addEventListener('pointerdown', (e) => { if (e.target === ask) closeAsk(); });
+{ const ac = document.getElementById('arcard'); ac.addEventListener('pointerdown', (e) => { if (e.target === ac) ac.style.display = 'none'; }); }
+// Where a question goes: if the listing has the broker's email (or WhatsApp), the visitor's own email app (or WhatsApp) opens with the
+// question written and addressed to the broker, so it arrives from the buyer, straight to the broker. We only note that it happened.
+// With no contact on file, the question is saved for us to pass on.
+const CT = D.contact || {}, DIRECT = !!(CT.email || CT.whatsapp);
+if (DIRECT) { $('qown').style.display = 'none'; askgo.textContent = CT.email ? 'Open my email to send it' : 'Send on WhatsApp'; if (CT.email && CT.whatsapp) $('askwa').style.display = 'block'; }
+function question() { const q = { l: NV.id, r: NV.rcpt, name: F.name.value.trim(), email: F.email.value.trim(), phone: F.phone.value.trim(), role: F.role.value, msg: F.msg.value.trim(), website: askf.querySelector('.hp').value };
+  const okMail = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(q.email);
+  if (q.name.length < 2 || q.msg.length < 5 || (!DIRECT && !okMail)) { askst.textContent = DIRECT ? 'Please add your name and your question.' : 'Please add your name, a working email and your question.'; askst.style.color = 'var(--hero)'; return null; }
+  return q; }
+const ROLE = { buyer: 'a buyer', seller: 'a business owner', agent: 'a broker or agent', other: '' };
+function letter(q) { return `${q.msg}\n\n${q.name}${ROLE[q.role] ? ' (' + ROLE[q.role] + ')' : ''}\n\nSent from the 3D viewer of ${D.name}: ${location.origin + location.pathname}`; }
+function sentDirect(q, via) { fetch(NV.api + '_enquiry', { method: 'POST', keepalive: true, body: JSON.stringify({ ...q, via }) }).catch(() => {}); T('enquiry', q.role + ' ' + via);
+  askst.style.color = ''; askst.textContent = askNote; closeAsk(); toast(via === 'email' ? 'Your email app has it ready. Press send there.' : 'WhatsApp has it ready. Press send there.'); }
+$('askwa').onclick = () => { const q = question(); if (!q) return; sentDirect(q, 'whatsapp'); window.open('https://wa.me/' + String(CT.whatsapp).replace(/\D/g, '') + '?text=' + encodeURIComponent(letter(q)), '_blank', 'noopener'); };
+askf.onsubmit = async (e) => { e.preventDefault(); const q = question(); if (!q) return;
+  if (DIRECT && !CT.email) { $('askwa').onclick(); return; }
+  if (DIRECT) { sentDirect(q, 'email'); location.href = 'mailto:' + CT.email + '?subject=' + encodeURIComponent('Question about ' + D.name) + '&body=' + encodeURIComponent(letter(q)); return; }
+  askgo.disabled = true; askst.style.color = ''; askst.textContent = 'Sending…';
+  try { const r = await fetch(NV.api + '_enquiry', { method: 'POST', body: JSON.stringify(q) }).then(x => x.json());
+    if (!r.ok) throw new Error(r.why || 'not sent');
+    T('enquiry', q.role); askf.reset(); closeAsk(); askst.textContent = askNote; toast('Sent. Thank you, you will hear back by email.');
+  } catch (err) { askst.textContent = 'Sorry, that did not send. Please try again in a moment.'; askst.style.color = 'var(--hero)'; }
+  askgo.disabled = false; };
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); if (ask.style.display === 'flex') ask.style.display = 'none'; else if (arcard.style.display === 'flex') arcard.style.display = 'none'; else if (card.style.display === 'block') hideCard(); else if (growOn) setGrow(false); else if (sel) choose(null); } });
 
 // ---------- spin hint ----------
 const hint = document.getElementById('hint');
 function stopSpin() { controls.autoRotate = false; hint.style.opacity = 0; }
-canvas.addEventListener('pointerdown', () => { stopSpin(); anim = null; });
+canvas.addEventListener('pointerdown', () => { stopTour(); stopSpin(); anim = null; });
 
 // ---------- AR ----------
 const mv = document.getElementById('mv'), arcard = document.getElementById('arcard'), arst = document.getElementById('arst'), argo = document.getElementById('argo');
-document.getElementById('ar').onclick = () => { arcard.style.display = 'flex';
+const arcopy = document.getElementById('arcopy');
+arcopy.onclick = async () => { const u = new URL(location.href); if (await copyText(u.toString())) { arcopy.textContent = 'Copied. Now paste it into Safari or Chrome'; T('share', 'copied for ar'); } };
+document.getElementById('ar').onclick = () => { stopTour(); arcard.style.display = 'flex';
   T('ar-button', mobile ? 'phone' : 'computer');
   if (!mobile) { const a = document.getElementById('arqr'); a.style.display = 'block'; NV.qr(a); arst.textContent = 'Scan this with your phone camera. The model opens on your phone, then tap View on your desk.'; argo.style.display = 'none'; }
-  else { arst.textContent = ''; argo.disabled = false; } };
+  else { arst.textContent = NV.inapp ? 'You are inside an app\'s own browser, where the camera view often cannot start. If it does not, copy the link and open it in Safari (iPhone) or Chrome (Android).' : ''; arcopy.style.display = NV.inapp ? 'block' : 'none'; argo.disabled = false; } };
 argo.onclick = async () => {
   T('ar-launch'); if (mv.canActivateAR) { mv.activateAR(); return; }
   arst.textContent = 'Getting the model ready…'; argo.disabled = true;
@@ -396,7 +522,7 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (anim) { const k = Math.min(1, (now - anim.t0) / anim.dur), e = ease(k); controls.target.lerpVectors(anim.a0, anim.a1, e); camera.position.lerpVectors(anim.p0, anim.p1, e); if (k >= 1) anim = null; }
-  controls.update(); liftView(dt);
+  controls.update(); liftView(dt); tickTour(dt);
   if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
   if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
     const k = Math.min(1, glowT / 0.6);
@@ -417,7 +543,9 @@ requestAnimationFrame(frame);
 const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 600);
 if (!mobile) hint.textContent = 'Drag to spin · scroll to zoom';
 setTimeout(() => { hint.style.opacity = 0; }, 6000);
-window.__ready = true; NV.loaded();
+window.__ready = true; NV.loaded(); window.__tour = startTour;
+if (!NV.reduced && !NV.qs.has('notour')) { let seen = false; try { seen = localStorage.getItem('nvtour:' + NV.id) === '1'; localStorage.setItem('nvtour:' + NV.id, '1'); } catch (e) {}
+  if (!seen) setTimeout(() => { if (!sel && !growOn && controls.autoRotate && arcard.style.display !== 'flex' && ask.style.display !== 'flex') startTour('auto'); }, 3500); }
 if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
 window.__choose = (id) => choose(HOT.find(h => h.id === id) || null); window.__grow = setGrow;
 </script>
