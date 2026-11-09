@@ -6,13 +6,22 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>Your scan in 3D · Harbour Radiology</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Your scan in 3D · Harbour Radiology">
+<meta property="og:description" content="Spin it, tap any part, and place it on your table.">
+<meta property="og:site_name" content="Harbour Radiology">
+<meta property="og:image" content="https://neroengine.com/scan/view/m/poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.png?v=86b9eea3">
 <link rel="apple-touch-icon" href="icon.png?v=86b9eea3">
 <link rel="stylesheet" href="../_e/fonts/montserrat.css">
 <script>window.NVCFG = {"id":"0dd02f2cd38b","product":"scan","three":"three160","t":"https://nero-viewer.nerolabs.workers.dev/scan/view/_t"};</script>
 <script>(function () {
   var C = window.NVCFG || {}, qs = new URLSearchParams(location.search);
-  var R = (qs.get('r') || 'none').replace(/[^\w-]/g, '').slice(0, 24) || 'none', T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
+  var R = (qs.get('r') || '').replace(/[^\w-]/g, '').slice(0, 24), T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
+  var app = !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone);
+  try { if (R) localStorage.setItem('nvr:' + C.id, R); else if (app) R = localStorage.getItem('nvr:' + C.id) || ''; } catch (err) {}
+  R = R || 'none';
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
   function beacon(e, x) {
     try {
@@ -21,7 +30,7 @@
     } catch (err) {}
   }
   var ua = navigator.userAgent, inapp = /FBAN|FBAV|Instagram|LinkedInApp|GSA\/|Line\/|MicroMessenger|; wv\)/.test(ua) ? 'in-app' : '';
-  beacon('open', (mobile ? 'phone' : 'computer') + (qs.get('v') === 'qr' ? ' via qr' : '') + (inapp ? ' ' + inapp : ''));
+  beacon('open', (mobile ? 'phone' : 'computer') + (qs.get('v') === 'qr' ? ' via qr' : '') + (inapp ? ' ' + inapp : '') + (app ? ' home screen app' : ''));
   function time() { var s = Math.round((performance.now() - t0) / 1000); if (s - sent >= 5) { sent = s; beacon('time', s); } }
   addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') time(); });
   addEventListener('pagehide', time);   // iPhone Safari closes tabs without a visibilitychange
@@ -40,7 +49,7 @@
   addEventListener('unhandledrejection', function (e) { fail((e.reason && (e.reason.message || e.reason)) || 'load failed'); });
   setTimeout(function () { if (!loaded) fail('timeout: no 3D after 40s'); }, 40000);
   window.NV = {
-    id: C.id, rcpt: R, mobile: mobile, inapp: !!inapp, qs: qs, beacon: beacon, fail: fail,
+    id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, app: app, qs: qs, beacon: beacon, fail: fail,
     reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
     loaded: function () { if (loaded) return; loaded = 1; beacon('loaded', (Math.round((performance.now() - t0) / 100) / 10) + 's'); },
     qr: function (el) { if (!window.qrcode || !el) return; var u = new URL(location.href); u.searchParams.set('v', 'qr'); var q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
@@ -122,6 +131,11 @@
   #nvfail .in { max-width:420px; } #nvfail img.logo { height:56px; max-width:70%; object-fit:contain; } #nvfail img.poster { width:100%; border-radius:14px; margin:16px 0 4px; }
   #nvfail p { font-size:14px; line-height:1.45; color:#c9d2d8; margin:12px 0; } #nvfail button { border:0; border-radius:12px; background:var(--acc); color:#04121a; font:800 14px var(--font),sans-serif; padding:12px 18px; }
   button:focus-visible, a:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+  #share { display:inline-flex; align-items:center; gap:5px; } #share svg { width:12px; height:12px; }
+  @media (max-width: 480px) { #share span { display:none; } #share { padding:6px 9px; } #share svg { width:14px; height:14px; } }
+  #toast { position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 150px); transform:translateX(-50%); background:#f4f4f4; color:#04121a; font:700 13px var(--font),sans-serif; padding:9px 14px; border-radius:20px; z-index:12; opacity:0; pointer-events:none; transition:opacity .3s; max-width:calc(100vw - 32px); text-align:center; }
+  #toast.on { opacity:1; }
+  .foot a.pv { color:inherit; text-decoration:underline; text-underline-offset:2px; }
 </style>
 </head>
 <body>
@@ -132,7 +146,8 @@
 <div class="tag" id="tagA"></div>
 <div class="tag lab" id="lab0"></div><div class="tag lab" id="lab1"></div>
 
-<div class="top"><div class="brand"><img src="logo.png?v=86b9eea3" alt="Harbour Radiology"></div><div class="tr"><div class="hint" id="hint" data-t="hint">Girá · pellizcá · tocá cualquier parte</div><button class="lang" id="lang">EN</button></div></div>
+<div class="top"><div class="brand"><img src="logo.png?v=86b9eea3" alt="Harbour Radiology"></div><div class="tr"><div class="hint" id="hint" data-t="hint">Girá · pellizcá · tocá cualquier parte</div><button class="lang" id="share" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg><span data-t="share">Share</span></button><button class="lang" id="lang">EN</button></div></div>
+<div id="toast" role="status"></div>
 
 <div class="card" id="card"><button class="x" id="cardx">✕</button><button class="x" id="cardm" style="right:40px">–</button><div class="sub" id="csub"></div><h3 id="ct"></h3><div id="cp"></div><div class="acts" id="cacts"></div></div>
 
@@ -161,7 +176,7 @@
   <div class="row steps" id="steps">
     <button class="big" id="sprev" data-t="back">Back</button><span class="count" id="scount"></span><button class="big problem" id="snext">Next</button><button class="big" id="sexit" data-t="exit">Exit</button><button class="big ar" id="sar" style="flex:0 0 auto" data-t="ar">AR</button>
   </div>
-  <div class="foot" id="foot"><span data-t="foot"></span> · <a id="wa" href="https://www.harbour-radiology.com.au/" target="_blank" rel="noopener">harbour-radiology.com.au</a></div>
+  <div class="foot" id="foot"><span data-t="foot"></span> · <a id="wa" href="https://www.harbour-radiology.com.au/" target="_blank" rel="noopener">harbour-radiology.com.au</a> · <a class="pv" id="priv" href="../_e/legal/privacy-scan.html" target="_blank" rel="noopener" data-t="priv">Privacy</a></div>
 </div>
 
 <div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your table</div>
@@ -193,6 +208,7 @@ const T = {
     l_teeth: 'Teeth', l_canal: 'Nerve canal', l_nervemap: 'Nerve map', l_sinus: 'Sinuses', l_skull: 'Upper skull', l_ear: 'Ears', l_muscle: 'Muscles', l_airway: 'Airway', l_dots: 'Tap points',
     pbtn: 'Show my problem', arbtn: 'See it on my table', back: 'Back', next: 'Next', done: 'Done', exit: 'Exit', ar: 'AR',
     foot: 'FROM YOUR OWN SCAN · PATIENT EDUCATION, NOT A DIAGNOSIS', more: '  · tap to read',
+    share: 'Share', priv: 'Privacy', copied: 'Link copied. Paste it into an email or message.', privHref: '../_e/legal/privacy-scan.html',
     exag: 'EXAGGERATED TO SHOW CLEARLY', sim: 'SIMULATED MOVEMENT',
     exl: n => `The movement is exaggerated about ${n} times so it is easy to see. The numbers above are your real ones.`,
     tooth: k => `Tooth ${k} · from your scan`, toothName: (q, nm) => `Your ${q} ${nm}`,
@@ -204,6 +220,7 @@ const T = {
     l_teeth: 'Dientes', l_canal: 'Canal del nervio', l_nervemap: 'Mapa de nervios', l_sinus: 'Senos maxilares', l_skull: 'Cráneo', l_ear: 'Oídos', l_muscle: 'Músculos', l_airway: 'Vía aérea', l_dots: 'Puntos',
     pbtn: 'Mostrar mi problema', arbtn: 'Verlo en mi mesa', back: 'Atrás', next: 'Siguiente', done: 'Listo', exit: 'Salir', ar: 'RA',
     foot: 'DE TU PROPIA TOMOGRAFÍA · MATERIAL EDUCATIVO, NO REEMPLAZA LA CONSULTA', more: '  · tocá para leer',
+    share: 'Compartir', priv: 'Privacidad', copied: 'Enlace copiado, listo para pegar en un correo o mensaje.', privHref: '../_e/legal/privacy-scan-es.html',
     exag: 'EXAGERADO PARA QUE SE VEA CLARO', sim: 'MOVIMIENTO SIMULADO',
     exl: n => `El movimiento está exagerado unas ${n} veces para que se vea fácil. Los números de arriba son los tuyos, reales.`,
     tooth: k => `Diente ${k} · de tu tomografía`, toothName: (q, nm) => `Tu ${nm} ${q}`,
@@ -808,6 +825,7 @@ const ART = {
     p2: "<b>In Apple's AR you walk round it instead of spinning it.</b> Drag with one finger to move it, twist two fingers to turn it, and lean in close to look inside.",
     p3: "The “Object” tab at the top is Apple's own screen and works the same way. Our buttons and steps stay here on this page.",
     prep: 'Getting your 3D model ready…', go: 'Place it on my table', ready: n => `Ready, in ${n}.`, phone: 'AR works on iPhone and Android phones: open this same link on your phone.', noar: "This phone can't place it in your room, but everything else on this page works. On Android, open the link in Chrome.",
+    inapp: "You are inside an app's own browser, where the camera view often cannot start. If it does not, copy the link and open it in Safari (iPhone) or Chrome (Android).", copy: 'Copy the link', copied: 'Copied. Now paste it into Safari or Chrome',
     fail: m => `Sorry, that did not work (${m}). Try again.`, alt: n => `See-through ${n} instead (less detail)`, back: 'Back to Real bone' },
   es: { sub: 'Realidad aumentada', title: 'Poné tu tomografía sobre una mesa',
     p1: g => `La realidad aumentada de tu celular pone tu tomografía sobre una mesa de verdad, en tamaño real, en <b>hueso real sólido</b> para que veas el detalle${g}. Las capas que tenés activadas también aparecen.`,
@@ -815,6 +833,7 @@ const ART = {
     p2: '<b>En la realidad aumentada de Apple caminás alrededor en lugar de girarla.</b> Arrastrá con un dedo para moverla, girá dos dedos para rotarla y acercate para mirar adentro.',
     p3: 'La pestaña “Objeto” de arriba es una pantalla propia de Apple y funciona igual. Nuestros botones y pasos quedan acá, en esta página.',
     prep: 'Preparando tu modelo 3D…', go: 'Ponerla en mi mesa', ready: n => `Lista, en ${n}.`, phone: 'La realidad aumentada funciona en celulares iPhone y Android: abrí este mismo enlace en tu celular.', noar: 'Este celular no puede ponerla en tu habitación, pero todo lo demás de esta página funciona. En Android, abrí el enlace en Chrome.',
+    inapp: 'Estás dentro del navegador de una aplicación, donde la cámara muchas veces no puede iniciar. Si no inicia, copiá el enlace y abrilo en Safari (iPhone) o Chrome (Android).', copy: 'Copiar el enlace', copied: 'Copiado. Ahora pegalo en Safari o Chrome',
     fail: m => `Perdón, no funcionó (${m}). Probá de nuevo.`, alt: n => `${n} transparente (menos detalle)`, back: 'Volver a hueso real' },
 };
 function openAR() {
@@ -829,6 +848,11 @@ function openAR() {
   const go = document.createElement('button'); go.textContent = A.go; go.style.background = '#f4f4f4'; go.style.color = '#000'; go.disabled = true;
   go.onclick = e => { e.stopPropagation(); beacon('ar-launch'); if (mv.canActivateAR) mv.activateAR(); else st.textContent = noAR(); };
   a.appendChild(go);
+  // inside Gmail, Outlook, Instagram, Facebook or LinkedIn's own browser the camera view often cannot start: say so and offer the link to copy
+  // (placed at the top of the card, which scrolls, so it is seen without scrolling)
+  if (CORE.inapp && mob) { const box = document.createElement('div'); box.style.cssText = 'border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:9px 10px;margin:0 0 10px;font-size:12.5px;line-height:1.4;color:#ddd'; box.textContent = A.inapp;
+    const cp = document.createElement('button'); cp.textContent = A.copy; cp.style.cssText = 'display:block;margin-top:8px;border:0;border-radius:9px;padding:8px 12px;background:#f4f4f4;color:#000;font:700 13px var(--font),sans-serif';
+    cp.onclick = async e => { e.stopPropagation(); if (await copyText(location.href)) { cp.textContent = A.copied; beacon('share', 'copied for ar'); } }; box.appendChild(cp); document.getElementById('cp').prepend(box); }
   const prep = async () => {
     const me = ++busy; go.disabled = true; st.textContent = A.prep;
     try { await buildAR(lk); if (me !== busy) return; go.disabled = false; st.textContent = A.ready(nm(lk)) + (mv.canActivateAR ? '' : ' ' + noAR()); }
@@ -850,9 +874,19 @@ function applyLang() {
   document.documentElement.lang = LANG;
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
   document.getElementById('lang').textContent = t('lang');
+  { const pv = document.getElementById('priv'); if (pv) pv.href = t('privHref'); document.getElementById('share').setAttribute('aria-label', t('share')); }
   if (inSteps) document.getElementById('snext').textContent = t(step === PATIENT.steps.length - 1 ? 'done' : 'next');
   if (card.style.display === 'block' && lastCard) { const m = card.classList.contains('min'); lastCard(); setMin(m); }
 }
+// ---------- share: each share gets its own code, so a forwarded view is not mistaken for the first person ----------
+const toastEl = document.getElementById('toast'); let toastT = 0;
+function toast(m) { toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2600); }
+async function copyText(x) { try { await navigator.clipboard.writeText(x); return true; } catch (e) { const i = document.createElement('input'); i.value = x; document.body.appendChild(i); i.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} i.remove(); return ok; } }
+document.getElementById('share').onclick = async () => { const u = new URL(location.href); u.search = ''; u.hash = '';
+  try { const r = await Promise.race([fetch(CORE.api + '_share', { method: 'POST', body: JSON.stringify({ l: CORE.id, r: RCPT }) }).then(x => x.json()), new Promise((_, no) => setTimeout(no, 2500))]); if (r && r.c) u.searchParams.set('r', r.c); } catch (e) {}
+  const url = u.toString();
+  if (navigator.share && MOBILE) { try { await navigator.share({ title: document.title, url }); beacon('share', 'sheet'); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  if (await copyText(url)) { beacon('share', 'copied'); toast(t('copied')); } else prompt(t('share'), url); };
 document.getElementById('lang').onclick = () => { LANG = LANG === 'es' ? 'en' : 'es'; try { localStorage.setItem('scanLang', LANG); } catch (e) {} applyLang(); };
 applyLang();
 document.getElementById('load').style.display = 'none';
@@ -906,7 +940,7 @@ function frame() {
 }
 frame();
 </script>
-<div id="nvfail" hidden><div class="in"><img class="logo" src="logo.png?v=86b9eea3" alt="Harbour Radiology">
+<div id="nvfail" hidden><div class="in"><img class="logo" src="logo.png?v=86b9eea3" alt="Harbour Radiology"><img class="poster" src="../m/poster.jpg?v=104d8b4b" alt="">
   <p>The 3D view could not start on this phone or connection. Please try again, or open this link on another phone or a computer.</p><button onclick="location.reload()">Try again</button></div></div>
 </body>
 </html>

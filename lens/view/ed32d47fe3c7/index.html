@@ -14,11 +14,20 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.png?v=19e5476f">
 <link rel="apple-touch-icon" href="icon.png?v=19e5476f">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#161314">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bayside">
 <link rel="stylesheet" href="../_e/fonts/montserrat.css">
 <script>window.NVCFG = {"id":"ed32d47fe3c7","product":"lens","three":"three181","t":"https://nero-viewer.nerolabs.workers.dev/lens/view/_t"};</script>
 <script>(function () {
   var C = window.NVCFG || {}, qs = new URLSearchParams(location.search);
-  var R = (qs.get('r') || 'none').replace(/[^\w-]/g, '').slice(0, 24) || 'none', T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
+  var R = (qs.get('r') || '').replace(/[^\w-]/g, '').slice(0, 24), T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
+  var app = !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone);
+  try { if (R) localStorage.setItem('nvr:' + C.id, R); else if (app) R = localStorage.getItem('nvr:' + C.id) || ''; } catch (err) {}
+  R = R || 'none';
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
   function beacon(e, x) {
     try {
@@ -27,7 +36,7 @@
     } catch (err) {}
   }
   var ua = navigator.userAgent, inapp = /FBAN|FBAV|Instagram|LinkedInApp|GSA\/|Line\/|MicroMessenger|; wv\)/.test(ua) ? 'in-app' : '';
-  beacon('open', (mobile ? 'phone' : 'computer') + (qs.get('v') === 'qr' ? ' via qr' : '') + (inapp ? ' ' + inapp : ''));
+  beacon('open', (mobile ? 'phone' : 'computer') + (qs.get('v') === 'qr' ? ' via qr' : '') + (inapp ? ' ' + inapp : '') + (app ? ' home screen app' : ''));
   function time() { var s = Math.round((performance.now() - t0) / 1000); if (s - sent >= 5) { sent = s; beacon('time', s); } }
   addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') time(); });
   addEventListener('pagehide', time);   // iPhone Safari closes tabs without a visibilitychange
@@ -46,7 +55,7 @@
   addEventListener('unhandledrejection', function (e) { fail((e.reason && (e.reason.message || e.reason)) || 'load failed'); });
   setTimeout(function () { if (!loaded) fail('timeout: no 3D after 40s'); }, 40000);
   window.NV = {
-    id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, qs: qs, beacon: beacon, fail: fail,
+    id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, app: app, qs: qs, beacon: beacon, fail: fail,
     reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
     loaded: function () { if (loaded) return; loaded = 1; beacon('loaded', (Math.round((performance.now() - t0) / 100) / 10) + 's'); },
     qr: function (el) { if (!window.qrcode || !el) return; var u = new URL(location.href); u.searchParams.set('v', 'qr'); var q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
@@ -81,6 +90,7 @@
   #bottom { position:fixed; left:0; right:0; bottom:0; padding:10px 0 calc(env(safe-area-inset-bottom) + 8px); background:linear-gradient(rgba(var(--bgc),0), rgba(var(--bgc),.93) 28%); }
   #card { margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.1); border-radius:14px; padding:12px 14px 12px; display:none; position:relative; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
   #card .k { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--hero); font-weight:700; padding-right:128px; }
+  #card .k small { display:block; font-size:12px; letter-spacing:0; text-transform:none; font-weight:600; color:var(--text); margin-top:1px; } #card .k small::first-letter { text-transform:uppercase; }
   #card h2 { margin:3px 0 4px; font-size:21px; font-weight:800; letter-spacing:-.01em; }
   #card h2 em { font-style:normal; color:var(--hero); }
   #card p { margin:0; font-size:13.5px; line-height:1.4; color:var(--text); }
@@ -103,8 +113,8 @@
   .chip { flex:0 0 auto; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink); font:600 13.5px var(--font), sans-serif; padding:9px 14px; border-radius:22px; }
   .chip.on { background:var(--hero); border-color:var(--hero); color:var(--onhero); }
   .row { display:flex; gap:8px; padding:0 16px; align-items:stretch; }
-  #grow { flex:1 1 0; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink);
-          font:600 13.5px var(--font), sans-serif; padding:8px 12px; border-radius:12px; text-align:left; }
+  #grow { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink);
+          font:600 13px var(--font), sans-serif; padding:8px 10px; border-radius:12px; text-align:left; white-space:nowrap; }
   #grow small { display:block; font-size:12px; letter-spacing:.1em; color:var(--hero); font-weight:700; }
   .sw { width:38px; height:22px; border-radius:11px; background:var(--sw); position:relative; flex:0 0 auto; transition:background .2s; }
   .sw::after { content:""; position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .2s; }
@@ -158,6 +168,16 @@
   .sheet .no { width:100%; border:0; background:none; color:var(--muted2); font:600 13px var(--font), sans-serif; padding:12px 0 2px; }
   @media (min-width: 760px) { .sheet { align-items:center; justify-content:center; } .sheet .in { max-width:460px; margin:0; } }
   #arcopy { display:none; width:100%; border:1px solid rgba(var(--lc),.25); border-radius:12px; background:none; color:var(--ink); font:700 14px var(--font), sans-serif; padding:11px; margin:2px 0 6px; }
+  /* what's near: a short list in the card, one arrow per direction on the rim of the base */
+  .chip.nearc { display:flex; align-items:center; gap:6px; border-color:var(--hero); } .chip.nearc svg { width:14px; height:14px; flex:0 0 auto; }
+  #nlist { display:none; margin:6px -6px 0; max-height:min(25dvh, 188px); overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  #card.near #nlist { display:block; } #card.near #cp { font-size:12.5px; color:var(--muted); }
+  .nr { display:grid; grid-template-columns:30px 1fr auto; align-items:center; column-gap:9px; width:100%; border:0; background:none; color:var(--ink); font:600 13.5px var(--font), sans-serif; text-align:left; padding:6px 6px; border-radius:9px; min-height:36px; }
+  .nr i { font-style:normal; font-size:12px; font-weight:800; color:var(--hero); border:1px solid var(--hero); border-radius:6px; text-align:center; padding:2px 0; }
+  .nr span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nr b { font-weight:700; font-size:13px; white-space:nowrap; color:var(--text); }
+  .nr small { grid-column:2 / 4; display:none; font-size:12px; font-weight:500; line-height:1.35; color:var(--muted); white-space:normal; padding:1px 0 2px; }
+  .nr.on { background:rgba(var(--lc),.09); } .nr.on i { background:var(--hero); color:var(--onhero); } .nr.on small { display:block; } .nr.on span { white-space:normal; }
+  .tag.nt { pointer-events:auto; cursor:pointer; padding:5px 10px; } .tag.nt.on { background:var(--hero); color:var(--onhero); } .tag.nt.off { opacity:.6; }
   #card .src a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
   button:focus-visible, a:focus-visible { outline:2px solid var(--hero); outline-offset:2px; }
   /* the facts as a plain list: read by screen readers always, shown to everyone if the 3D view cannot load */
@@ -196,7 +216,7 @@
 <div id="tags" aria-hidden="true"></div>
 <div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your desk</div>
 <div id="bottom">
-  <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div id="season"><div class="m"><i></i><i></i><i></i><i class="idea"></i><i class="half"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="half2"></i><i class="idea"></i><i></i></div><div class="l"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div><div class="k2"><b>Open now</b> · <em>Concept: longer season</em></div></div><div class="src" id="cs"></div></div>
+  <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div id="nlist"></div><div id="season"><div class="m"><i></i><i></i><i></i><i class="idea"></i><i class="half"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="half2"></i><i class="idea"></i><i></i></div><div class="l"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div><div class="k2"><b>Open now</b> · <em>Concept: longer season</em></div></div><div class="src" id="cs"></div></div>
   <button id="mini" hidden><span id="minit"></span><em>Show info</em></button>
   <div id="chips"></div>
   <div class="row">
@@ -230,7 +250,7 @@
   <button class="go" id="askwa" type="button" style="display:none;background:none;border:1px solid rgba(var(--lc),.25);color:var(--ink);margin-top:8px">Send on WhatsApp</button>
   <button class="no" id="askno" type="button">Back to the 3D view</button>
 </form></div>
-<model-viewer id="mv" src="model.glb?v=911f8eeb" ios-src="model.usdz?v=f85e7272" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor" loading="lazy" alt="Bayside Inn and Marina, illustrative 3D model"></model-viewer>
+<model-viewer id="mv" src="model.glb?v=d4f2215c" ios-src="model.usdz?v=f5f5bf84" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor" loading="lazy" alt="Bayside Inn and Marina, illustrative 3D model"></model-viewer>
 <div id="nvfail" hidden><div class="in">
   <img class="logo" src="logo.png?v=94dc519e" alt="Pavia Real Estate Services">
   <h1>Bayside Inn &amp; Marina</h1><p class="sub">Cooperstown, New York · on Otsego Lake</p>
@@ -238,7 +258,7 @@
   <div class="why">The 3D view could not start on this device or connection. The facts are below. <br>Illustrative model made from public data. Not to scale, not a survey.</div>
   <button onclick="location.reload()">Try the 3D view again</button>
 </div></div>
-<div id="facts"><h2>Bayside Inn &amp; Marina: the facts</h2><h2><em>58</em> boat docks</h2><p>Three floating piers on Otsego Lake. The listing says 58 docks.</p><small>Source: Pavia listing on Crexi</small><h2><em>20</em> motel rooms</h2><p>Rooms 1 to 10 have private lake-view balconies. Rooms 11 to 20 are a short walk to the lake.</p><small>Source: baysidecooperstown.com, motel rooms</small><h2>Sleep up to <em>10</em></h2><p>Cottages of up to three bedrooms, rented by the week, or nightly if available.</p><small>Source: baysidecooperstown.com, cottages</small><h2>Private beach</h2><p>A groomed sand beach on the lake, with two gazebos and a large parking lot.</p><small>Source: Pavia listing on Crexi</small><h2>Otsego Lake</h2><p>4,046 acres of water and the source of the Susquehanna River. Only 2 public boat launches on the whole lake.</p><small>Sources: NYS DEC lake map and launch list, Susquehanna River Basin Commission</small><h2>Room to <em>grow</em> (Concept · an idea, not a forecast)</h2><p>Open about 5 months now, Memorial Day to Columbus Day. The idea: open longer into spring and fall (red, dashed).</p><small>Season: baysidecooperstown.com and the Pavia listing (&quot;closes in mid-October&quot;)</small></div>
+<div id="facts"><h2>Bayside Inn &amp; Marina: the facts</h2><h2><em>58</em> boat docks</h2><p>Three floating piers on Otsego Lake. The listing says 58 docks.</p><small>Source: Pavia listing on Crexi (58 docks in the text, the piers in its aerial photos)</small><h2><em>20</em> motel rooms</h2><p>Rooms 1 to 10 have private lake-view balconies. Rooms 11 to 20 are a short walk to the lake.</p><small>Source: baysidecooperstown.com, motel rooms</small><h2>Sleep up to <em>10</em></h2><p>Cottages of up to three bedrooms, rented by the week, or nightly if available.</p><small>Source: baysidecooperstown.com, cottages</small><h2>Private beach</h2><p>A groomed sand beach on the lake, with two gazebos and a large parking lot.</p><small>Source: Pavia listing on Crexi</small><h2>Otsego Lake</h2><p>4,046 acres of water and the source of the Susquehanna River. The state lists only 2 public boat launch sites on the whole lake.</p><small>Sources: NYS DEC lake map and launch list, Susquehanna River Basin Commission</small><h2>Room to <em>grow</em> (Concept · an idea, not a forecast)</h2><p>Open about four and a half months now, Memorial Day to Columbus Day. The idea: open longer into spring and fall (red, dashed).</p><small>Season: baysidecooperstown.com and the Pavia listing (&quot;closes in mid-October&quot;)</small></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -252,7 +272,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Everything about this listing (facts, sources, colours, effects) comes from its listing.json. Nothing about trading or income.
-const D = {"font":"Montserrat","name":"Bayside Inn & Marina","contact":{},"checked":"09-11-2026","theme":{"hero":"#ff4257"},"scene":{"root":"Bayside","baseParts":["ground","lake","plinth"],"waterParts":["lake"],"fadeParts":[],"backdrop":["#2b2526","#1c1819","#121011"],"hemi":["#dfe8f0","#3a3020"],"minDistance":0.1,"home":{"at":[0,-45,0],"dist":560,"el":0.8,"az":0.75,"fit":12},"glow":{"lerp":0,"base":0,"gain":0.8,"lumk":0.75},"tagDy":14},"fx":{"slips":{"type":"dots","list":"slips","r":0.9,"seg":10,"minY":1.2,"lift":0.6,"k":4,"rate":40,"depth":true},"beach":{"type":"outline","pts":"beachPoly","fmt":"xzy","lift":0.4,"closed":true,"tension":0.2,"seg":120,"r":0.7,"k":3},"shore":{"type":"outline","pts":"shore","fmt":"xz","y":0.9,"clip":3,"closed":false,"tension":0.3,"seg":300,"r":0.9,"k":3},"season":{"type":"season","now":[4.8,9.5],"idea":[[3.06,3.5],[3.56,4.0],[4.06,4.5],[4.56,4.75],[9.56,10.0],[10.06,10.5],[10.56,11.0]],"nowMonths":[5,6,7,8,9],"ideaMonths":[3,4,10],"lit":"#f2ece9"}},"hot":[{"id":"marina","chip":"Marina","k":"The marina","h":"<em>58<\/em> boat docks","p":"Three floating piers on Otsego Lake. The listing says 58 docks.","s":"Source: Pavia listing on Crexi","parts":["marina"],"tag":"58 boat docks","view":{"at":[70,0,-10],"dist":150,"el":0.55,"az":0.6},"fx":["slips"]},{"id":"motel","chip":"Motel","k":"The motel","h":"<em>20<\/em> motel rooms","p":"Rooms 1 to 10 have private lake-view balconies. Rooms 11 to 20 are a short walk to the lake.","s":"Source: baysidecooperstown.com, motel rooms","parts":["motel"],"tag":"20 rooms · 10 with lake-view balconies","view":{"at":[-100,12,3],"dist":115,"el":0.42,"az":1.05},"fx":[]},{"id":"cottages","chip":"Cottages","k":"The cottages","h":"Sleep up to <em>10<\/em>","p":"Cottages of up to three bedrooms, rented by the week, or nightly if available.","s":"Source: baysidecooperstown.com, cottages","parts":["cottages"],"tag":"Cottages sleep up to 10","view":{"at":[-30,6,25],"dist":120,"el":0.6,"az":0.25},"fx":[]},{"id":"beach","chip":"Private beach","k":"The beach","h":"Private beach","p":"A groomed sand beach on the lake, with two gazebos and a large parking lot.","s":"Source: Pavia listing on Crexi","parts":["beach"],"tag":"Private beach","view":{"at":[50,1,-14],"dist":95,"el":0.5,"az":0.75},"fx":["beach"]},{"id":"lake","chip":"Otsego Lake","k":"The lake","h":"Otsego Lake","p":"4,046 acres of water and the source of the Susquehanna River. Only 2 public boat launches on the whole lake.","s":"Sources: NYS DEC lake map and launch list, Susquehanna River Basin Commission","parts":["lake"],"tag":"Otsego Lake","view":{"at":[60,0,-40],"dist":300,"el":0.62,"az":0.7},"fx":["shore"],"glow":0.06,"dy":2}],"grow":{"k":"Concept · an idea, not a forecast","h":"Room to <em>grow<\/em>","p":"Open about 5 months now, Memorial Day to Columbus Day. The idea: open longer into spring and fall (red, dashed).","s":"Season: baysidecooperstown.com and the Pavia listing (\"closes in mid-October\")","view":{"at":[0,-115,0],"dist":700,"el":1.08,"az":0.75,"fit":30},"fx":["season"],"tag":{"at":[0,30,0],"text":"Concept: open longer"}},"files":{"glb":"model.glb?v=911f8eeb","info":"model_info.json?v=54758023"}};
+const D = {"font":"Montserrat","near":null,"name":"Bayside Inn & Marina","contact":{},"checked":"09-11-2026","theme":{"hero":"#ff4257"},"scene":{"root":"Bayside","baseParts":["ground","lake","plinth"],"waterParts":["lake"],"fadeParts":[],"backdrop":["#2b2526","#1c1819","#121011"],"hemi":["#dfe8f0","#3a3020"],"minDistance":0.1,"home":{"at":[0,-45,0],"dist":560,"el":0.8,"az":0.75,"fit":12},"glow":{"lerp":0,"base":0,"gain":0.8,"lumk":0.75},"tagDy":14},"fx":{"slips":{"type":"dots","list":"slips","r":0.9,"seg":10,"minY":1.2,"lift":0.6,"k":4,"rate":40,"depth":true},"beach":{"type":"outline","pts":"beachPoly","fmt":"xzy","lift":0.4,"closed":true,"tension":0.2,"seg":120,"r":0.7,"k":3},"shore":{"type":"outline","pts":"shore","fmt":"xz","y":0.9,"clip":3,"closed":false,"tension":0.3,"seg":300,"r":0.9,"k":3},"season":{"type":"season","now":[4.8,9.5],"idea":[[3.06,3.5],[3.56,4.0],[4.06,4.5],[4.56,4.75],[9.56,10.0],[10.06,10.5],[10.56,11.0]],"nowMonths":[5,6,7,8,9],"ideaMonths":[3,4,10],"lit":"#f2ece9"}},"hot":[{"id":"marina","chip":"Marina","k":"The marina","h":"<em>58<\/em> boat docks","p":"Three floating piers on Otsego Lake. The listing says 58 docks.","s":"Source: Pavia listing on Crexi (58 docks in the text, the piers in its aerial photos)","parts":["marina"],"tag":"58 boat docks","view":{"at":[70,0,-10],"dist":150,"el":0.55,"az":0.6},"fx":["slips"],"links":[{"t":"Crexi listing","u":"https://www.crexi.com/properties/2674900/new-york-bayside-inn-marina-motel"}]},{"id":"motel","chip":"Motel","k":"The motel","h":"<em>20<\/em> motel rooms","p":"Rooms 1 to 10 have private lake-view balconies. Rooms 11 to 20 are a short walk to the lake.","s":"Source: baysidecooperstown.com, motel rooms","parts":["motel"],"tag":"20 rooms · 10 with lake-view balconies","view":{"at":[-100,12,3],"dist":115,"el":0.42,"az":1.05},"fx":[],"links":[{"t":"Motel rooms page","u":"https://www.baysidecooperstown.com/motel-rooms"}]},{"id":"cottages","chip":"Cottages","k":"The cottages","h":"Sleep up to <em>10<\/em>","p":"Cottages of up to three bedrooms, rented by the week, or nightly if available.","s":"Source: baysidecooperstown.com, cottages","parts":["cottages"],"tag":"Cottages sleep up to 10","view":{"at":[-30,6,25],"dist":120,"el":0.6,"az":0.25},"fx":[],"links":[{"t":"Cottages page","u":"https://www.baysidecooperstown.com/cottages"}]},{"id":"beach","chip":"Private beach","k":"The beach","h":"Private beach","p":"A groomed sand beach on the lake, with two gazebos and a large parking lot.","s":"Source: Pavia listing on Crexi","parts":["beach"],"tag":"Private beach","view":{"at":[50,1,-14],"dist":95,"el":0.5,"az":0.75},"fx":["beach"],"links":[{"t":"Crexi listing","u":"https://www.crexi.com/properties/2674900/new-york-bayside-inn-marina-motel"},{"t":"Bayside waterfront page","u":"https://www.baysidecooperstown.com/facilities-outside"}]},{"id":"lake","chip":"Otsego Lake","k":"The lake","h":"Otsego Lake","p":"4,046 acres of water and the source of the Susquehanna River. The state lists only 2 public boat launch sites on the whole lake.","s":"Sources: NYS DEC lake map and launch list, Susquehanna River Basin Commission","parts":["lake"],"tag":"Otsego Lake","view":{"at":[60,0,-40],"dist":300,"el":0.62,"az":0.7},"fx":["shore"],"glow":0.06,"dy":2,"links":[{"t":"NYS DEC lake map","u":"https://extapps.dec.ny.gov/docs/fish_marine_pdf/otlkmap.pdf"},{"t":"NYS DEC launch list","u":"https://dec.ny.gov/things-to-do/boating/launch-sites/otsego-county"},{"t":"Susquehanna River Basin Commission","u":"https://www.srbc.gov/portals/susquehanna-atlas/data-and-maps/subbasins/index.html"}]}],"grow":{"k":"Concept · an idea, not a forecast","h":"Room to <em>grow<\/em>","p":"Open about four and a half months now, Memorial Day to Columbus Day. The idea: open longer into spring and fall (red, dashed).","s":"Season: baysidecooperstown.com and the Pavia listing (\"closes in mid-October\")","view":{"at":[0,-115,0],"dist":700,"el":1.08,"az":0.75,"fit":30},"fx":["season"],"tag":{"at":[0,30,0],"text":"Concept: open longer"},"links":[{"t":"Motel rooms page","u":"https://www.baysidecooperstown.com/motel-rooms"},{"t":"Crexi listing","u":"https://www.crexi.com/properties/2674900/new-york-bayside-inn-marina-motel"}]},"files":{"glb":"model.glb?v=d4f2215c","info":"model_info.json?v=54758023"}};
 const HOT = D.hot, GROW = D.grow, SC = D.scene, T = NV.beacon, mobile = NV.mobile;
 
 const HERO = new THREE.Color(D.theme.hero);
@@ -378,26 +398,33 @@ const target = new THREE.Vector3(); let anim = null;
 function poseOf(v) { const at = W(...place(v.at)); let d = v.dist * S * (camera.aspect < 0.8 ? 1.35 : 1); const ph = Math.PI / 2 - v.el;
   if (v.fit) { const hh = Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect); d = Math.max(v.dist * S, (R + v.fit) * S / Math.sin(hh) * 1.02); }
   const p = new THREE.Vector3().setFromSphericalCoords(d, ph, v.az).add(at); return { at, p }; }
-function goView(v, dur = 1.1) { const to = poseOf(v); if (NV.reduced) { controls.target.copy(to.at); camera.position.copy(to.p); anim = null; return; }
-  anim = { t0: performance.now(), dur: dur * 1000, a0: controls.target.clone(), p0: camera.position.clone(), a1: to.at, p1: to.p }; }
+// orbit: swing round the model instead of cutting straight across it (used when turning to face a place that is near)
+function goView(v, dur = 1.1, orbit) { const to = poseOf(v); if (NV.reduced) { controls.target.copy(to.at); camera.position.copy(to.p); anim = null; return; }
+  anim = { t0: performance.now(), dur: dur * 1000, a0: controls.target.clone(), p0: camera.position.clone(), a1: to.at, p1: to.p };
+  if (orbit) { const s0 = new THREE.Spherical().setFromVector3(anim.p0.clone().sub(anim.a0)), s1 = new THREE.Spherical().setFromVector3(to.p.clone().sub(to.at)), d = s1.theta - s0.theta;
+    anim.s0 = s0; anim.s1 = s1; anim.dth = Math.atan2(Math.sin(d), Math.cos(d)); } }
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
   bloom.resolution.set(w / 2, h / 2); }
 addEventListener('resize', resize); resize();
 { const p = poseOf(HOME); camera.position.copy(p.p); controls.target.copy(p.at); controls.update(); }
 
 // ---------- hotspots ----------
-let sel = null, growOn = false, glowT = 0;
+let sel = null, growOn = false, nearOn = false, glowT = 0;
 const chips = document.getElementById('chips'), card = document.getElementById('card');
+const NEAR = D.near && D.near.items.length ? D.near : null, NEARC = NEAR ? { k: "What's near", h: "What's <em>near</em>", p: NEAR.p, s: NEAR.s } : null;
+if (NEAR) { const b = document.createElement('button'); b.className = 'chip nearc'; b.id = 'nearchip'; b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="currentColor"/></svg>What\u2019s near';
+  b.onclick = () => { stopTour(); if (nearOn) { if (card.style.display === 'none') showCard(NEARC, 'near'); else setNear(false); } else { T('tap', 'near'); setNear(true); } }; chips.appendChild(b); }
 // tap a chip: choose it. Tap the chosen chip again: bring its info back if it was hidden, otherwise let go of it.
 HOT.forEach(h => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = h.chip; b.dataset.id = h.id; b.setAttribute('aria-pressed', 'false');
   b.onclick = () => { if (sel && sel.id === h.id) { if (card.style.display === 'none') showCard(h); else choose(null); } else choose(h); }; chips.appendChild(b); });
 const mini = document.getElementById('mini'), resetBtn = document.getElementById('reset');
 const bottomBox = document.getElementById('bottom');
-function hideCard() { const c = growOn ? GROW : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
-mini.onclick = () => showCard(growOn ? GROW : sel, growOn);
-function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept ? 'concept' : ''; card.style.display = 'block';
-  { const all = [...HOT, ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
-  document.getElementById('ck').textContent = c.k; document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
+function hideCard() { const c = growOn ? GROW : nearOn ? NEARC : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
+mini.onclick = () => showCard(growOn ? GROW : nearOn ? NEARC : sel, growOn ? 'concept' : nearOn ? 'near' : '');
+function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept === true ? 'concept' : (concept || ''); card.style.display = 'block';
+  { const all = [...HOT, ...(NEARC ? [NEARC] : []), ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
+  { const ck = document.getElementById('ck'), parts = String(c.k).split(' · '); ck.textContent = parts[0]; if (parts.length > 1) { const sm = document.createElement('small'); sm.textContent = parts.slice(1).join(' · '); ck.appendChild(sm); } } document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
   const cs = document.getElementById('cs'); cs.textContent = c.s;
   for (const k of c.links || []) { const a = document.createElement('a'); a.href = k.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = k.t; cs.append(' · ', a); }
   if (c.links && c.links.length && D.checked) cs.append(' · checked ' + D.checked); }
@@ -408,34 +435,92 @@ function choose(h, quiet) {
   sel = h; stopSpin();
   chips.querySelectorAll('.chip').forEach(b => { const on = !!h && b.dataset.id === h.id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   if (h && growOn) setGrow(false, true);
+  if (h && nearOn) setNear(false, true);
   showCard(h); hideFx(); glowT = 0;
   if (h) showFx(h.fx);
   goView(h ? h.view : HOME);
   if (!h) resetMats();
 }
 document.getElementById('cx').onclick = hideCard;   // hide the words, keep the view (Adam, 09-11-2026)
-resetBtn.onclick = () => { T('tap', 'reset'); if (growOn) setGrow(false); else choose(null); };
+resetBtn.onclick = () => { T('tap', 'reset'); if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null); };
 const growBtn = document.getElementById('grow');
 function setGrow(on, quiet) { growOn = on; growBtn.classList.toggle('on', on); growBtn.setAttribute('aria-pressed', on); glowT = 0; hideFx();
-  if (on) { sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); showFx(GROW.fx);
+  if (on) { if (nearOn) setNear(false, true); sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); showFx(GROW.fx);
     showCard(GROW, true); stopSpin(); goView(GROW.view); }
   else { resetMats(); if (!quiet) { showCard(null); goView(HOME); } } }
 growBtn.onclick = () => { stopTour(); if (!growOn) T('tap', 'grow'); setGrow(!growOn); };
 
+// ---------- what's near: sourced places round the rim of the base, one arrow per direction (listing.json "near") ----------
+// Each place has a compass bearing from the property (worked out from its position when the page is built), a drive time or
+// distance, and its source. Places in nearly the same direction share one arrow, so the rim never gets crowded.
+const nlist = document.getElementById('nlist'), nearG = new THREE.Group(); nearG.visible = false; model.add(nearG);
+const NG = [], NROW = []; let nearSel = null, NEARV = null;
+const fmtMin = (m) => m >= 60 ? Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') : m + ' min';
+const nearD = (it) => it.min != null ? fmtMin(it.min) : it.mi + ' mi';
+const COMP = [['N', 'north'], ['NE', 'north-east'], ['E', 'east'], ['SE', 'south-east'], ['S', 'south'], ['SW', 'south-west'], ['W', 'west'], ['NW', 'north-west']];
+const comp = (b) => COMP[Math.round((((b % 360) + 360) % 360) / 45) % 8];
+if (NEAR) {
+  const u = R / 140, rad = (b) => (b - (SC.north || 0)) * Math.PI / 180, far = (it) => it.min != null ? it.min : it.mi * 1.5;
+  const its = NEAR.items.map((it, i) => ({ ...it, i })).sort((a, b) => a.b - b.b), groups = [];
+  for (const it of its) { const g = groups[groups.length - 1]; if (g && it.b - g[g.length - 1].b <= 14) g.push(it); else groups.push([it]); }
+  if (groups.length > 1 && groups[0][0].b + 360 - groups[groups.length - 1].slice(-1)[0].b <= 14) groups[0] = groups.pop().concat(groups[0]);   // north wraps round
+  const shape = new THREE.Shape([new THREE.Vector2(0, 8), new THREE.Vector2(-5.5, -3), new THREE.Vector2(0, -0.5), new THREE.Vector2(5.5, -3)]);
+  for (const g of groups) { const a = Math.atan2(g.reduce((s, it) => s + Math.sin(rad(it.b)), 0), g.reduce((s, it) => s + Math.cos(rad(it.b)), 0));
+    const geo = new THREE.ShapeGeometry(shape); geo.rotateX(-Math.PI / 2); geo.scale(u, 1, u); geo.rotateY(-a);
+    const mat = glowM(4), mesh = new THREE.Mesh(geo, mat), rr = R + 12 * u; mesh.position.set(Math.sin(a) * rr, 1.4, -Math.cos(a) * rr); nearG.add(mesh);
+    const el = document.getElementById('tags').appendChild(Object.assign(document.createElement('div'), { className: 'tag nt' })); el.style.display = 'none';
+    const G = { a, mat, el, items: g.slice().sort((x, y) => far(x) - far(y)), at: new THREE.Vector3(Math.sin(a) * (rr + 4 * u), 7 * u, -Math.cos(a) * (rr + 4 * u)) };
+    el.onclick = () => { stopTour(); const k = G.items.indexOf(nearSel); pickNear(G.items[(k + 1) % G.items.length].i); };   // tap again: the next place that way
+    G.items.forEach(it => { it.g = G; }); NG.push(G); }
+  // the list in the card, nearest first
+  its.sort((x, y) => far(x) - far(y)).forEach(it => { const b = document.createElement('button'); b.className = 'nr'; b.type = 'button'; const c = comp(it.b);
+    const i = document.createElement('i'), n = document.createElement('span'), d = document.createElement('b'), s = document.createElement('small');
+    i.textContent = c[0]; n.textContent = it.n; d.textContent = nearD(it);
+    s.textContent = (it.mi != null && it.min != null ? it.mi + ' miles by road, ' : 'By road, ') + 'to the ' + c[1] + '. Source: ' + it.s;
+    b.append(i, n, d, s); b.onclick = () => { stopTour(); pickNear(it.i); }; nlist.appendChild(b); NROW[it.i] = { it, b }; });
+  NEARV = { at: [0, -50 * u, 0], dist: HOME.dist, el: 0.95, az: HOME.az, fit: 34 * u };
+}
+// choose one place: the model swings round so that place comes to the front, just above the card (on a wide screen the card sits over the front, so it goes to the back)
+function pickNear(i) { const row = NROW[i]; if (!row) return; const same = nearSel === row.it; nearSel = same ? null : row.it;
+  NROW.forEach(r => r && r.b.classList.toggle('on', r.it === nearSel)); controls.autoRotate = false;
+  if (nearSel) { T('tap', 'near ' + nearSel.n); if (card.style.display !== 'none') row.b.scrollIntoView({ block: 'nearest' }); goView({ ...NEARV, az: innerWidth < 760 ? Math.PI - nearSel.g.a : -nearSel.g.a }, 1.2, true); } }
+function setNear(on, quiet) { if (!NEAR) return; nearOn = on; nearSel = null; nearG.visible = on; glowT = 0;
+  const nc = document.getElementById('nearchip'); NROW.forEach(r => r && r.b.classList.remove('on'));
+  if (on) { if (growOn) setGrow(false, true); sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); hideFx();
+    nc.classList.add('on'); nc.setAttribute('aria-pressed', 'true'); showCard(NEARC, 'near'); nlist.scrollTop = 0; stopSpin(); goView(NEARV); controls.autoRotate = !NV.reduced; controls.autoRotateSpeed = 0.35; }
+  else { nc.classList.remove('on'); nc.setAttribute('aria-pressed', 'false'); NG.forEach(g => { g.el.style.display = 'none'; }); controls.autoRotateSpeed = 0.55; if (!quiet) { showCard(null); goView(HOME); } } }
+const nearV = new THREE.Vector3();
+function tickNear(t) { const pulse = NV.reduced ? 1 : 0.8 + 0.2 * Math.sin(t * 3), k = Math.min(1, t / 0.5), placed = [];
+  // the chosen direction is placed first, so it keeps its spot and the others step out of its way
+  for (const g of NG.slice().sort((x, y) => (nearSel && nearSel.g === y) - (nearSel && nearSel.g === x))) { const mine = nearSel && nearSel.g === g, it = mine ? nearSel : g.items[0];
+    g.mat.opacity = k * (mine ? 1 : nearSel ? 0.3 : pulse);
+    nearV.copy(g.at); model.localToWorld(nearV); nearV.project(camera); const el = g.el;
+    if (nearV.z > 1) { el.style.display = 'none'; continue; }
+    const c = comp(g.a * 180 / Math.PI + (SC.north || 0))[1], text = mine || g.items.length === 1 ? (it.t || it.n) + ' · ' + nearD(it) : c[0].toUpperCase() + c.slice(1) + ' · ' + g.items.length + ' places'; if (el.textContent !== text) el.textContent = text;
+    el.className = 'tag nt' + (mine ? ' on' : nearSel ? ' off' : ''); el.style.display = 'block';
+    const hw = el.offsetWidth / 2 + 8, x = Math.min(innerWidth - hw, Math.max(hw, (nearV.x * 0.5 + 0.5) * innerWidth)), h = el.offsetHeight + 6;
+    let y = Math.max(h + (innerWidth < 760 ? 150 : 70), (-nearV.y * 0.5 + 0.5) * innerHeight - 8);   // stay below the header and its buttons
+    for (let n = 0; n < 6 && placed.some(q => Math.abs(q.x - x) < q.hw + hw - 10 && Math.abs(q.y - y) < h); n++) y += h;   // two labels never sit on top of each other
+    placed.push({ x, y, hw }); el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; } }
+
 // ---------- guided tour: flies round the property and stops on each fact, in the film's order ----------
 const tourBtn = document.getElementById('tourbtn'), tourBar = document.getElementById('tourbar');
-const STOPS = [...HOT, ...(GROW ? ['grow'] : [])], STOP_S = 6.5;
+const STOPS = [...HOT, ...(NEAR ? ['near'] : []), ...(GROW ? ['grow'] : [])], STOP_S = 6.5;
+// go to one stop: a fact, What's near, or Room to grow
+function goStop(s, quiet) {
+  if (s === 'grow') { if (!quiet) T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); }
+  else if (s === 'near') { if (!quiet) T('tap', 'near'); if (sel) choose(null, true); setNear(true); }
+  else choose(s, quiet); }
 let tour = null;   // { i, t } while playing
-function tourGo(i) { tour.i = i; tour.t = 0; const s = STOPS[i]; if (s === 'grow') { if (sel) choose(null, true); setGrow(true); } else { choose(s, true); } }
+function tourGo(i) { tour.i = i; tour.t = 0; goStop(STOPS[i], true); }
 function startTour(how) { if (tour) return; T('tour', how); tour = { i: 0, t: 0 }; tourBtn.classList.add('on'); tourBtn.setAttribute('aria-pressed', 'true'); tourBtn.lastElementChild.textContent = 'Stop'; tourGo(0); }
 function stopTour(finished) { if (!tour) return; tour = null; tourBtn.classList.remove('on'); tourBtn.setAttribute('aria-pressed', 'false'); tourBtn.lastElementChild.textContent = 'Tour'; tourBar.style.width = '0';
-  if (finished) { if (growOn) setGrow(false); else choose(null, true); controls.autoRotate = !NV.reduced; } }
+  if (finished) { if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null, true); controls.autoRotate = !NV.reduced; } }
 function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (tour.i + Math.min(1, tour.t / STOP_S)) / STOPS.length) + '%';
   if (tour.t >= STOP_S) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
 tourBtn.onclick = () => { if (tour) stopTour(); else startTour('tap'); };
 // arrows on the card: step to the next or previous fact (Room to grow is the last one)
-function step(d) { stopTour(); const n = STOPS.length, i = growOn ? n - 1 : HOT.indexOf(sel), s = STOPS[((i < 0 ? 0 : i + d) + n) % n];
-  if (s === 'grow') { T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); } else choose(s); }
+function step(d) { stopTour(); const n = STOPS.length, i = growOn ? STOPS.indexOf('grow') : nearOn ? STOPS.indexOf('near') : HOT.indexOf(sel); goStop(STOPS[((i < 0 ? 0 : i + d) + n) % n]); }
 document.getElementById('cprev').onclick = () => step(-1); document.getElementById('cnext').onclick = () => step(1);
 
 // ---------- share: each share gets its own code, so a forwarded view is not mistaken for the first person ----------
@@ -480,7 +565,7 @@ askf.onsubmit = async (e) => { e.preventDefault(); const q = question(); if (!q)
     T('enquiry', q.role); askf.reset(); closeAsk(); askst.textContent = askNote; toast('Sent. Thank you, you will hear back by email.');
   } catch (err) { askst.textContent = 'Sorry, that did not send. Please try again in a moment.'; askst.style.color = 'var(--hero)'; }
   askgo.disabled = false; };
-addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); if (ask.style.display === 'flex') ask.style.display = 'none'; else if (arcard.style.display === 'flex') arcard.style.display = 'none'; else if (card.style.display === 'block') hideCard(); else if (growOn) setGrow(false); else if (sel) choose(null); } });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); if (ask.style.display === 'flex') ask.style.display = 'none'; else if (arcard.style.display === 'flex') arcard.style.display = 'none'; else if (card.style.display === 'block') hideCard(); else if (growOn) setGrow(false); else if (nearOn) setNear(false); else if (sel) choose(null); } });
 
 // ---------- spin hint ----------
 const hint = document.getElementById('hint');
@@ -528,7 +613,10 @@ const G = SC.glow;
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (anim) { const k = Math.min(1, (now - anim.t0) / anim.dur), e = ease(k); controls.target.lerpVectors(anim.a0, anim.a1, e); camera.position.lerpVectors(anim.p0, anim.p1, e); if (k >= 1) anim = null; }
+  if (anim) { const k = Math.min(1, (now - anim.t0) / anim.dur), e = ease(k); controls.target.lerpVectors(anim.a0, anim.a1, e);
+    if (anim.s0) camera.position.setFromSphericalCoords(anim.s0.radius + (anim.s1.radius - anim.s0.radius) * e, anim.s0.phi + (anim.s1.phi - anim.s0.phi) * e, anim.s0.theta + anim.dth * e).add(controls.target);
+    else camera.position.lerpVectors(anim.p0, anim.p1, e);
+    if (k >= 1) anim = null; }
   controls.update(); liftView(dt); tickTour(dt);
   if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
   if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
@@ -542,7 +630,7 @@ function frame(now) {
     tickFx(GROW.fx, glowT, 1, pulse);
     if (GROW.glowParts) MATS.forEach(m => { if (GROW.glowParts.includes(m.userData.p)) { m.emissive.copy(HERO); m.emissiveIntensity = 0.5 * (1 - 0.7 * m.userData.lum) * pulse; } });
     showTags([GROW.tag], true);
-  } else hideTags(0);
+  } else { hideTags(0); if (nearOn) { glowT += dt; tickNear(glowT); } }
   composer.render();
   requestAnimationFrame(frame);
 }
@@ -551,10 +639,19 @@ const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() 
 if (!mobile) hint.textContent = 'Drag to spin · scroll to zoom';
 setTimeout(() => { hint.style.opacity = 0; }, 6000);
 window.__ready = true; NV.loaded(); window.__tour = startTour;
-if (!NV.reduced && !NV.qs.has('notour')) { let seen = false; try { seen = localStorage.getItem('nvtour:' + NV.id) === '1'; localStorage.setItem('nvtour:' + NV.id, '1'); } catch (e) {}
-  if (!seen) setTimeout(() => { if (!sel && !growOn && controls.autoRotate && arcard.style.display !== 'flex' && ask.style.display !== 'flex') startTour('auto'); }, 3500); }
+// the tour never starts by itself: it plays only when the Tour button is pressed (Adam, 09-11-2026)
 if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
-window.__choose = (id) => choose(HOT.find(h => h.id === id) || null); window.__grow = setGrow;
+// ---------- works with no signal: once opened, this listing is saved on the device (see engine/sw.js) ----------
+if ('serviceWorker' in navigator && !NV.qs.has('nosw')) {
+  navigator.serviceWorker.addEventListener('message', (e) => { if (!e.data || !e.data.nvSaved) return; window.__saved = e.data.nvSaved;
+    let told = true; try { told = localStorage.getItem('nvsaved:' + NV.id) === '1'; localStorage.setItem('nvsaved:' + NV.id, '1'); } catch (err) {}
+    if (NV.app && !told) toast('Saved on this device. It now opens with no signal.'); });
+  navigator.serviceWorker.register('sw.js', { scope: './' }).then(() => navigator.serviceWorker.ready).then((reg) => {
+    const save = () => { const list = [location.href, ...performance.getEntriesByType('resource').map(x => x.name)].filter(u => u.startsWith(location.origin + '/'));
+      if (reg.active) reg.active.postMessage({ cache: [...new Set(list)], page: location.href }); };
+    save(); setTimeout(save, 15000); }).catch(() => {});
+}
+window.__choose = (id) => choose(HOT.find(h => h.id === id) || null); window.__grow = setGrow; window.__near = (on, i) => { setNear(on); if (on && i != null) pickNear(i); };
 </script>
 </body>
 </html>
