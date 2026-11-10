@@ -47,11 +47,22 @@
     if (t === window || !t || !t.tagName) fail(e.message || 'script error');
   }, true);
   addEventListener('unhandledrejection', function (e) { fail((e.reason && (e.reason.message || e.reason)) || 'load failed'); });
-  setTimeout(function () { if (!loaded) fail('timeout: no 3D after 40s'); }, 40000);
+  var w0 = Date.now(), slowSent = 0;
+  function check(at) {
+    if (loaded) return;
+    var real = Date.now() - w0;
+    if (real < at - 5000) { if (!slowSent) { slowSent = 1; beacon('sandbox', 'clock sped up ' + Math.round(real / 1000) + 's'); } return setTimeout(function () { check(at); }, Math.max(1000, at - real)); }
+    if (at < 90000) { beacon('slow', 'still loading after ' + Math.round(real / 1000) + 's'); return setTimeout(function () { check(90000); }, 90000 - real); }
+    fail('timeout: no 3D after 90s');
+  }
+  setTimeout(function () { check(40000); }, 40000);
   window.NV = {
     id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, app: app, qs: qs, beacon: beacon, fail: fail,
     reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
-    loaded: function () { if (loaded) return; loaded = 1; beacon('loaded', (Math.round((performance.now() - t0) / 100) / 10) + 's'); },
+    loaded: function () {
+      if (loaded) return; loaded = 1; beacon('loaded', (Math.round((Date.now() - w0) / 100) / 10) + 's');
+      if (failed) { var f = document.getElementById('nvfail'); if (f) f.hidden = true; document.documentElement.classList.remove('nvfailed'); }
+    },
     qr: function (el) { if (!window.qrcode || !el) return; var u = new URL(location.href); u.searchParams.set('v', 'qr'); var q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
   };
   window.ModelViewerElement = window.ModelViewerElement || {};
