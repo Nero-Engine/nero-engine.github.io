@@ -27,7 +27,7 @@
   var R = (qs.get('r') || '').replace(/[^\w-]/g, '').slice(0, 24), T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
   var app = !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone);
   try { if (R) localStorage.setItem('nvr:' + C.id, R); else if (app) R = localStorage.getItem('nvr:' + C.id) || ''; } catch (err) {}
-  try { if (qs.get('me') === '1') localStorage.setItem('nvme', '1'); if (qs.get('me') === '0') localStorage.removeItem('nvme'); if (localStorage.getItem('nvme') === '1') R = 'adam'; } catch (err) {}
+  try { if (qs.get('me') === '1') localStorage.setItem('nvme', '1'); if (qs.get('me') === '0') localStorage.removeItem('nvme'); if (localStorage.getItem('nvme') === '1' && R !== 'phonetest') R = 'adam'; } catch (err) {}
   R = R || 'none';
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
   function beacon(e, x) {
