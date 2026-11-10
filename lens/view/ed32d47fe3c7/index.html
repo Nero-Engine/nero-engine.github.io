@@ -524,7 +524,12 @@ function tickNear(t) { const pulse = NV.reduced ? 1 : 0.8 + 0.2 * Math.sin(t * 3
 
 // ---------- guided tour: flies round the property and stops on each fact, in the film's order ----------
 const tourBtn = document.getElementById('tourbtn'), tourBar = document.getElementById('tourbar');
-const STOPS = [...HOT, ...(NEAR ? ['near'] : []), ...(GROW ? ['grow'] : [])], STOP_S = 6.5;
+const STOPS = [...HOT, ...(NEAR ? ['near'] : []), ...(GROW ? ['grow'] : [])];
+// 10-11-2026 (Adam: "the scenes move too fast to read"): each stop stays long enough to read its card (about 3 words a second plus the fly-in),
+// Room to grow stays until its build animation has finished, and the tour ends on the last stop instead of closing it.
+const words = (o) => { const t = [o && o.h, o && o.p, o && o.k].filter(Boolean).join(' ').replace(/<[^>]+>/g, ' '); return t.split(/\s+/).filter(Boolean).length; };
+const STOP_DUR = STOPS.map(s => { const o = s === 'grow' ? GROW : s === 'near' ? (typeof NEARC !== 'undefined' ? NEARC : null) : s; const r = Math.min(16, Math.max(8, 2.5 + words(o) / 3));
+  return s === 'grow' ? Math.max(r, 16) : r; });
 // go to one stop: a fact, What's near, or Room to grow
 function goStop(s, quiet) {
   if (s === 'grow') { if (!quiet) T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); }
@@ -534,9 +539,9 @@ let tour = null;   // { i, t } while playing
 function tourGo(i) { tour.i = i; tour.t = 0; goStop(STOPS[i], true); }
 function startTour(how) { if (tour) return; T('tour', how); tour = { i: 0, t: 0 }; tourBtn.classList.add('on'); tourBtn.setAttribute('aria-pressed', 'true'); tourBtn.lastElementChild.textContent = 'Stop'; tourGo(0); }
 function stopTour(finished) { if (!tour) return; tour = null; tourBtn.classList.remove('on'); tourBtn.setAttribute('aria-pressed', 'false'); tourBtn.lastElementChild.textContent = 'Tour'; tourBar.style.width = '0';
-  if (finished) { if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null, true); controls.autoRotate = !NV.reduced; } }
-function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (tour.i + Math.min(1, tour.t / STOP_S)) / STOPS.length) + '%';
-  if (tour.t >= STOP_S) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
+  if (finished) { /* stay on the last stop (Adam, 10-11-2026) */ } }
+function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (STOP_DUR.slice(0, tour.i).reduce((a, b) => a + b, 0) + Math.min(tour.t, STOP_DUR[tour.i])) / STOP_DUR.reduce((a, b) => a + b, 0)) + '%';
+  if (tour.t >= STOP_DUR[tour.i]) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
 tourBtn.onclick = () => { if (tour) stopTour(); else startTour('tap'); };
 // arrows on the card: step to the next or previous fact (Room to grow is the last one)
 function step(d) { stopTour(); const n = STOPS.length, i = growOn ? STOPS.indexOf('grow') : nearOn ? STOPS.indexOf('near') : HOT.indexOf(sel); goStop(STOPS[((i < 0 ? 0 : i + d) + n) % n]); }
