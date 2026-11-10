@@ -1,0 +1,225 @@
+// Life layer for the desk viewer (10-11-2026, first used on Stella Mare RV Resort).
+// Small moving pieces (carts, a mower with a pelican waddling behind, a few people, pelicans, highway cars), swaying palms,
+// moving water, surf on the beach, a Sunset switch and the Room to grow build animation.
+// Loaded only when listing.json has scene.life. It moves in the web viewer only: the AR file stays a still model.
+// The model carries the pieces as hidden "proto_*" parts inside the plinth; paths and places come from model_info.json "life".
+let THREE;   // handed in by the engine, so there is only one copy of three.js on the page
+
+export async function init(X) {
+  THREE = X.THREE;
+  const { model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, NV, glowM } = X;
+  const L = INFO.life || {}, CFG = SC.life || {}, reduced = !!NV.reduced, TS = CFG.speed ?? 1.5, LAND = INFO.land ?? 0.5;
+  const PY = (INFO.protoAt || [0, -8, 0])[1];
+  const root = new THREE.Group(); root.name = 'life'; model.add(root);
+  const ease = (k) => k < 0 ? 0 : k > 1 ? 1 : k * k * (3 - 2 * k);
+  const back = (k) => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.9, x = k - 1; return 1 + (c + 1) * x * x * x + c * x * x; };
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+
+  // ---------- instanced copies of a hidden piece ----------
+  function inst(name, n, opt = {}) {
+    const p = part[name]; if (!p || !n) return null; const meshes = []; p.traverse(o => { if (o.isMesh) meshes.push(o); });
+    const ims = meshes.map(o => { o.updateMatrix(); const g = o.geometry.clone(); g.applyMatrix4(o.matrix); g.translate(0, -PY, 0);
+      const im = new THREE.InstancedMesh(g, o.material, n); im.castShadow = true; im.frustumCulled = false; im.userData.tint = !!opt.tint && o.material.name === opt.tint;
+      if (im.userData.tint) for (let i = 0; i < n; i++) im.setColorAt(i, new THREE.Color(1, 1, 1));
+      (opt.parent || root).add(im); return im; });
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(0, 0, 0, 'YXZ'), pv = new THREE.Vector3(), sv = new THREE.Vector3();
+    const box = new THREE.Box3(); ims.forEach(im => { im.geometry.computeBoundingBox(); box.union(im.geometry.boundingBox); });
+    const I = { n, box, ims,
+      set(i, x, y, z, ry = 0, s = 1, rz = 0, rx = 0) { e.set(rx, ry, rz); q.setFromEuler(e); m4.compose(pv.set(x, y, z), q, sv.setScalar(Math.max(s, 1e-4))); for (const im of ims) im.setMatrixAt(i, m4); },
+      color(i, c) { const col = new THREE.Color(c); for (const im of ims) if (im.userData.tint) im.setColorAt(i, col); },
+      done() { for (const im of ims) { im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; } },
+      show(v) { for (const im of ims) im.visible = v; } };
+    for (let i = 0; i < n; i++) I.set(i, 0, PY, 0, 0, 0.0001); I.done(); return I;
+  }
+
+  // ---------- ground height under a point (once, at start) ----------
+  const ray = new THREE.Raycaster(), groundM = []; (part.ground || model).traverse(o => { if (o.isMesh) groundM.push(o); });
+  model.updateMatrixWorld(true);
+  const groundY = (x, z, fall = LAND) => { const o = model.localToWorld(new THREE.Vector3(x, 60, z)); ray.set(o, new THREE.Vector3(0, -1, 0)); const h = ray.intersectObjects(groundM, false)[0];
+    return h ? model.worldToLocal(h.point.clone()).y : fall; };
+
+  // ---------- paths ----------
+  function path(pts, closed, withY) {
+    const P = pts.map(p => ({ x: p[0], z: p[1], y: withY ? groundY(p[0], p[1]) : null })); if (closed) P.push({ ...P[0] });
+    const cum = [0]; for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].z - P[i - 1].z));
+    const len = cum[cum.length - 1] || 1;
+    return { len, P, at(d, o) { let i = 1; while (i < cum.length - 1 && cum[i] < d) i++; const a = P[i - 1], b = P[i], t = clamp((d - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1));
+      o.x = a.x + (b.x - a.x) * t; o.z = a.z + (b.z - a.z) * t; o.y = a.y == null ? null : a.y + (b.y - a.y) * t; const dx = b.x - a.x, dz = b.z - a.z, l = Math.hypot(dx, dz) || 1; o.dx = dx / l; o.dz = dz / l; return o; } };
+  }
+  const angTo = (a, b, k) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * k; };
+
+  // movers: 'loop' (closed), 'wrap' (start again at the beginning), 'pingpong' (there and back)
+  const movers = [], tmp = {};
+  function mover(I, idx, pts, o = {}) {
+    const mode = o.mode || (o.loop ? 'loop' : 'pingpong'), p = path(pts, mode === 'loop', !!o.ground);
+    const m = Object.assign({ I, idx, p, mode, sp: o.speed || 1, side: o.side || 0, d: (o.t0 || 0) * p.len, dir: 1, y: o.y ?? LAND, s: o.s ?? 1, h: null, ph: Math.random() * 6, wait: 0, pause: o.pause ?? 0 }, o.extra || {});
+    movers.push(m); return m;
+  }
+  function place(m, d, dir, t) {
+    m.p.at(d, tmp); const dx = tmp.dx * dir, dz = tmp.dz * dir, x = tmp.x - dz * m.side, z = tmp.z + dx * m.side, want = Math.atan2(dx, dz);
+    m.h = m.h == null || reduced ? want : angTo(m.h, want, Math.min(1, (m.turn ?? 6) * (m.dt || 0.016)));
+    let y = (tmp.y != null ? tmp.y : m.y) + (m.lift || 0), s = m.s, rz = 0;
+    if (m.walk) { y += Math.abs(Math.sin(t * m.walk + m.ph)) * 0.12; rz = Math.sin(t * m.walk + m.ph) * 0.06; }
+    if (m.waddle) { rz = Math.sin(t * m.waddle + m.ph) * 0.22; y += Math.abs(Math.sin(t * m.waddle + m.ph)) * 0.08; }
+    if (m.buzz) y += Math.sin(t * 40 + m.ph) * 0.02;
+    if (m.mode === 'wrap') s *= clamp(Math.min(d, m.p.len - d) / 14);
+    m.I.set(m.idx, x, y, z, m.h, s, rz);
+  }
+  function moveAll(dt, t) {
+    for (const m of movers) { m.dt = dt;
+      if (m.follow) { const f = m.follow; let d = f.d - f.dir * m.gap, dir = f.dir; if (d < 0) { d = -d; dir = -dir; } if (d > f.p.len) { d = 2 * f.p.len - d; dir = -dir; } place(m, d, dir, t); continue; }
+      if (!reduced) { if (m.wait > 0) m.wait -= dt; else { m.d += m.dir * m.sp * dt * TS;
+        if (m.mode === 'loop' || m.mode === 'wrap') m.d = ((m.d % m.p.len) + m.p.len) % m.p.len;
+        else if (m.d > m.p.len) { m.d = m.p.len; m.dir = -1; m.wait = m.pause; } else if (m.d < 0) { m.d = 0; m.dir = 1; m.wait = m.pause; } } }
+      place(m, m.d, m.dir, t); }
+  }
+
+  // ---------- the cast (kept small on purpose: subtle, never busy) ----------
+  const SHIRTS = ['#e8553a', '#3a7fd0', '#f2c230', '#ffffff', '#ff7aa0', '#2f9e6a', '#d24a32', '#7a5cd6', '#40b8c4', '#f08a3c', '#9ad14a', '#ffffff'];
+  const carts = inst('proto_cart', (L.carts || []).length);
+  (L.carts || []).forEach((c, i) => mover(carts, i, c.pts, { mode: c.loop ? 'loop' : 'pingpong', speed: c.speed, side: c.side, t0: c.t0, pause: 4, extra: { turn: 4 } }));
+  const nWalk = (L.walkers || []).length, nStill = (L.still || []).length, nSwim = L.swim ? L.swim.n : 0, nKids = L.splash ? L.splash.n : 0;
+  const people = inst('proto_person', nWalk + nStill + nSwim + nKids, { tint: 'shirt' }); let pi = 0;
+  const dogs = inst('proto_dog', (L.walkers || []).filter(w => w.dog).length); let di = 0;
+  (L.walkers || []).forEach((w) => { const onSand = w.pts.length && w.pts[0][0] > 200, m = mover(people, pi, w.pts, { speed: w.speed, side: w.side, t0: w.t0, pause: 2.5, ground: onSand, y: LAND, extra: { walk: 7, turn: 5 } });
+    people.color(pi++, w.shirt || SHIRTS[pi % SHIRTS.length]);
+    if (w.dog && dogs) movers.push(Object.assign({}, m, { I: dogs, idx: di++, follow: m, gap: -2.2, side: m.side + 0.9, walk: 11, h: null, ph: Math.random() * 6 })); });
+  const still = (L.still || []).map((s, i) => { const k = pi++; people.color(k, s.shirt || SHIRTS[(k + 3) % SHIRTS.length]); return { k, ...s }; });
+  const swim = []; for (let i = 0; i < nSwim; i++) { const k = pi++; people.color(k, SHIRTS[(k + 5) % SHIRTS.length]); swim.push(k); }
+  const kids = []; for (let i = 0; i < nKids; i++) { const k = pi++; people.color(k, SHIRTS[(k + 7) % SHIRTS.length]); kids.push(k); }
+  // the mower, with a pelican waddling along behind it (the joke: it thinks the mower is its mum)
+  const mower = inst('proto_mower', L.mower ? 1 : 0), pelSit = inst('proto_pelican_sit', (L.mower ? 1 : 0) + (L.perch ? 1 : 0));
+  let mowM = null; if (mower) { mowM = mover(mower, 0, L.mower.pts, { speed: L.mower.speed, pause: 0.6, extra: { buzz: 1, turn: 2.2 } });
+    movers.push({ I: pelSit, idx: 0, p: mowM.p, follow: mowM, gap: 4.2, side: 0, y: LAND, s: 1, h: null, ph: 0, waddle: 9, turn: 3 }); }
+  if (L.perch && pelSit) pelSit.set(pelSit.n - 1, L.perch.at[0], L.perch.y, L.perch.at[1], 2.4);
+  const pels = inst('proto_pelican', (L.pelicans || []).length);
+  // highway cars: each carriageway one way, gentle fade in and out at the rim
+  const CARC = ['#ffffff', '#c9302c', '#2b2f36', '#9aa3ad', '#2d5fa8', '#f2f0ea', '#4a4f57'];
+  const nCars = (L.cars || []).reduce((a, c) => a + (c.n || 3), 0), cars = inst('proto_car', nCars, { tint: 'car_body' }); let ci = 0;
+  (L.cars || []).forEach((c) => { for (let j = 0; j < (c.n || 3); j++) { mover(cars, ci, c.pts, { mode: 'wrap', speed: c.speed * (0.9 + 0.2 * Math.random()), t0: (j + Math.random() * 0.5) / (c.n || 3), side: 0, y: LAND + 0.05, extra: { turn: 8 } }); cars.color(ci, CARC[ci % CARC.length]); ci++; } });
+  [carts, people, dogs, mower, pelSit, pels, cars].forEach(I => I && I.done());
+
+  // ---------- palms sway (the crowns only, gently) ----------
+  const swayU = { value: 0 };
+  if (!reduced) MATS.filter(m => ['palms', 'proto_palm'].includes(m.userData.p) && /frond/.test(m.name)).forEach(m => {
+    m.onBeforeCompile = (sh) => { sh.uniforms.uSway = swayU; sh.vertexShader = 'uniform float uSway;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      float swh = max(0.0, position.y - 3.0); float swp = position.x * 0.17 + position.z * 0.13;
+      transformed.x += (sin(uSway * 1.2 + swp) * 0.06 + sin(uSway * 3.1 + swp * 2.0) * 0.02) * swh;
+      transformed.z += (cos(uSway * 1.0 + swp * 1.3) * 0.05) * swh;
+      transformed.y -= abs(sin(uSway * 1.7 + swp)) * 0.015 * swh;`); };
+    m.customProgramCacheKey = () => 'nvsway1'; m.needsUpdate = true; });
+
+  // ---------- water: the ripples drift ----------
+  const waterTex = []; for (const w of SC.waterParts || []) part[w] && part[w].traverse(o => { if (o.isMesh && o.material.normalMap) { const t = o.material.normalMap; t.wrapS = t.wrapT = THREE.RepeatWrapping; waterTex.push({ t, m: o.material, n0: o.material.normalScale.clone() }); } });
+
+  // ---------- surf: three soft lines of foam roll in to the beach ----------
+  const surf = [];
+  if (L.sea && L.sea.length > 3 && !reduced) {
+    const S = L.sea, n = S.length, N = S.map((p, i) => { const a = S[Math.max(0, i - 1)], b = S[Math.min(n - 1, i + 1)]; let nx = b[1] - a[1], nz = -(b[0] - a[0]); const l = Math.hypot(nx, nz) || 1; nx /= l; nz /= l; if (nx < 0) { nx = -nx; nz = -nz; } return [nx, nz]; });
+    for (let w = 0; w < 3; w++) { const pos = new Float32Array(n * 2 * 3), idx = []; for (let i = 0; i < n - 1; i++) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setIndex(idx);
+      const m = new THREE.MeshBasicMaterial({ color: 0xf2f7f6, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.renderOrder = 3; root.add(mesh); surf.push({ g, m, ph: w / 3 }); }
+    surf.S = S; surf.N = N;
+  }
+  const RIM = (INFO.R || 420) - 2.5;
+  const tickSurf = (t) => { if (!surf.length) return; const S = surf.S, N = surf.N, y = (INFO.waterY ?? 0.05) + 0.04;
+    for (const s of surf) { const f = ((t / 7) + s.ph) % 1, d = 34 * (1 - f) - 1.5, wd = 1.2 + 2.6 * Math.sin(Math.PI * f), p = s.g.attributes.position.array;
+      for (let i = 0; i < S.length; i++) { const wob = Math.sin(i * 0.9 + t * 0.6 + s.ph * 9) * 1.6, dd = d + wob, [nx, nz] = N[i], k = i * 6;
+        let ax = S[i][0] + nx * dd, az = S[i][1] + nz * dd, bx = S[i][0] + nx * (dd + wd), bz = S[i][1] + nz * (dd + wd);
+        if (Math.hypot(bx, bz) > RIM) { const sc = RIM / Math.hypot(bx, bz); bx *= sc; bz *= sc; } if (Math.hypot(ax, az) > RIM) { ax = bx; az = bz; }
+        p[k] = ax; p[k + 1] = y; p[k + 2] = az; p[k + 3] = bx; p[k + 4] = y; p[k + 5] = bz; }
+      s.g.attributes.position.needsUpdate = true; s.m.opacity = 0.55 * Math.pow(Math.sin(Math.PI * f), 0.6) * (f > 0.85 ? (1 - f) / 0.15 : 1); } };
+
+  // ---------- Sunset switch ----------
+  const hemi = scene.children.find(o => o.isHemisphereLight), sd = INFO.sun || [-0.42, 0.16, 0.89];
+  const DAY = { sc: sun.color.clone(), si: sun.intensity, sp: sun.position.clone(), hi: hemi ? hemi.intensity : 0, hs: hemi ? hemi.color.clone() : null, hg: hemi ? hemi.groundColor.clone() : null, ex: renderer.toneMappingExposure, en: scene.environmentIntensity, bg: SC.backdrop };
+  const DUSK = { sc: new THREE.Color('#ff8d4d'), si: 2.0, sp: new THREE.Vector3(sd[0] * 1.25, 0.24, sd[2] * 1.25), hi: 0.3, hs: new THREE.Color('#8a90c4'), hg: new THREE.Color('#40281c'), ex: 1.0, en: 0.25, bg: CFG.duskBackdrop || ['#3a2d4d', '#7d4436', '#1b1210'] };
+  const lampsI = INFO.lamps || [], lampM = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffc27a').multiplyScalar(3.2), toneMapped: false, transparent: true, opacity: 0 });
+  const lampMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.42, 8, 6), lampM, Math.max(1, lampsI.length)); lampMesh.frustumCulled = false;
+  const poolTex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,190,120,0.9)'); g.addColorStop(1, 'rgba(255,170,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(cv); })();
+  const poolM = new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  const poolMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(9, 9).rotateX(-Math.PI / 2), poolM, Math.max(1, lampsI.length)); poolMesh.frustumCulled = false; poolMesh.renderOrder = 3;
+  { const m4 = new THREE.Matrix4(); lampsI.forEach((p, i) => { lampMesh.setMatrixAt(i, m4.makeTranslation(p[0], p[1], p[2])); poolMesh.setMatrixAt(i, m4.makeTranslation(p[0], LAND + 0.12, p[2])); }); }
+  lampMesh.visible = poolMesh.visible = false; root.add(lampMesh, poolMesh);
+  const GLOWS = [['glass', new THREE.Color(1.0, 0.6, 0.28), 1.5], ['pool_water', new THREE.Color(0.2, 0.75, 1.0), 0.9], ['rv_glass', new THREE.Color(1.0, 0.6, 0.28), 1.5]];
+  const glowMats = MATS.filter(m => GLOWS.some(g => g[0] === m.name)).map(m => ({ m, e0: m.userData.e0.clone(), g: GLOWS.find(g => g[0] === m.name) }));
+  let dusk = false, dk = 0;
+  const bgCv = scene.background && scene.background.image, bgX = bgCv && bgCv.getContext && bgCv.getContext('2d');
+  const lerpHex = (a, b, k) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), k).getHexString();
+  const paintBg = (k) => { if (!bgX) return; const gr = bgX.createLinearGradient(0, 0, 0, bgCv.height); [0, 0.55, 1].forEach((s, i) => gr.addColorStop(s, lerpHex(DAY.bg[i], DUSK.bg[i], k))); bgX.fillStyle = gr; bgX.fillRect(0, 0, bgCv.width, bgCv.height); scene.background.needsUpdate = true; };
+  function applyDusk(k, selOn) {
+    const e = ease(k); sun.color.copy(DAY.sc).lerp(DUSK.sc, e); sun.intensity = DAY.si + (DUSK.si - DAY.si) * e; sun.position.copy(DAY.sp).lerp(DUSK.sp, e);
+    if (hemi) { hemi.intensity = DAY.hi + (DUSK.hi - DAY.hi) * e; hemi.color.copy(DAY.hs).lerp(DUSK.hs, e); hemi.groundColor.copy(DAY.hg).lerp(DUSK.hg, e); }
+    renderer.toneMappingExposure = DAY.ex + (DUSK.ex - DAY.ex) * e; scene.environmentIntensity = DAY.en + (DUSK.en - DAY.en) * e; paintBg(e);
+    const lk = ease((k - 0.35) / 0.65); lampM.opacity = lk; poolM.opacity = 0.75 * lk; lampMesh.visible = poolMesh.visible = lk > 0.01;
+    for (const g of glowMats) { g.m.userData.e0.copy(g.e0).lerp(g.g[1].clone().multiplyScalar(g.g[2]), lk); if (!selOn(g.m)) { g.m.emissive.copy(g.m.userData.e0); g.m.emissiveIntensity = 1; } }
+  }
+  // the button sits under the Tour button, same look
+  const tb = document.getElementById('tourbtn'), st = document.createElement('style');
+  st.textContent = `#sunbtn { position:fixed; left:14px; top:calc(env(safe-area-inset-top) + ${tb ? 108 : 64}px); z-index:4; border:1px solid rgba(var(--lc),.2); background:rgba(var(--bgc),.7); color:var(--ink); font:600 12.5px var(--font), sans-serif; padding:8px 12px; border-radius:20px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; gap:6px; min-height:36px; cursor:pointer; }
+    #sunbtn svg { width:15px; height:15px; } #sunbtn.on { background:var(--hero); color:var(--onhero); border-color:var(--hero); }`;
+  document.head.appendChild(st);
+  const btn = document.createElement('button'); btn.id = 'sunbtn'; btn.type = 'button'; btn.setAttribute('aria-pressed', 'false');
+  const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/></svg>';
+  const DAY_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M1.5 12H4M20 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>';
+  const label = () => { btn.innerHTML = dusk ? DAY_SVG + '<span>Daytime</span>' : SUN_SVG + '<span>Sunset</span>'; btn.classList.toggle('on', dusk); btn.setAttribute('aria-pressed', dusk); btn.setAttribute('aria-label', dusk ? 'Back to daytime' : 'Show the park at sunset'); };
+  label(); btn.onclick = () => { dusk = !dusk; label(); }; (tb && tb.parentNode ? tb.parentNode : document.body).insertBefore(btn, tb ? tb.nextSibling : null);
+  window.__sunset = (on) => { dusk = on == null ? !dusk : !!on; label(); if (reduced) dk = dusk ? 1 : 0; };
+
+  // ---------- Room to grow: the lawn builds itself ----------
+  const FX = {
+    build(c) {
+      const g = new THREE.Group(), pads = INFO[c.list || 'grow'] || [], rots = INFO[c.rot || 'growRot'] || [], lane = L.growLane || [], n = pads.length;
+      const xs = pads.map(p => p[0]).concat(lane.map(p => p[0])), zs = pads.map(p => p[2]), x0 = Math.min(...xs) - 12, x1 = Math.max(...xs) + 12, z0 = Math.min(...zs) - 14, z1 = Math.max(...zs) + 14;
+      const sweepM = glowM(2.4, { side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+      const sweep = new THREE.Mesh(new THREE.PlaneGeometry(z1 - z0, 9), sweepM); sweep.rotation.y = Math.PI / 2; sweep.position.set(x0, LAND + 4.5, (z0 + z1) / 2); g.add(sweep);
+      const conc = new THREE.MeshStandardMaterial({ color: '#b9b4a9', roughness: 0.92 });
+      const LW = c.laneWidth ?? 6, laneM = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, LW), conc), lx0 = lane.length ? lane[0][0] : x0, lx1 = lane.length ? lane[1][0] : x1, lz = lane.length ? lane[0][1] : 0;
+      laneM.receiveShadow = true; g.add(laneM);
+      const edgeM = glowM(3.2), edges = [-1, 1].map(sg => { const e = new THREE.Mesh(new THREE.BoxGeometry(1, 0.25, 0.45), edgeM); e.position.z = lz + sg * LW / 2; g.add(e); return e; });
+      const PL = c.len ?? 18, PW = c.wid ?? 4.8, padI = new THREE.InstancedMesh(new THREE.BoxGeometry(PW, 0.32, PL), conc, Math.max(1, n)); padI.receiveShadow = true; padI.frustumCulled = false; g.add(padI);
+      const outM = pads.map(() => glowM(c.k ?? 3)), outs = pads.map((ct, i) => { const ry = rots[i] || 0, pts = [[-PW / 2, -PL / 2], [PW / 2, -PL / 2], [PW / 2, PL / 2], [-PW / 2, PL / 2]].map(([x, z]) => new THREE.Vector3(x * Math.cos(ry) + z * Math.sin(ry) + ct[0], LAND + 0.45, -x * Math.sin(ry) + z * Math.cos(ry) + ct[2]));
+        const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0), 24, 0.32, 5, true), outM[i]); g.add(m); return m; });
+      const palmsP = L.growPalms || [], palmI = inst('proto_palm', palmsP.length, { parent: g });
+      const rvP = (L.growRVs || []), rvI = inst('proto_rv', rvP.length, { parent: g }), rvPaths = rvP.map(r => path(r.path, false));
+      const rvLongX = rvI ? (rvI.box.max.x - rvI.box.min.x) > (rvI.box.max.z - rvI.box.min.z) : false;
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), pv = new THREE.Vector3(), sv = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), o = {};
+      const T = { sweep: [0.5, 2.0], lane: [1.0, 2.4], pad0: 1.8, padGap: c.padGap ?? 0.045, padDur: 0.55, palm0: 2.2, palmGap: 0.06, rv0: 3.3, rvGap: 0.5, rvDur: 2.6 };
+      const padEnd = T.pad0 + (n - 1) * T.padGap + T.padDur, fmt = c.tag || (GROW && GROW.tag && GROW.tag.text) || '', total = c.count ?? n;
+      return { obj: g, mat: edgeM, tick(t0, k, pulse) {
+        const t = reduced ? 99 : t0;
+        const sf = clamp((t - T.sweep[0]) / (T.sweep[1] - T.sweep[0])); sweep.position.x = x0 + (x1 - x0) * ease(sf); sweepM.opacity = 0.55 * Math.sin(Math.PI * sf); sweep.visible = sf > 0 && sf < 1;
+        const lf = ease((t - T.lane[0]) / (T.lane[1] - T.lane[0])), len = Math.max(0.01, (lx1 - lx0) * lf), mid = lx0 + len / 2;
+        laneM.scale.x = len; laneM.position.set(mid, LAND - 0.12 + 0.14 * lf, lz); laneM.visible = lf > 0;
+        edges.forEach(e => { e.scale.x = len; e.position.x = mid; e.position.y = LAND + 0.2; e.visible = lf > 0; }); edgeM.opacity = lf * (0.55 + 0.45 * pulse);
+        for (let i = 0; i < n; i++) { const pf = clamp((t - T.pad0 - i * T.padGap) / T.padDur), b = back(pf), p = pads[i];
+          q.setFromAxisAngle(up, rots[i] || 0); m4.compose(pv.set(p[0], LAND - 0.5 + 0.62 * b, p[2]), q, sv.set(1, 1, 1).multiplyScalar(pf > 0 ? 1 : 1e-4)); padI.setMatrixAt(i, m4);
+          outM[i].opacity = pf * (t > padEnd + 0.4 ? 0.45 + 0.4 * pulse : 1); outs[i].visible = pf > 0; }
+        padI.instanceMatrix.needsUpdate = true;
+        if (palmI) { palmsP.forEach((p, j) => { const pf = clamp((t - T.palm0 - j * T.palmGap) / 0.55); palmI.set(j, p[0], LAND, p[1], j * 1.7, pf > 0 ? back(pf) * 1.05 : 1e-4); }); palmI.done(); }
+        if (rvI) { rvP.forEach((r, j) => { const P = rvPaths[j], rf = clamp((t - T.rv0 - j * T.rvGap) / T.rvDur);
+            if (rf <= 0) { rvI.set(j, 0, PY, 0, 0, 1e-4); return; } const e2 = ease(rf); P.at(e2 * P.len, o);
+            const yaw = rvLongX ? Math.atan2(-o.dz, o.dx) : Math.atan2(o.dx, o.dz); rvI.set(j, o.x, LAND, o.z, yaw, clamp(rf * 6)); }); rvI.done(); }
+        if (GROW && GROW.tag && fmt) { const nn = Math.round(total * clamp((t - T.pad0) / (padEnd - T.pad0))); GROW.tag.text = fmt.replace(/\d+/, String(nn)); }
+      } };
+    },
+  };
+
+  // ---------- each frame ----------
+  let t = 0;
+  function tick(dt, state = {}) {
+    t += dt; const grow = !!state.growOn, sel = state.sel;
+    moveAll(dt, t);
+    // the mower and its pelican leave the lawn while the Room to grow idea plays on it
+    if (mower) { mower.show(!grow); pelSit.ims.forEach(im => im.visible = true); if (grow) { pelSit.set(0, 0, PY, 0, 0, 1e-4); } }
+    still.forEach((s, i) => people.set(s.k, s.at[0], s.y, s.at[1], (s.ry || 0) + (reduced ? 0 : Math.sin(t * 0.4 + i * 2) * 0.35)));
+    if (L.swim) swim.forEach((k, i) => { const a = t * 0.18 * TS + i * Math.PI, c = L.swim.c; people.set(k, c[0] + Math.cos(a) * L.swim.rx, L.swim.y - 1.75 + Math.sin(t * 2 + i) * 0.05, c[1] + Math.sin(a) * L.swim.rz, -a); });
+    if (L.splash) kids.forEach((k, i) => { const a = t * 0.5 * TS * (i ? -1 : 1) + i * 2.4, c = L.splash.c, r = L.splash.r * (0.7 + 0.3 * Math.sin(t * 0.7 + i)); people.set(k, c[0] + Math.cos(a) * r, L.splash.y + Math.abs(Math.sin(t * 9 + i)) * 0.15, c[1] + Math.sin(a) * r, i ? -a : -a + Math.PI, 0.62); });
+    if (pels) (L.pelicans || []).forEach((p, i) => { const a = (reduced ? 0 : t) * 0.11 * TS + (p.t0 || 0) + i * 2, c = p.c; pels.set(i, c[0] + Math.cos(a) * p.r, p.y + Math.sin(t * 0.5 + i) * 1.2, c[1] + Math.sin(a) * p.r, -a, 1.6, 0.32); });
+    [carts, people, dogs, mower, pelSit, pels, cars].forEach(I => I && I.done());
+    if (!reduced) { swayU.value = t; for (const w of waterTex) { w.t.offset.x = t * 0.018; w.t.offset.y = t * 0.011; w.m.normalScale.copy(w.n0).multiplyScalar(0.85 + 0.15 * Math.sin(t * 0.8)); } tickSurf(t); }
+    const want = dusk ? 1 : 0; if (dk !== want || dusk) { dk = reduced ? want : dk + Math.sign(want - dk) * Math.min(Math.abs(want - dk), dt / 2.4); applyDusk(dk, (m) => !!sel && sel.parts.includes(m.userData.p)); }
+  }
+  return { fx: FX, tick };
+}
