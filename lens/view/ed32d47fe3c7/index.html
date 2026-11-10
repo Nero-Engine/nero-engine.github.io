@@ -98,6 +98,7 @@
   #top .t span em { font-style:normal; color:var(--hero); font-weight:700; }
   #hint { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); font-size:12px; color:var(--dim); background:rgba(var(--bgc),.6);
           padding:5px 11px; border-radius:20px; white-space:nowrap; pointer-events:none; transition:opacity .6s; }
+  @media (max-width:760px) { #hint { top:calc(env(safe-area-inset-top) + 200px); white-space:normal; width:max-content; max-width:78vw; text-align:center; line-height:1.4; } }
   #bottom { position:fixed; left:0; right:0; bottom:0; padding:10px 0 calc(env(safe-area-inset-bottom) + 8px); background:linear-gradient(rgba(var(--bgc),0), rgba(var(--bgc),.93) 28%); }
   #card { margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.1); border-radius:14px; padding:12px 14px 12px; display:none; position:relative; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
   #card .k { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--hero); font-weight:700; padding-right:128px; }
@@ -215,7 +216,7 @@
 <canvas id="c" aria-label="Bayside Inn and Marina, illustrative 3D model. Drag to spin, pinch or scroll to zoom." role="img"></canvas>
 <div id="load"><img src="logo.png?v=94dc519e" alt="Pavia Real Estate Services"><div class="bar"><i id="lbar"></i></div><span>Loading the 3D model</span></div>
 <div id="top"><img src="logo.png?v=94dc519e" alt="Pavia Real Estate Services"><div class="t"><b>Bayside Inn &amp; Marina</b><span>Cooperstown, New York · on Otsego Lake</span></div></div>
-<div id="hint">Drag to spin · pinch to zoom</div>
+<div id="hint">Drag to spin · two fingers to move and zoom</div>
 <div id="tourbar"></div>
 <button id="tourbtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg><span>Tour</span></button>
 <div id="acts">
@@ -299,7 +300,10 @@ const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
 const camera = new THREE.PerspectiveCamera(40, 1, 0.005, 50);
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false; controls.rotateSpeed = 0.7;
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.rotateSpeed = 0.7;
+// move across the plate (Adam, 10-11-2026: "I need to be able to move the whole plate sideways"): right-drag or shift-drag on a computer,
+// two fingers on a phone; scroll and pinch zoom toward the pointer, not the middle; double-tap flies in to that spot
+controls.enablePan = true; controls.screenSpacePanning = false; controls.zoomToCursor = true;
 controls.minDistance = SC.minDistance ?? 0.08; controls.maxDistance = 3.2; controls.maxPolarAngle = 1.38; controls.autoRotate = !NV.reduced; controls.autoRotateSpeed = 0.55;
 const sun = new THREE.DirectionalLight(0xfff1e0, 2.6); sun.position.set(-0.6, 1.1, 0.45); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -0.34, right: 0.34, top: 0.34, bottom: -0.34, near: 0.1, far: 3 }); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.002;
@@ -326,7 +330,7 @@ const MATS = [], part = {};
 model.children.forEach(c => part[c.name] = c);
 model.traverse(o => { if (!o.isMesh) return; o.castShadow = !BASEP.includes(o.parent.name); o.receiveShadow = true;
   o.material = o.material.clone(); const m = o.material; m.userData.c0 = m.color.clone(); m.userData.lum = Math.min(1, (m.color.r + m.color.g + m.color.b) / 3 * (m.map ? 0.7 : 1) * 1.6); m.userData.e0 = m.emissive.clone(); m.userData.p = o.parent.name; MATS.push(m); });
-for (const w of SC.waterParts || []) part[w] && part[w].traverse(o => { if (o.isMesh) { o.castShadow = false; o.material.depthWrite = false; o.renderOrder = 2; } });
+for (const w of SC.waterParts || []) part[w] && part[w].traverse(o => { if (o.isMesh) { o.castShadow = false; o.material.depthWrite = false; o.renderOrder = 2; Object.assign(o.material, { polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 4 }); } });   // land wins where it meets the water, so shorelines don't flicker
 const FADEM = MATS.filter(m => (SC.fadeParts || []).includes(m.userData.p)); FADEM.forEach(m => { m.transparent = true; m.opacity = 1; });
 let fadeO = 1;
 const W = (x, y, z) => new THREE.Vector3(x * S, y * S, z * S);   // model metres to scene units
@@ -394,6 +398,9 @@ const MAKE = {
       const [lx, lz] = at(mo + 0.5, rr + 13); sp.position.set(lx, y + 3, lz); sp.scale.setScalar(15); g.add(sp); }
     return { obj: g, mat: idea, tick: (t) => { idea.opacity = 0.65 + 0.35 * Math.sin(t * 3); } }; },
 };
+// ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
+let LIFE = null;
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=27e70a3139'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
 for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
 const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
 const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
@@ -582,6 +589,30 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); if (a
 const hint = document.getElementById('hint');
 function stopSpin() { controls.autoRotate = false; hint.style.opacity = 0; }
 canvas.addEventListener('pointerdown', () => { stopTour(); stopSpin(); anim = null; });
+controls.addEventListener('start', () => { resetBtn.hidden = false; });
+// double-tap or double-click: fly in to that spot on the plate
+{ const rc = new THREE.Raycaster(), ndc = new THREE.Vector2(), hitM = []; BASEP.forEach(n => part[n] && part[n].traverse(o => { if (o.isMesh && n !== 'plinth') hitM.push(o); }));
+  let lastT = 0, lastP = [0, 0], downP = [0, 0];
+  const flyTo = (x, y) => { const r = canvas.getBoundingClientRect(); ndc.set((x - r.left) / r.width * 2 - 1, -((y - r.top) / r.height) * 2 + 1); rc.setFromCamera(ndc, camera);
+    const h = rc.intersectObjects(hitM, false)[0]; if (!h) return; const off = camera.position.clone().sub(controls.target); off.setLength(Math.max(controls.minDistance * 1.5, off.length() * 0.45));
+    stopTour(); stopSpin(); resetBtn.hidden = false; T('tap', 'fly');
+    if (NV.reduced) { controls.target.copy(h.point); camera.position.copy(h.point).add(off); return; }
+    anim = { t0: performance.now(), dur: 900, a0: controls.target.clone(), p0: camera.position.clone(), a1: h.point.clone(), p1: h.point.clone().add(off) }; };
+  canvas.addEventListener('pointerdown', (e) => { if (e.isPrimary) downP = [e.clientX, e.clientY]; });
+  canvas.addEventListener('pointerup', (e) => { if (!e.isPrimary || Math.hypot(e.clientX - downP[0], e.clientY - downP[1]) > 10) return; const now = performance.now();
+    if (now - lastT < 350 && Math.hypot(e.clientX - lastP[0], e.clientY - lastP[1]) < 40) { lastT = 0; flyTo(e.clientX, e.clientY); } else { lastT = now; lastP = [e.clientX, e.clientY]; } }); }
+// trackpad: two fingers move the plate (like a phone), pinch zooms; a mouse wheel still zooms
+{ let padUntil = 0;
+  const isPad = (e) => { if (e.ctrlKey || e.deltaMode !== 0) return false; const now = performance.now();
+    const pad = e.deltaX !== 0 || (e.wheelDeltaY !== undefined && e.wheelDeltaY !== 0 && Math.abs(e.wheelDeltaY) === Math.abs(e.deltaY) * 3) || (!Number.isInteger(e.deltaY));
+    if (pad) padUntil = now + 220; return pad || now < padUntil; };
+  canvas.parentElement.addEventListener('wheel', (e) => { if (e.target !== canvas || !controls.enabled || !isPad(e)) return;
+    e.preventDefault(); e.stopPropagation(); stopTour(); stopSpin(); anim = null; resetBtn.hidden = false;
+    controls._pan(-e.deltaX, -e.deltaY); }, { capture: true, passive: false }); }
+// keep the middle of the view on the plate, so it can never be lost off the edge
+const keepOnPlate = () => { const t = controls.target, lim = R * S * 0.95, r = Math.hypot(t.x, t.z); let dx = 0, dy = 0, dz = 0;
+  if (r > lim) { dx = t.x * (lim / r - 1); dz = t.z * (lim / r - 1); } const ty = Math.min(0.03, Math.max(-0.01, t.y)); dy = ty - t.y;
+  if (dx || dy || dz) { t.x += dx; t.y += dy; t.z += dz; camera.position.x += dx; camera.position.y += dy; camera.position.z += dz; } };
 
 // ---------- AR ----------
 const mv = document.getElementById('mv'), arcard = document.getElementById('arcard'), arst = document.getElementById('arst'), argo = document.getElementById('argo');
@@ -628,7 +659,8 @@ function frame(now) {
     if (anim.s0) camera.position.setFromSphericalCoords(anim.s0.radius + (anim.s1.radius - anim.s0.radius) * e, anim.s0.phi + (anim.s1.phi - anim.s0.phi) * e, anim.s0.theta + anim.dth * e).add(controls.target);
     else camera.position.lerpVectors(anim.p0, anim.p1, e);
     if (k >= 1) anim = null; }
-  controls.update(); liftView(dt); tickTour(dt);
+  controls.update(); keepOnPlate(); liftView(dt); tickTour(dt);
+  if (LIFE) LIFE.tick(dt, { sel, growOn });
   if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
   if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
     const k = Math.min(1, glowT / 0.6);
@@ -647,9 +679,9 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 600);
-if (!mobile) hint.textContent = 'Drag to spin · scroll to zoom';
-setTimeout(() => { hint.style.opacity = 0; }, 6000);
-window.__ready = true; NV.loaded(); window.__tour = startTour;
+hint.textContent = mobile ? 'Drag to spin · two fingers to move and zoom · double-tap to fly in' : 'Drag to spin · two fingers or right-drag to move · pinch or scroll to zoom';
+setTimeout(() => { hint.style.opacity = 0; }, 8000);
+window.__ready = true; window.__cam = () => [controls.target.x, controls.target.z, camera.position.distanceTo(controls.target)]; NV.loaded(); window.__tour = startTour;
 // the tour never starts by itself: it plays only when the Tour button is pressed (Adam, 09-11-2026)
 if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
 // ---------- works with no signal: once opened, this listing is saved on the device (see engine/sw.js) ----------
