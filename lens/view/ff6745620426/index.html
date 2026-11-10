@@ -595,11 +595,18 @@ controls.addEventListener('start', () => { resetBtn.hidden = false; });
   canvas.addEventListener('pointerup', (e) => { if (!e.isPrimary || Math.hypot(e.clientX - downP[0], e.clientY - downP[1]) > 10) return; const now = performance.now();
     if (now - lastT < 350 && Math.hypot(e.clientX - lastP[0], e.clientY - lastP[1]) < 40) { lastT = 0; flyTo(e.clientX, e.clientY); } else { lastT = now; lastP = [e.clientX, e.clientY]; } }); }
 // trackpad: two fingers move the plate (like a phone), pinch zooms; a mouse wheel still zooms
-{ let padUntil = 0;
-  const isPad = (e) => { if (e.ctrlKey || e.deltaMode !== 0) return false; const now = performance.now();
-    const pad = e.deltaX !== 0 || (e.wheelDeltaY !== undefined && e.wheelDeltaY !== 0 && Math.abs(e.wheelDeltaY) === Math.abs(e.deltaY) * 3) || (!Number.isInteger(e.deltaY));
-    if (pad) padUntil = now + 220; return pad || now < padUntil; };
-  canvas.parentElement.addEventListener('wheel', (e) => { if (e.target !== canvas || !controls.enabled || !isPad(e)) return;
+{ // the browser doesn't say which device sent a scroll, so judge each gesture once, at its start (the Mapbox method)
+  let last = 0, pad = false; const log = window.__wheelLog = [];
+  const judge = (e) => { const dy = Math.abs(e.deltaY), dx = Math.abs(e.deltaX);
+    if (e.deltaMode !== 0) return false;                                        // lines or pages: a mouse wheel (Firefox)
+    if (dy && Math.abs(dy / 4.000244140625 - Math.round(dy / 4.000244140625)) < 1e-6) return false;   // Mac mouse wheel: exact steps of 4.000244
+    if (Number.isInteger(dy) && dy >= 50 && !dx) return false;                  // Windows mouse wheel: 100 or 120 a notch
+    return true; };                                                             // smooth, uneven amounts: a trackpad
+  canvas.parentElement.addEventListener('wheel', (e) => { if (e.target !== canvas || !controls.enabled) return;
+    const now = performance.now(); if (log.length < 60) log.push([+e.deltaX.toFixed(3), +e.deltaY.toFixed(3), e.deltaMode, e.ctrlKey ? 1 : 0]);
+    if (e.ctrlKey) { last = now; return; }                                      // pinch: the browser sends it as zoom
+    if (now - last > 250) pad = judge(e); else if (!pad && Math.abs(e.deltaX) > 0.5) pad = true;
+    last = now; if (!pad) return;                                               // mouse wheel: let the zoom handle it
     e.preventDefault(); e.stopPropagation(); stopTour(); stopSpin(); anim = null; resetBtn.hidden = false;
     controls._pan(-e.deltaX, -e.deltaY); }, { capture: true, passive: false }); }
 // keep the middle of the view on the plate, so it can never be lost off the edge
