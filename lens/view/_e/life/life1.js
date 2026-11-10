@@ -7,7 +7,7 @@ let THREE;   // handed in by the engine, so there is only one copy of three.js o
 
 export async function init(X) {
   THREE = X.THREE;
-  const { model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, NV, glowM } = X;
+  const { model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, NV, glowM } = X; const GM = X.GLOWMATS || [];   // GM: glow materials the engine dims by day (scene.dayGlow)
   const L = INFO.life || {}, CFG = SC.life || {}, reduced = !!NV.reduced, TS = CFG.speed ?? 1.5, LAND = INFO.land ?? 0.5;
   const PY = (INFO.protoAt || [0, -8, 0])[1];
   const root = new THREE.Group(); root.name = 'life'; model.add(root);
@@ -231,9 +231,9 @@ export async function init(X) {
   // ---------- Room to grow: the lawn builds itself, out of light ----------
   // (Adam, 10-11-2026: not yellow, "more glowing, like built-in light"): everything first appears as warm white light, then turns solid
   const LIGHT = new THREE.Color(CFG.light || '#fff2da');
-  const lightM = (k, extra) => new THREE.MeshBasicMaterial(Object.assign({ color: LIGHT.clone().multiplyScalar(k), toneMapped: false, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }, extra));
+  const lightM = (k, extra) => { const m = new THREE.MeshBasicMaterial(Object.assign({ color: LIGHT.clone().multiplyScalar(k), toneMapped: false, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }, extra)); m.userData.gc = m.color.clone(); GM.push(m); return m; };
   // light shapes that flash per item: additive, brightness set per copy (black = invisible)
-  const ghosts = (geo, n, k, parent) => { const m = new THREE.MeshBasicMaterial({ color: LIGHT.clone().multiplyScalar(k), toneMapped: false, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  const ghosts = (geo, n, k, parent) => { const m = new THREE.MeshBasicMaterial({ color: LIGHT.clone().multiplyScalar(k), toneMapped: false, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }); m.userData.gc = m.color.clone(); GM.push(m);
     const im = new THREE.InstancedMesh(geo, m, Math.max(1, n)); im.frustumCulled = false; im.renderOrder = 4; const c0 = new THREE.Color(0, 0, 0); for (let i = 0; i < im.count; i++) im.setColorAt(i, c0); parent.add(im);
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), pv = new THREE.Vector3(), sv = new THREE.Vector3(1, 1, 1), up = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
     return { set(i, x, y, z, ry, b, s = 1) { q.setFromAxisAngle(up, ry || 0); m4.compose(pv.set(x, y, z), q, sv.setScalar(b > 0.003 ? s : 1e-4)); im.setMatrixAt(i, m4); im.setColorAt(i, col.setScalar(Math.max(0, b))); },
@@ -396,5 +396,5 @@ export async function init(X) {
     if (!reduced) { swayU.value = t; for (const w of waterTex) { w.t.offset.x = t * 0.018; w.t.offset.y = t * 0.011; w.m.normalScale.copy(w.n0).multiplyScalar(0.85 + 0.15 * Math.sin(t * 0.8)); } tickSurf(t); }
     const want = dusk ? 1 : 0; if (dk !== want || dusk) { dk = reduced ? want : dk + Math.sign(want - dk) * Math.min(Math.abs(want - dk), dt / 2.4); applyDusk(dk, (m) => !!sel && sel.parts.includes(m.userData.p)); }
   }
-  return { fx: FX, tick };
+  return { fx: FX, tick, dusk: () => dk };
 }

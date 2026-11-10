@@ -329,7 +329,11 @@ const FADEM = MATS.filter(m => (SC.fadeParts || []).includes(m.userData.p)); FAD
 let fadeO = 1;
 const W = (x, y, z) => new THREE.Vector3(x * S, y * S, z * S);   // model metres to scene units
 const V = (a, dy = 0) => new THREE.Vector3(a[0], a[1] + dy, a[2]);
-const glowM = (k = 3, extra) => new THREE.MeshBasicMaterial(Object.assign({ color: HERO.clone().multiplyScalar(k), toneMapped: false, transparent: true, opacity: 0, depthWrite: false }, extra));
+// glow colour and a daytime dimmer, per listing (Adam, 10-11-2026, Montana: "during the daytime view, the glow is too bright... slightly tinted in their blue brand color"):
+// scene.glowHex tints every glow (default the hero colour); scene.dayGlow (0..1) dims every glow by day and brings it back to full at sunset
+const GLOWC = new THREE.Color(SC.glowHex || D.theme.hero), GLOWMATS = [];
+const glowM = (k = 3, extra) => { const m = new THREE.MeshBasicMaterial(Object.assign({ color: GLOWC.clone().multiplyScalar(k), toneMapped: false, transparent: true, opacity: 0, depthWrite: false }, extra)); m.userData.gc = m.color.clone(); GLOWMATS.push(m); return m; };
+let DAYF = 1; const BLOOM0 = 0.8;
 
 // ---------- places: where things are, read from the model's own notes (model_info.json) ----------
 // a place can be [x, y, z], {info: key}, {anchor: name, at: 'ctr' | 'top'}, {mid: [anchorA, anchorB]}, {mean: [listKey, [indexes]]} or {fx: effectId}
@@ -394,7 +398,7 @@ const MAKE = {
 };
 // ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
 let LIFE = null;
-if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=90f2001063'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=d227c962b4'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM, GLOWMATS }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
 for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
 const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
 const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
@@ -667,17 +671,18 @@ function frame(now) {
     if (k >= 1) anim = null; }
   controls.update(); keepOnPlate(); liftView(dt); tickTour(dt);
   if (LIFE) LIFE.tick(dt, { sel, growOn });
+  if (SC.dayGlow != null) { const f = SC.dayGlow + (1 - SC.dayGlow) * (LIFE && LIFE.dusk ? LIFE.dusk() : 0); if (f !== DAYF) { DAYF = f; GLOWMATS.forEach(m => m.color.copy(m.userData.gc).multiplyScalar(f)); bloom.strength = BLOOM0 * (0.55 + 0.45 * f); } }
   if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
   if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
     const k = Math.min(1, glowT / 0.6);
     MATS.forEach(m => { const on = sel.parts.includes(m.userData.p), base = BASEP.includes(m.userData.p);
-      if (on) { m.color.copy(m.userData.c0); if (G.lerp) m.color.lerp(HERO, G.lerp * k); m.emissive.copy(HERO); m.emissiveIntensity = (sel.glow ?? (G.base + G.gain * (1 - G.lumk * m.userData.lum))) * pulse * k; }
+      if (on) { m.color.copy(m.userData.c0); if (G.lerp) m.color.lerp(HERO, G.lerp * k); m.emissive.copy(GLOWC); m.emissiveIntensity = (sel.glow ?? (G.base + G.gain * (1 - G.lumk * m.userData.lum))) * pulse * k * DAYF; }
       else { m.color.copy(m.userData.c0).multiplyScalar(1 - (base ? 0.25 : 0.45) * k); m.emissive.copy(m.userData.e0); } });
     tickFx(sel.fx, glowT, k, pulse);
     showTags(sel.tags || [{ at: sel.tagAt, dy: sel.dy ?? SC.tagDy ?? 8, text: sel.tag }]);
   } else if (growOn) { glowT += dt; const pulse = NV.reduced ? 1 : 0.7 + 0.3 * Math.sin(glowT * 3);
     tickFx(GROW.fx, glowT, 1, pulse);
-    if (GROW.glowParts) MATS.forEach(m => { if (GROW.glowParts.includes(m.userData.p)) { m.emissive.copy(HERO); m.emissiveIntensity = 0.5 * (1 - 0.7 * m.userData.lum) * pulse; } });
+    if (GROW.glowParts) MATS.forEach(m => { if (GROW.glowParts.includes(m.userData.p)) { m.emissive.copy(GLOWC); m.emissiveIntensity = 0.5 * (1 - 0.7 * m.userData.lum) * pulse * DAYF; } });
     showTags([GROW.tag], true);
   } else { hideTags(0); if (nearOn) { glowT += dt; tickNear(glowT); } }
   composer.render();
