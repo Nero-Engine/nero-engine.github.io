@@ -99,6 +99,62 @@ export async function init(X) {
   (L.cars || []).forEach((c) => { for (let j = 0; j < (c.n || 3); j++) { mover(cars, ci, c.pts, { mode: 'wrap', speed: c.speed * (0.9 + 0.2 * Math.random()), t0: (j + Math.random() * 0.5) / (c.n || 3), side: 0, y: LAND + 0.05, extra: { turn: 8 } }); cars.color(ci, CARC[ci % CARC.length]); ci++; } });
   [carts, people, dogs, mower, pelSit, pels, cars].forEach(I => I && I.done());
 
+  // ---------- the bear (Montana Basecamp 10-11-2026, Adam's funny touch): only when model_info life.bear exists, so other listings are unchanged ----------
+  // A black bear ambles a loop from the field to one picnic table, sniffs the cooler, a camper opens the RV door, peeks, ducks back in and slams it;
+  // the bear looks up, sniffs again, turns and ambles off. Four-leg walk (lateral sequence), every foot planted while it is on the ground:
+  // the stride is driven by the distance walked, so the feet never slide.
+  let bearTick = () => {}; const bearI = [];
+  if (L.bear && part.proto_bear_body && part.proto_bear_leg) try {
+    const BR = L.bear, bp = path(BR.path, false), bB = inst('proto_bear_body', 1), bH = inst('proto_bear_head', 1), bL = inst('proto_bear_leg', 4);
+    const dr = inst('proto_door', BR.door ? 1 : 0), cp = BR.camper ? inst('proto_person', 1, { tint: 'shirt' }) : null; if (cp) cp.color(0, BR.camper.shirt || '#f08a3c');
+    bearI.push(bB, bH, bL, dr, cp);
+    const Lg = 0.6, SW = 0.45, s0 = Lg * Math.sin(SW), BETA = 0.62, CYC = (2 * s0) / BETA, Y = BR.y ?? 0.2, V = (BR.speed ?? 1.0) * (CFG.bearPace ?? 1);
+    const HIPS = [[0.19, -0.5, 0], [0.19, 0.48, 0.25], [-0.19, -0.5, 0.5], [-0.19, 0.48, 0.75]];   // x, z, phase: left hind, left fore, right hind, right fore
+    const NECK = [0, 0.92, 0.78], o = {}, look = {};
+    let d = Math.max(0, (BR.stopD || 0) - 45), ph = 0, h = null, mode = 'walk', tm = 0, hy = 0, hp = 0.12;
+    const at = (dd) => bp.at(((dd % bp.len) + bp.len) % bp.len, o);
+    const ease3 = (k) => k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k);
+    const camPt = BR.camper ? BR.camper.out : null;
+    function poseLegs(x, z, yb) {
+      const c = Math.cos(h), s = Math.sin(h);
+      HIPS.forEach(([lx, lz, off], i) => { const u = (((ph + off) % 1) + 1) % 1; let xf, lift = 0;
+        if (u < BETA) xf = s0 - 2 * s0 * (u / BETA); else { const w = (u - BETA) / (1 - BETA); xf = -s0 + 2 * s0 * ease3(w); lift = Math.sin(Math.PI * w) * 0.09; }
+        const th = -Math.asin(Math.max(-0.95, Math.min(0.95, xf / Lg)));
+        bL.set(i, x + lx * c + lz * s, yb + 0.62 + lift, z - lx * s + lz * c, h, 1, 0, th); });
+    }
+    bearTick = (dt, t) => {
+      if (reduced) { d = BR.stopD - 3.5; at(d); h = Math.atan2(o.dx, o.dz); ph = 0; } else {
+        tm += dt;
+        if (mode === 'walk') { const left = BR.stopD - (((d % bp.len) + bp.len) % bp.len), k = left > 0 && left < 1.6 ? Math.max(0.18, left / 1.6) : 1, step = V * k * dt;
+          if (left > 0 && left <= step + 0.005) { d += left; ph += left / CYC; mode = 'sniff'; tm = 0; } else { d += step; ph += step / CYC; } }
+        else if (mode === 'sniff') { if (tm > (BR.dwell ?? 7.5)) { mode = 'turn'; tm = 0; } }
+        else if (mode === 'turn') { at(d + 1.2); const p0 = { ...o }; at(d); const want = Math.atan2(p0.x - o.x, p0.z - o.z); let dd = want - h; while (dd > Math.PI) dd -= 2 * Math.PI; while (dd < -Math.PI) dd += 2 * Math.PI;
+          const st = Math.sign(dd) * Math.min(Math.abs(dd), 1.3 * dt); h += st; ph += Math.abs(st) * 0.45 / CYC; if (Math.abs(dd) < 0.04) { mode = 'walk'; tm = 0; d += 0.01; } }
+      }
+      at(d); const x = o.x, z = o.z;
+      if (mode === 'walk' || h == null) { at(d + 0.9); const want = Math.atan2(o.x - x, o.z - z); h = h == null || reduced ? want : angTo(h, want, Math.min(1, 3.2 * dt)); at(d); }
+      const moving = mode === 'walk' && !reduced, yb = Y + (moving ? 0.022 * Math.sin(ph * Math.PI * 4) : 0), roll = moving ? 0.03 * Math.sin(ph * Math.PI * 2) : 0;
+      bB.set(0, x, yb, z, h, 1, roll);
+      poseLegs(x, z, yb);
+      // head: low and swinging as it walks; down and sniffing at the cooler; up to stare at the camper
+      let wy = 0.13 * Math.sin(ph * Math.PI * 2) + 0.08 * Math.sin(t * 0.37), wp = 0.14 + 0.05 * Math.sin(ph * Math.PI * 4);
+      if (mode === 'sniff' && !reduced) { const T = tm; wp = 0.5 + 0.06 * Math.sin(t * 9); wy = 0.12 * Math.sin(t * 0.8);
+        if (T > 3.1 && T < 5.7 && camPt) { const ang = Math.atan2(camPt[0] - x, camPt[2] - z); let rel = ang - h; while (rel > Math.PI) rel -= 2 * Math.PI; while (rel < -Math.PI) rel += 2 * Math.PI;
+          const k = ease3((T - 3.1) / 0.35) * (1 - ease3((T - 5.3) / 0.4)); wy = wy * (1 - k) + Math.max(-1.0, Math.min(1.0, rel)) * k; wp = wp * (1 - k) - 0.12 * k; } }
+      if (mode === 'turn') { wp = 0.22; wy = 0; }
+      hy += (wy - hy) * Math.min(1, 6 * dt); hp += (wp - hp) * Math.min(1, 6 * dt);
+      const c = Math.cos(h), s = Math.sin(h); bH.set(0, x + NECK[2] * s, yb + NECK[1], z + NECK[2] * c, h + hy, 1, 0, hp);
+      // the camper: door opens, a peek, a quick duck back in, door slammed
+      if (dr || cp) { const T = mode === 'sniff' ? tm : 99; let a = 0, out = 0;
+        if (T < 99) { a = 1.7 * ease3((T - 1.3) / 0.6); out = ease3((T - 1.9) / 0.6); if (T > 3.85) { out *= 1 - ease3((T - 3.85) / 0.28); } if (T > 4.12) a *= 1 - Math.min(1, (T - 4.12) / 0.2); }
+        if (dr) { const H0 = BR.door.hinge; dr.set(0, H0[0], H0[1], H0[2], BR.door.ry - a); }
+        if (cp) { const A = BR.camper.in, Bo = BR.camper.out; cp.set(0, A[0] + (Bo[0] - A[0]) * out, A[1], A[2] + (Bo[2] - A[2]) * out, BR.camper.ry + 0.35 * out * Math.sin(t * 2.2), 1, 0, 0.18 * out); }
+      }
+      bearI.forEach(I => I && I.done());
+    };
+    bearTick(0, 0);
+  } catch (err) { console.warn('bear', err); }
+
   // ---------- palms sway (the crowns only, gently) ----------
   const swayU = { value: 0 };
   if (!reduced) MATS.filter(m => ['palms', 'proto_palm'].includes(m.userData.p) && /frond/.test(m.name)).forEach(m => {
@@ -193,6 +249,12 @@ export async function init(X) {
       const LW = c.laneWidth ?? 6, laneM = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, LW), conc), lx0 = lane.length ? lane[0][0] : x0, lx1 = lane.length ? lane[1][0] : x1, lz = lane.length ? lane[0][1] : 0;
       laneM.receiveShadow = true; g.add(laneM);
       const edgeM = lightM(2.6), edges = [-1, 1].map(sg => { const e = new THREE.Mesh(new THREE.BoxGeometry(1, 0.25, 0.45), edgeM); e.position.z = lz + sg * LW / 2; g.add(e); return e; });
+      // several lanes in any direction (Montana Basecamp 10-11-2026): life.growLanes = polylines; each segment draws in turn. Without it, the single lane above.
+      const MULTI = (L.growLanes || []).filter(l => l && l.length > 1), segs = [];
+      for (const l of MULTI) for (let i = 1; i < l.length; i++) { const [ax, az] = l[i - 1], [bx, bz] = l[i], sl = Math.hypot(bx - ax, bz - az); if (sl < 0.5) continue;
+        const ry = -Math.atan2(bz - az, bx - ax), mm = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, LW), conc); mm.rotation.y = ry; mm.receiveShadow = true; g.add(mm);
+        const ee = [-1, 1].map(sg => { const e = new THREE.Mesh(new THREE.BoxGeometry(1, 0.25, 0.45), edgeM); e.rotation.y = ry; g.add(e); return { e, sg }; });
+        segs.push({ ax, az, ux: (bx - ax) / sl, uz: (bz - az) / sl, sl, mm, ee }); }
       const PL = c.len ?? 18, PW = c.wid ?? 4.8, padI = new THREE.InstancedMesh(new THREE.BoxGeometry(PW, 0.32, PL), conc, Math.max(1, n)); padI.receiveShadow = true; padI.frustumCulled = false; g.add(padI);
       const outM = pads.map(() => lightM(c.k ?? 2.4)), outs = pads.map((ct, i) => { const ry = rots[i] || 0, pts = [[-PW / 2, -PL / 2], [PW / 2, -PL / 2], [PW / 2, PL / 2], [-PW / 2, PL / 2]].map(([x, z]) => new THREE.Vector3(x * Math.cos(ry) + z * Math.sin(ry) + ct[0], LAND + 0.45, -x * Math.sin(ry) + z * Math.cos(ry) + ct[2]));
         const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0), 24, 0.32, 5, true), outM[i]); g.add(m); return m; });
@@ -210,6 +272,10 @@ export async function init(X) {
         const lf = ease((t - T.lane[0]) / (T.lane[1] - T.lane[0])), len = Math.max(0.01, (lx1 - lx0) * lf), mid = lx0 + len / 2;
         laneM.scale.x = len; laneM.position.set(mid, LAND - 0.12 + 0.14 * lf, lz); laneM.visible = lf > 0;
         edges.forEach(e => { e.scale.x = len; e.position.x = mid; e.position.y = LAND + 0.2; e.visible = lf > 0; }); edgeM.opacity = lf * (t < T.lane[1] + 0.6 ? 1 : 0.35 + 0.2 * pulse); laneG.scale.x = len; laneG.position.set(mid, LAND + 0.2, lz); laneGM.opacity = 0.35 * flash(t, T.lane[0], T.lane[1] - T.lane[0], 1.6); laneG.visible = laneGM.opacity > 0.003;
+        if (segs.length) { laneM.visible = false; laneG.visible = false; edges.forEach(e => e.visible = false); const n2 = segs.length, span = T.lane[1] - T.lane[0];
+          segs.forEach((sg, i) => { const f = ease((t - T.lane[0] - i * span * 0.35) / (span * 0.9)), ln = Math.max(0.01, sg.sl * f), mx = sg.ax + sg.ux * ln / 2, mz = sg.az + sg.uz * ln / 2;
+            sg.mm.scale.x = ln; sg.mm.position.set(mx, LAND - 0.12 + 0.14 * f, mz); sg.mm.visible = f > 0;
+            sg.ee.forEach(({ e, sg: k }) => { e.scale.x = ln; e.position.set(mx - sg.uz * k * LW / 2, LAND + 0.2, mz + sg.ux * k * LW / 2); e.visible = f > 0; }); }); }
         for (let i = 0; i < n; i++) { const pf = clamp((t - T.pad0 - i * T.padGap) / T.padDur), b = back(pf), p = pads[i];
           q.setFromAxisAngle(up, rots[i] || 0); m4.compose(pv.set(p[0], LAND - 0.5 + 0.62 * b, p[2]), q, sv.set(1, 1, 1).multiplyScalar(pf > 0 ? 1 : 1e-4)); padI.setMatrixAt(i, m4);
           outM[i].opacity = pf * (t > padEnd + 0.4 ? 0.22 + 0.16 * pulse : 0.7); outs[i].visible = pf > 0;
@@ -319,6 +385,7 @@ export async function init(X) {
     t += dt; const grow = !!state.growOn, sel = state.sel;
     wfTick(dt);
     moveAll(dt, t);
+    bearTick(dt, t);
     // the mower and its pelican leave the lawn while the Room to grow idea plays on it
     if (mower) { mower.show(!grow); pelSit.ims.forEach(im => im.visible = true); if (grow) { pelSit.set(0, 0, PY, 0, 0, 1e-4); } }
     still.forEach((s, i) => people.set(s.k, s.at[0], s.y, s.at[1], (s.ry || 0) + (reduced ? 0 : Math.sin(t * 0.4 + i * 2) * 0.35)));

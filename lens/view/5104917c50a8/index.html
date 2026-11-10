@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Montana Basecamp in 3D</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Montana Basecamp in 3D">
+<meta property="og:description" content="Spin it, tap the facts, and place it on your desk.">
+<meta property="og:site_name" content="Avison Young">
+<meta property="og:image" content="https://neroengine.com/lens/view/5104917c50a8/poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon.png?v=28db4ab9">
+<link rel="apple-touch-icon" href="icon.png?v=28db4ab9">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0b0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Montana Basecamp">
+<link rel="stylesheet" href="../_e/fonts/montserrat.css">
+<script>window.NVCFG = {"id":"5104917c50a8","product":"lens","three":"three181","t":"https://nero-viewer.nerolabs.workers.dev/lens/view/_t"};</script>
+<script>(function () {
+  var C = window.NVCFG || {}, qs = new URLSearchParams(location.search);
+  var R = (qs.get('r') || '').replace(/[^\w-]/g, '').slice(0, 24), T = C.t || '../_t', t0 = performance.now(), sent = 0, loaded = 0, failed = 0, errs = 0;
+  var app = !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone);
+  try { if (R) localStorage.setItem('nvr:' + C.id, R); else if (app) R = localStorage.getItem('nvr:' + C.id) || ''; } catch (err) {}
+  try { if (qs.get('me') === '1') localStorage.setItem('nvme', '1'); if (qs.get('me') === '0') localStorage.removeItem('nvme'); if (localStorage.getItem('nvme') === '1') R = 'adam'; } catch (err) {}
+  R = R || 'none';
+  var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  function beacon(e, x) {
+    try {
+      var s = JSON.stringify({ l: C.id, r: R, e: e, x: String(x == null ? '' : x).slice(0, 80) });
+      if (!(navigator.sendBeacon && navigator.sendBeacon(T, s))) fetch(T, { method: 'POST', body: s, keepalive: true });
+    } catch (err) {}
+  }
+  var ua = navigator.userAgent, inapp = /FBAN|FBAV|Instagram|LinkedInApp|GSA\/|Line\/|MicroMessenger|; wv\)/.test(ua) ? 'in-app' : '';
+  beacon('open', (mobile ? 'phone' : 'computer') + (qs.get('v') === 'qr' ? ' via qr' : '') + (inapp ? ' ' + inapp : '') + (app ? ' home screen app' : ''));
+  function time() { var s = Math.round((performance.now() - t0) / 1000); if (s - sent >= 5) { sent = s; beacon('time', s); } }
+  addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') time(); });
+  addEventListener('pagehide', time);   // iPhone Safari closes tabs without a visibilitychange
+  function fail(why) {
+    why = String(why || 'error').slice(0, 78);
+    if (loaded) { if (errs++ < 3) beacon('err', why); return; }   // a later hiccup: note it, keep the viewer up
+    if (failed) return; failed = 1; beacon('err', why);
+    var show = function () { var f = document.getElementById('nvfail'), l = document.getElementById('load'); if (l) l.style.display = 'none'; if (f) f.hidden = false; document.documentElement.classList.add('nvfailed'); };
+    if (document.body) show(); else addEventListener('DOMContentLoaded', show);
+  }
+  addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t !== window && t.tagName === 'SCRIPT') return fail('script did not load: ' + (t.src || '').split('/').pop());
+    if (t === window || !t || !t.tagName) fail(e.message || 'script error');
+  }, true);
+  addEventListener('unhandledrejection', function (e) { fail((e.reason && (e.reason.message || e.reason)) || 'load failed'); });
+  var w0 = Date.now(), slowSent = 0;
+  function check(at) {
+    if (loaded) return;
+    var real = Date.now() - w0;
+    if (real < at - 5000) { if (!slowSent) { slowSent = 1; beacon('sandbox', 'clock sped up ' + Math.round(real / 1000) + 's'); } return setTimeout(function () { check(at); }, Math.max(1000, at - real)); }
+    if (at < 90000) { beacon('slow', 'still loading after ' + Math.round(real / 1000) + 's'); return setTimeout(function () { check(90000); }, 90000 - real); }
+    fail('timeout: no 3D after 90s');
+  }
+  setTimeout(function () { check(40000); }, 40000);
+  window.NV = {
+    id: C.id, rcpt: R, api: C.t ? C.t.replace(/_t$/, '') : '../', mobile: mobile, inapp: !!inapp, app: app, qs: qs, beacon: beacon, fail: fail,
+    reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
+    loaded: function () {
+      if (loaded) return; loaded = 1; beacon('loaded', (Math.round((Date.now() - w0) / 100) / 10) + 's');
+      if (failed) { var f = document.getElementById('nvfail'); if (f) f.hidden = true; document.documentElement.classList.remove('nvfailed'); }
+    },
+    qr: function (el) { if (!window.qrcode || !el) return; var u = new URL(location.href); u.searchParams.set('v', 'qr'); var q = qrcode(0, 'M'); q.addData(u.toString()); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+  };
+  window.ModelViewerElement = window.ModelViewerElement || {};
+  window.ModelViewerElement.dracoDecoderLocation = new URL('../_e/' + (C.three || 'three181') + '/examples/jsm/libs/draco/', location.href).href;
+})();
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "../_e/three181/build/three.module.js",
+  "three/addons/": "../_e/three181/examples/jsm/"
+} }
+</script>
+<script type="module" src="../_e/mv400/model-viewer.min.js"></script>
+<script src="../_e/qr144/qrcode.js"></script>
+<style>
+  /* Nero Lens viewer engine. Colours come from the listing's theme (the broker's brand), never typed in here. */
+  :root { --font:"Montserrat"; --hero:#7fa6ff; --navy:#3a4458; --sky:#e6eeff; --brand:#7fa6ff; --ink:#f3f5fa; --dim:#a9b1c2; --panel:rgba(16,18,25,.9); --bg:#0a0b0f; --bgc:10,11,15; --lc:230,236,255; --text:#e2e6ef; --text2:#d5dae5; --muted:#9aa3b5; --muted2:#9aa3b5; --sw:#3a4458; --swon:var(--hero); --bar:#262c3a; --loadbar:var(--hero); --arbg:#141822; --scrim:6,7,10; --onhero:#0a0b0f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; overflow:hidden; background:var(--bg); color:var(--ink); font-family:var(--font), -apple-system, Helvetica, Arial, sans-serif; }
+  canvas#c { position:fixed; inset:0; width:100vw; height:100dvh; display:block; touch-action:none; }
+  #top { position:fixed; left:0; right:0; top:0; padding:calc(env(safe-area-inset-top) + 12px) 16px 10px; display:flex; align-items:center; gap:12px; pointer-events:none;
+         background:linear-gradient(rgba(var(--bgc),.88), rgba(var(--bgc),0)); }
+  #top img { height:30px; width:auto; }
+  #top .t { line-height:1.15; }
+  #top .t b { display:block; font-size:15px; font-weight:700; letter-spacing:.01em; }
+  #top .t span { font-size:12px; color:var(--dim); font-weight:500; }
+  #top .t span em { font-style:normal; color:var(--hero); font-weight:700; }
+  #hint { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); font-size:12px; color:var(--dim); background:rgba(var(--bgc),.6);
+          padding:5px 11px; border-radius:20px; white-space:nowrap; pointer-events:none; transition:opacity .6s; }
+  @media (max-width:760px) { #hint { top:calc(env(safe-area-inset-top) + 200px); white-space:normal; width:max-content; max-width:78vw; text-align:center; line-height:1.4; } }
+  #bottom { position:fixed; left:0; right:0; bottom:0; padding:10px 0 calc(env(safe-area-inset-bottom) + 8px); background:linear-gradient(rgba(var(--bgc),0), rgba(var(--bgc),.93) 28%); }
+  #card { margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.1); border-radius:14px; padding:12px 14px 12px; display:none; position:relative; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  #card .k { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--hero); font-weight:700; padding-right:128px; }
+  #card .k small { display:block; font-size:12px; letter-spacing:0; text-transform:none; font-weight:600; color:var(--text); margin-top:1px; } #card .k small::first-letter { text-transform:uppercase; }
+  #card h2 { margin:3px 0 4px; font-size:21px; font-weight:800; letter-spacing:-.01em; }
+  #card h2 em { font-style:normal; color:var(--hero); }
+  #card p { margin:0; font-size:13.5px; line-height:1.4; color:var(--text); }
+  #card .src { margin-top:6px; font-size:12px; line-height:1.35; color:var(--muted); }
+  #card .x { position:absolute; right:2px; top:2px; width:44px; height:44px; border:0; background:none; color:var(--muted2); font-size:22px; }
+  #card.concept { border:1px dashed var(--hero); }
+  #cnav { position:absolute; right:44px; top:4px; display:flex; align-items:center; gap:2px; color:var(--muted2); font-size:12px; font-weight:600; }
+  #cnav button { width:38px; height:40px; border:0; background:none; color:var(--ink); font-size:24px; line-height:1; padding:0 0 3px; }
+  @media (max-width: 759px) {
+    #bottom.reading #chips, #bottom.reading .row, #bottom.reading #legal .extra { display:none; }
+    #bottom.reading #card { margin-bottom:6px; padding:10px 14px 10px; } #bottom.reading #legal { padding-top:2px; }
+    #bottom.reading #card h2 { font-size:19px; margin:2px 0 3px; } #bottom.reading #card p { font-size:13px; line-height:1.35; }
+    #bottom.reading #card .src { margin-top:4px; }
+  }
+  #mini { display:flex; align-items:center; justify-content:space-between; gap:10px; width:calc(100% - 32px); margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.14); border-radius:12px; padding:9px 12px; color:var(--ink); font:700 13.5px var(--font), sans-serif; text-align:left; }
+  #mini[hidden], #reset[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
+  #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 108px); z-index:4; }
+  #chips { display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
+  #chips::-webkit-scrollbar { display:none; }
+  .chip { flex:0 0 auto; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink); font:600 13.5px var(--font), sans-serif; padding:9px 14px; border-radius:22px; }
+  .chip.on { background:var(--hero); border-color:var(--hero); color:var(--onhero); }
+  .row { display:flex; gap:8px; padding:0 16px; align-items:stretch; }
+  #grow { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink);
+          font:600 13px var(--font), sans-serif; padding:8px 10px; border-radius:12px; text-align:left; white-space:nowrap; }
+  #grow small { display:block; font-size:12px; letter-spacing:.1em; color:var(--hero); font-weight:700; }
+  .sw { width:38px; height:22px; border-radius:11px; background:var(--sw); position:relative; flex:0 0 auto; transition:background .2s; }
+  .sw::after { content:""; position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .2s; }
+  #grow.on .sw { background:var(--swon); } #grow.on .sw::after { left:19px; }
+  #ar { flex:1.25 1 0; border:0; border-radius:12px; background:var(--sky); color:var(--navy); font:800 14.5px var(--font), sans-serif; padding:10px 12px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  #ar svg { width:20px; height:20px; }
+  #legal { text-align:center; font-size:12px; color:var(--muted2); padding:9px 16px 0; line-height:1.3; }
+  #legal a { color:inherit; }
+  .tag { position:fixed; left:0; top:0; pointer-events:none; transform:translate(-50%, -100%); white-space:nowrap; font-size:12px; font-weight:700; color:#fff; background:rgba(var(--bgc),.84);
+         border:1px solid var(--hero); padding:4px 9px; border-radius:8px; display:none; }
+  .tag::after { content:""; position:absolute; left:50%; bottom:-7px; width:1px; height:7px; background:var(--hero); }
+  .tag.c { border-style:dashed; }
+  #load { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:var(--bg); z-index:9; font-size:13px; color:var(--dim); transition:opacity .5s; }
+  #load img { height:56px; }
+  #load .bar { width:160px; height:3px; background:var(--bar); border-radius:2px; overflow:hidden; } #load .bar i { display:block; height:100%; width:0; background:var(--loadbar); transition:width .2s; }
+  #arcard { position:fixed; inset:0; background:rgba(var(--scrim),.75); display:none; align-items:flex-end; z-index:8; }
+  #arcard .in { margin:0 12px calc(env(safe-area-inset-bottom) + 12px); width:100%; background:var(--arbg); border-radius:16px; padding:18px 18px 14px; border:1px solid rgba(var(--lc),.1); }
+  #arcard h3 { margin:0 0 8px; font-size:19px; } #arcard p { margin:0 0 9px; font-size:13.5px; line-height:1.45; color:var(--text2); }
+  #arcard p.s { font-size:12px; color:var(--muted2); }
+  #arcard .go { width:100%; border:0; border-radius:12px; background:var(--hero); color:var(--onhero); font:800 15px var(--font), sans-serif; padding:13px; margin-top:4px; }
+  #arcard .go:disabled { opacity:.5; }
+  #arcard .no { width:100%; border:0; background:none; color:var(--muted2); font:600 13px var(--font), sans-serif; padding:12px 0 2px; }
+  #agent { margin:4px 0 6px; padding:10px 12px; border-radius:12px; background:rgba(var(--lc),.06); font-size:12.5px; line-height:1.45; color:var(--text2); }
+  #agent b { color:var(--ink); } #agent a { color:var(--hero); text-decoration:none; font-weight:600; }
+  #qrbox { position:fixed; right:22px; bottom:22px; background:#fff; color:var(--navy); border-radius:14px; padding:12px 12px 10px; display:none; text-align:center; font-size:12px; font-weight:700; line-height:1.3; z-index:5; box-shadow:0 8px 30px rgba(0,0,0,.45); }
+  #qrbox svg, #arqr svg { display:block; width:132px; height:132px; margin:0 auto 7px; }
+  #arqr { display:none; background:#fff; border-radius:12px; padding:12px; width:160px; margin:6px auto 10px; }
+  #arqr svg { width:136px; height:136px; margin:0; }
+  @media (min-width: 1000px) and (hover: hover) { #qrbox.on { display:block; } }
+  @media (min-width: 760px) { #arcard { align-items:center; justify-content:center; } #arcard .in { max-width:460px; margin:0; } }
+  model-viewer { position:fixed; width:1px; height:1px; left:-10px; top:-10px; opacity:0; pointer-events:none; }
+  @media (min-width: 760px) { #bottom { left:50%; right:auto; width:520px; transform:translateX(-50%); background:none; } #card { margin-left:16px; margin-right:16px; } }
+  #acts { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; display:flex; gap:8px; }
+  #acts button, #reset, #tourbtn { border:1px solid rgba(var(--lc),.2); background:rgba(var(--bgc),.7); color:var(--ink); font:600 12.5px var(--font), sans-serif; padding:8px 12px; border-radius:20px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; gap:6px; min-height:36px; }
+  #acts svg, #tourbtn svg { width:15px; height:15px; }
+  #askbtn { border-color:var(--hero) !important; }
+  #tourbtn { position:fixed; left:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; }
+  #tourbtn.on { background:var(--hero); color:var(--onhero); border-color:var(--hero); }
+  #tourbar { position:fixed; left:0; top:0; height:3px; width:0; background:var(--hero); z-index:6; }
+  #toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); background:var(--sky); color:var(--navy); font:700 13px var(--font), sans-serif; padding:9px 14px; border-radius:20px; z-index:12; opacity:0; pointer-events:none; transition:opacity .3s; white-space:nowrap; }
+  #toast.on { opacity:1; }
+  .sheet { position:fixed; inset:0; background:rgba(var(--scrim),.75); display:none; align-items:flex-end; z-index:11; }
+  .sheet .in { margin:0 12px calc(env(safe-area-inset-bottom) + 12px); width:100%; max-height:calc(100dvh - 40px); overflow:auto; background:var(--arbg); border-radius:16px; padding:18px 18px 14px; border:1px solid rgba(var(--lc),.1); }
+  .sheet .in { position:relative; } .sheet .x { position:absolute; right:6px; top:6px; width:44px; height:44px; border:0; background:none; color:var(--ink); font-size:26px; line-height:1; }
+  .sheet h3 { margin:0 0 4px; font-size:19px; padding-right:40px; } .sheet p { margin:0 0 10px; font-size:13px; line-height:1.45; color:var(--text2); } .sheet p.s { font-size:12px; color:var(--muted2); }
+  .sheet label { display:block; font-size:12px; font-weight:600; color:var(--dim); margin:8px 0 4px; }
+  .sheet input, .sheet textarea, .sheet select { width:100%; border:1px solid rgba(var(--lc),.2); background:rgba(var(--lc),.06); color:var(--ink); font:500 16px var(--font), sans-serif; padding:10px 12px; border-radius:10px; }
+  .sheet textarea { min-height:84px; resize:vertical; } .sheet select option { color:#111; }
+  .sheet .two { display:grid; grid-template-columns:1fr 1fr; gap:8px; } .sheet .hp { position:absolute; left:-9999px; }
+  .sheet .go { width:100%; border:0; border-radius:12px; background:var(--hero); color:var(--onhero); font:800 15px var(--font), sans-serif; padding:13px; margin-top:12px; } .sheet .go:disabled { opacity:.5; }
+  .sheet .no { width:100%; border:0; background:none; color:var(--muted2); font:600 13px var(--font), sans-serif; padding:12px 0 2px; }
+  @media (min-width: 760px) { .sheet { align-items:center; justify-content:center; } .sheet .in { max-width:460px; margin:0; } }
+  #arcopy { display:none; width:100%; border:1px solid rgba(var(--lc),.25); border-radius:12px; background:none; color:var(--ink); font:700 14px var(--font), sans-serif; padding:11px; margin:2px 0 6px; }
+  /* what's near: a short list in the card, one arrow per direction on the rim of the base */
+  .chip.nearc { display:flex; align-items:center; gap:6px; border-color:var(--hero); } .chip.nearc svg { width:14px; height:14px; flex:0 0 auto; }
+  #nlist { display:none; margin:6px -6px 0; max-height:min(25dvh, 188px); overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  #card.near #nlist { display:block; } #card.near #cp { font-size:12.5px; color:var(--muted); }
+  .nr { display:grid; grid-template-columns:30px 1fr auto; align-items:center; column-gap:9px; width:100%; border:0; background:none; color:var(--ink); font:600 13.5px var(--font), sans-serif; text-align:left; padding:6px 6px; border-radius:9px; min-height:36px; }
+  .nr i { font-style:normal; font-size:12px; font-weight:800; color:var(--hero); border:1px solid var(--hero); border-radius:6px; text-align:center; padding:2px 0; }
+  .nr span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nr b { font-weight:700; font-size:13px; white-space:nowrap; color:var(--text); }
+  .nr small { grid-column:2 / 4; display:none; font-size:12px; font-weight:500; line-height:1.35; color:var(--muted); white-space:normal; padding:1px 0 2px; }
+  .nr.on { background:rgba(var(--lc),.09); } .nr.on i { background:var(--hero); color:var(--onhero); } .nr.on small { display:block; } .nr.on span { white-space:normal; }
+  .tag.nt { pointer-events:auto; cursor:pointer; padding:5px 10px; } .tag.nt.on { background:var(--hero); color:var(--onhero); } .tag.nt.off { opacity:.6; }
+  #card .src a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
+  button:focus-visible, a:focus-visible { outline:2px solid var(--hero); outline-offset:2px; }
+  /* the facts as a plain list: read by screen readers always, shown to everyone if the 3D view cannot load */
+  #facts { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  #nvfail { position:fixed; inset:0; z-index:10; overflow:auto; background:var(--bg); padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 18px); }
+  #nvfail .in { max-width:560px; margin:0 auto; }
+  #nvfail img.logo { height:40px; } #nvfail img.poster { width:100%; border-radius:14px; margin:14px 0 4px; display:block; }
+  #nvfail h1 { font-size:22px; margin:14px 0 2px; } #nvfail .sub { color:var(--dim); font-size:13px; margin:0 0 10px; }
+  #nvfail .why { background:rgba(var(--lc),.07); border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.4; color:var(--text2); margin:10px 0; }
+  #nvfail button { border:0; border-radius:12px; background:var(--hero); color:var(--onhero); font:800 14px var(--font), sans-serif; padding:11px 16px; margin:4px 0 8px; }
+  .nvfailed #facts { position:static; width:auto; height:auto; clip-path:none; max-width:560px; margin:0 auto; }
+  #facts h2 { font-size:16px; margin:16px 0 2px; } #facts h2 em { font-style:normal; color:var(--hero); } #facts p { margin:0; font-size:13.5px; line-height:1.4; color:var(--text); } #facts small { display:block; font-size:12px; color:var(--muted); margin-top:3px; }
+  #load img { height:44px; } #top .t { border-left:1px solid rgba(230,236,255,.25); padding-left:12px; } #top .t span { white-space:nowrap; } #card.concept { border:1px dashed rgba(127,166,255,.7); }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Montana Basecamp, Kalispell, Montana, illustrative 3D model. Drag to spin, pinch or scroll to zoom." role="img"></canvas>
+<div id="load"><img src="logo.png?v=a2d37e92" alt="Avison Young"><div class="bar"><i id="lbar"></i></div><span>Loading the 3D model</span></div>
+<div id="top"><img src="logo.png?v=a2d37e92" alt="Avison Young"><div class="t"><b>Montana Basecamp</b><span>Kalispell, Montana · <em>$25,000,000</em> · 48 acres</span></div></div>
+<div id="hint">Drag to spin · two fingers to move and zoom</div>
+<div id="tourbar"></div>
+<button id="tourbtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg><span>Tour</span></button>
+<div id="acts">
+  <button id="askbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask</button>
+  <button id="sharebtn" aria-label="Share this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>Share</button>
+</div>
+<button id="reset" hidden>Reset view</button>
+<div id="toast" role="status"></div>
+<div id="tags" aria-hidden="true"></div>
+<div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your desk</div>
+<div id="bottom">
+  <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div id="nlist"></div><div class="src" id="cs"></div></div>
+  <button id="mini" hidden><span id="minit"></span><em>Show info</em></button>
+  <div id="chips"></div>
+  <div class="row">
+    <button id="grow" aria-pressed="false"><span><small>CONCEPT</small>Room to grow</span><span class="sw"></span></button>
+    <button id="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>View on your desk</button>
+  </div>
+  <div id="legal">Illustrative model made from public data. Not to scale, not a survey.<span class="extra"> Preview prepared for Avison Young. · <a href="../_e/legal/privacy.html" target="_blank" rel="noopener">Privacy</a></span></div>
+</div>
+<div id="arcard" role="dialog" aria-modal="true" aria-labelledby="arh"><div class="in">
+  <h3 id="arh">Put Montana Basecamp on your desk</h3>
+  <p>Your phone&#x27;s camera places the model on a real table or desk, about 60 cm (2 ft) across. Walk around it, or use two fingers to turn and resize it.</p>
+  <p class="s">Illustrative model made from public data. Not to scale, not a survey.</p>
+  <div id="arqr"></div><p id="arst" class="s"></p>
+  <button class="go" id="argo">Place it on my desk</button>
+  <button id="arcopy">Copy the link</button>
+  <div id="agent"><b>Avison Young</b> · Chris Kilcullen, Leslie Brown, Mason Bodie, Michael Agnew<br><a href="mailto:chris.kilcullen@avisonyoung.com">chris.kilcullen@avisonyoung.com</a> · <a href="tel:+13032508338">303-250-8338</a></div>
+  <button class="no" id="arno">Back to the 3D view</button>
+</div></div>
+<div id="ask" class="sheet" role="dialog" aria-modal="true" aria-labelledby="askh"><form class="in" id="askf" novalidate>
+  <button class="x" id="askx" type="button" aria-label="Close">×</button>
+  <h3 id="askh">Ask about Montana Basecamp</h3>
+  <p>Send a question about this listing to Avison Young.</p>
+  <div class="two"><div><label for="qn">Your name</label><input id="qn" name="name" autocomplete="name" required maxlength="80"></div>
+  <div><label for="qr">I am a</label><select id="qr" name="role"><option value="buyer">Buyer</option><option value="seller">Business owner</option><option value="agent">Broker or agent</option><option value="other">Other</option></select></div></div>
+  <div id="qown"><label for="qe">Email</label><input id="qe" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120">
+  <label for="qp">Phone (optional)</label><input id="qp" name="phone" type="tel" autocomplete="tel" maxlength="40"></div>
+  <label for="qm">Your question</label><textarea id="qm" name="msg" required maxlength="1500"></textarea>
+  <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <p class="s" id="askst" style="margin-top:8px">Your details are used only to answer you about this listing, and are passed to Avison Young.</p>
+  <button class="go" id="askgo" type="submit">Send my question</button>
+  <button class="go" id="askwa" type="button" style="display:none;background:none;border:1px solid rgba(var(--lc),.25);color:var(--ink);margin-top:8px">Send on WhatsApp</button>
+  <button class="no" id="askno" type="button">Back to the 3D view</button>
+</form></div>
+<model-viewer id="mv" src="model.glb?v=5c0d0245" ios-src="model.usdz?v=77045484" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor" loading="lazy" alt="Montana Basecamp, Kalispell, Montana, illustrative 3D model"></model-viewer>
+<div id="nvfail" hidden><div class="in">
+  <img class="logo" src="logo.png?v=a2d37e92" alt="Avison Young">
+  <h1>Montana Basecamp</h1><p class="sub">Kalispell, Montana · <em>$25,000,000</em> · 48 acres</p>
+  <img class="poster" src="poster.jpg?v=d3fa89ee" alt="Montana Basecamp, Kalispell, Montana, illustrative 3D model">
+  <div class="why">The 3D view could not start on this device or connection. The facts are below. <br>Illustrative model made from public data. Not to scale, not a survey.</div>
+  <button onclick="location.reload()">Try the 3D view again</button>
+</div></div>
+<div id="facts"><h2>Montana Basecamp: the facts</h2><h2><em>62</em> paved RV sites</h2><p>Back-in sites on both sides of one paved drive, with a turning circle at the south end. The resort opened in 2020.</p><small>Sources: Avison Young release (62 paved RV slips, opened in 2020), Revere listing (operating since 2020 with 62 paved RV sites)</small><h2><em>48</em> acres</h2><p>Offered at $25,000,000. Zoned PUD and B2 Commercial, with 330 RV entitlements (outlined: the parcel).</p><small>Sources: Avison Young release ($25 million, 48 acres, PUD and B2 Commercial zoning, 330 RV entitlements). Parcel line from public map data, approximate.</small><h2><em>3.29 million</em> visits</h2><p>Glacier National Park had 3,294,824 recreation visits from January to September 2026, already more than in all of 2025 (3,136,557). The park is about 45 minutes away by road.</p><small>Sources: National Park Service visitor statistics (IRMA), 2026 figures preliminary; drive time by road from OpenStreetMap routing (Valhalla), read 10-11-2026</small><h2>Kalispell in <em>8 min</em></h2><p>By road: downtown Kalispell 8 min, Flathead Lake at Somers 10, Bigfork 20, Glacier Park International Airport 22, Whitefish 29, Whitefish Mountain Resort 42, Glacier National Park 45.</p><small>Source: drive times by road from OpenStreetMap routing (Valhalla, checked against OSRM), read 10-11-2026</small><h2><em>+9.7%</em> people</h2><p>Flathead County grew from 104,355 people in 2020 to 114,527 in 2024, about 10,172 more.</p><small>Source: US Census Bureau population estimates (Vintage 2024: April 2020 base and July 2024 estimate)</small><h2><em>1.01 million</em> within 5 hours</h2><p>About 100,557 US residents live within an hour&#x27;s drive, 270,086 within 3 hours and 1.01 million within 5 hours (US only, Canada not counted).</p><small>Source: 2020 Census tract populations (Montana, Idaho, Washington) with drive times by road from OpenStreetMap routing (OSRM)</small><h2>Room to <em>grow</em> (Concept · an idea, not a forecast)</h2><p>The zoning allows 330 RV sites and 62 are built. The idea: the other 268 on the open land west of the drive, in rows like the ones there now. Subject to approvals; the layout is illustrative.</p><small>Sources: Avison Young release (330 RV entitlements including 62 paved slips). Layout: an idea drawn on public aerial photos (USGS NAIP), not a plan.</small></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// Everything about this listing (facts, sources, colours, effects) comes from its listing.json. Nothing about trading or income.
+const D = {"font":"Montserrat","near":null,"name":"Montana Basecamp","contact":{},"checked":"10-11-2026","theme":{"hero":"#7fa6ff"},"scene":{"root":"MontanaBasecamp","baseParts":["ground","plinth"],"waterParts":[],"fadeParts":["trees"],"backdrop":["#1c2130","#11141c","#07080b"],"hemi":["#e6eeff","#2e2a22"],"minDistance":0.05,"home":{"at":[-20,-10,0],"dist":900,"el":0.82,"az":0.75,"fit":14},"glow":{"lerp":0.25,"base":0.12,"gain":0.45,"lumk":0.8},"tagDy":8,"az":0.75,"life":{"speed":1.5}},"fx":{"pads":{"type":"rects","list":"pads","rot":"padRot","len":17,"wid":4.8,"y":0.5,"r":0.3,"k":3},"siteDots":{"type":"dots","list":"pads","r":1.0,"seg":10,"minY":0.4,"lift":5.0,"k":4,"rate":30,"depth":true},"parcel":{"type":"outline","pts":"parcel","y":0.9,"r":0.9,"k":3,"closed":true,"tension":0},"glacier":{"type":"arcs","from":"glacierFrom","to":"glacierTo","centre":[66,0,-14],"height":40,"k":2.8},"build":{"type":"build","list":"grow","rot":"growRot","len":17,"wid":4.8,"count":268,"padGap":0.02}},"hot":[{"id":"sites","chip":"RV sites","k":"The RV sites","h":"<em>62<\/em> paved RV sites","p":"Back-in sites on both sides of one paved drive, with a turning circle at the south end. The resort opened in 2020.","s":"Sources: Avison Young release (62 paved RV slips, opened in 2020), Revere listing (operating since 2020 with 62 paved RV sites)","parts":["pads","rvs"],"tag":"62 paved RV sites","view":{"at":[66,0,-20],"dist":470,"el":0.95,"az":0.55},"fx":["pads","siteDots"],"links":[{"t":"Avison Young release","u":"https://www.avisonyoung.us/w/avison-young-tapped-to-market-48-acre-montana-basecamp-development-opportunity-in-kalispell-montana-1"},{"t":"Revere listing","u":"https://platform.reverecre.com/project/6197e9e8-149c-4328-8246-6fbbf32a9767"}]},{"id":"land","chip":"48 acres","k":"The land","h":"<em>48<\/em> acres","p":"Offered at $25,000,000. Zoned PUD and B2 Commercial, with 330 RV entitlements (outlined: the parcel).","s":"Sources: Avison Young release ($25 million, 48 acres, PUD and B2 Commercial zoning, 330 RV entitlements). Parcel line from public map data, approximate.","parts":["ground"],"tag":"48 acres","view":{"at":[-75,0,-10],"dist":760,"el":1.05,"az":0.6},"fx":["parcel"],"glow":0.08,"links":[{"t":"Avison Young release","u":"https://www.avisonyoung.us/w/avison-young-tapped-to-market-48-acre-montana-basecamp-development-opportunity-in-kalispell-montana-1"},{"t":"Revere listing","u":"https://platform.reverecre.com/project/6197e9e8-149c-4328-8246-6fbbf32a9767"}]},{"id":"glacier","chip":"Glacier","k":"Why people come","h":"<em>3.29 million<\/em> visits","p":"Glacier National Park had 3,294,824 recreation visits from January to September 2026, already more than in all of 2025 (3,136,557). The park is about 45 minutes away by road.","s":"Sources: National Park Service visitor statistics (IRMA), 2026 figures preliminary; drive time by road from OpenStreetMap routing (Valhalla), read 10-11-2026","parts":["rvs"],"tag":"3.29 million visits to Glacier, Jan to Sep 2026","view":{"at":[20,-40,-20],"dist":1150,"el":1.0,"az":0.95,"fit":40},"fx":["glacier"],"glow":0.25,"links":[{"t":"NPS visitor statistics","u":"https://irma.nps.gov/Stats/SSRSReports/Park%20Specific%20Reports/Recreation%20Visitors%20By%20Month%20(1979%20-%20Last%20Calendar%20Year)?Park=GLAC"}]},{"id":"reach","chip":"Drive times","k":"Who can reach it","h":"Kalispell in <em>8 min<\/em>","p":"By road: downtown Kalispell 8 min, Flathead Lake at Somers 10, Bigfork 20, Glacier Park International Airport 22, Whitefish 29, Whitefish Mountain Resort 42, Glacier National Park 45.","s":"Source: drive times by road from OpenStreetMap routing (Valhalla, checked against OSRM), read 10-11-2026","parts":["drive"],"tag":"Kalispell 8 min · Glacier 45 min","view":{"at":[90,0,-150],"dist":620,"el":0.9,"az":0.35},"fx":[],"glow":0.3},{"id":"county","chip":"Growing county","k":"Is the area growing?","h":"<em>+9.7%<\/em> people","p":"Flathead County grew from 104,355 people in 2020 to 114,527 in 2024, about 10,172 more.","s":"Source: US Census Bureau population estimates (Vintage 2024: April 2020 base and July 2024 estimate)","parts":["town"],"tag":"Flathead County +9.7% since 2020","view":{"at":[0,-30,0],"dist":1000,"el":0.75,"az":1.25,"fit":30},"fx":[],"glow":0.2},{"id":"catch","chip":"Within reach","k":"How many people nearby","h":"<em>1.01 million<\/em> within 5 hours","p":"About 100,557 US residents live within an hour's drive, 270,086 within 3 hours and 1.01 million within 5 hours (US only, Canada not counted).","s":"Source: 2020 Census tract populations (Montana, Idaho, Washington) with drive times by road from OpenStreetMap routing (OSRM)","parts":["drive"],"tag":"100,557 people within 1 hour","view":{"at":[0,-60,0],"dist":1250,"el":1.15,"az":0.75,"fit":48},"fx":[],"glow":0.2}],"grow":{"k":"Concept · an idea, not a forecast","h":"Room to <em>grow<\/em>","p":"The zoning allows 330 RV sites and 62 are built. The idea: the other 268 on the open land west of the drive, in rows like the ones there now. Subject to approvals; the layout is illustrative.","s":"Sources: Avison Young release (330 RV entitlements including 62 paved slips). Layout: an idea drawn on public aerial photos (USGS NAIP), not a plan.","view":{"at":[-55,0,40],"dist":1050,"el":0.95,"az":0.75},"fx":["build"],"tag":{"at":[-105,12,-8],"text":"Concept: 268 more sites"},"links":[{"t":"Avison Young release","u":"https://www.avisonyoung.us/w/avison-young-tapped-to-market-48-acre-montana-basecamp-development-opportunity-in-kalispell-montana-1"}]},"files":{"glb":"model.glb?v=5c0d0245","info":"model_info.json?v=18381edc"}};
+const HOT = D.hot, GROW = D.grow, SC = D.scene, T = NV.beacon, mobile = NV.mobile;
+
+const HERO = new THREE.Color(D.theme.hero);
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.55;
+{ const cv = document.createElement('canvas'); cv.width = 16; cv.height = 256; const g = cv.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256);   // soft backdrop
+  gr.addColorStop(0, SC.backdrop[0]); gr.addColorStop(0.55, SC.backdrop[1]); gr.addColorStop(1, SC.backdrop[2]); g.fillStyle = gr; g.fillRect(0, 0, 16, 256);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
+const camera = new THREE.PerspectiveCamera(40, 1, 0.005, 50);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.rotateSpeed = 0.7;
+// move across the plate (Adam, 10-11-2026: "I need to be able to move the whole plate sideways"): right-drag or shift-drag on a computer,
+// two fingers on a phone; scroll and pinch zoom toward the pointer, not the middle; double-tap flies in to that spot
+controls.enablePan = true; controls.screenSpacePanning = false; controls.zoomToCursor = true;
+controls.minDistance = SC.minDistance ?? 0.08; controls.maxDistance = 3.2; controls.maxPolarAngle = 1.38; controls.autoRotate = !NV.reduced; controls.autoRotateSpeed = 0.55;
+const sun = new THREE.DirectionalLight(0xfff1e0, 2.6); sun.position.set(-0.6, 1.1, 0.45); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -0.34, right: 0.34, top: 0.34, bottom: -0.34, near: 0.1, far: 3 }); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.002;
+scene.add(sun); scene.add(new THREE.HemisphereLight(new THREE.Color(SC.hemi[0]), new THREE.Color(SC.hemi[1]), 0.55));
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.8, 0.45, 1.25); composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+const lbar = document.getElementById('lbar');
+const draco = new DRACOLoader().setDecoderPath('../_e/three181/examples/jsm/libs/draco/gltf/');
+const loader = new GLTFLoader().setDRACOLoader(draco);
+const [gltf, INFO] = await Promise.all([
+  loader.loadAsync(D.files.glb, (e) => { if (e.total) lbar.style.width = Math.round(100 * e.loaded / e.total) + '%'; }),
+  fetch(D.files.info).then(r => { if (!r.ok) throw new Error('model info ' + r.status); return r.json(); }),
+]);
+const model = gltf.scene.getObjectByName(SC.root) || gltf.scene;
+scene.add(gltf.scene);
+const S = INFO.scale, R = INFO.R, A = INFO.anchors || {};
+const BASEP = SC.baseParts || ['ground', 'plinth'];
+// own copy of every material per part, so one part can glow while the rest dim
+const MATS = [], part = {};
+model.children.forEach(c => part[c.name] = c);
+model.traverse(o => { if (!o.isMesh) return; o.castShadow = !BASEP.includes(o.parent.name); o.receiveShadow = true;
+  o.material = o.material.clone(); const m = o.material; m.userData.c0 = m.color.clone(); m.userData.lum = Math.min(1, (m.color.r + m.color.g + m.color.b) / 3 * (m.map ? 0.7 : 1) * 1.6); m.userData.e0 = m.emissive.clone(); m.userData.p = o.parent.name; MATS.push(m); });
+for (const w of SC.waterParts || []) part[w] && part[w].traverse(o => { if (o.isMesh) { o.castShadow = false; o.material.depthWrite = false; o.renderOrder = 2; Object.assign(o.material, { polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 4 }); } });   // land wins where it meets the water, so shorelines don't flicker
+const FADEM = MATS.filter(m => (SC.fadeParts || []).includes(m.userData.p)); FADEM.forEach(m => { m.transparent = true; m.opacity = 1; });
+let fadeO = 1;
+const W = (x, y, z) => new THREE.Vector3(x * S, y * S, z * S);   // model metres to scene units
+const V = (a, dy = 0) => new THREE.Vector3(a[0], a[1] + dy, a[2]);
+const glowM = (k = 3, extra) => new THREE.MeshBasicMaterial(Object.assign({ color: HERO.clone().multiplyScalar(k), toneMapped: false, transparent: true, opacity: 0, depthWrite: false }, extra));
+
+// ---------- places: where things are, read from the model's own notes (model_info.json) ----------
+// a place can be [x, y, z], {info: key}, {anchor: name, at: 'ctr' | 'top'}, {mid: [anchorA, anchorB]}, {mean: [listKey, [indexes]]} or {fx: effectId}
+const anchorAt = (n, at) => { const a = A[n]; return Array.isArray(a) ? a : (a[at || 'ctr'] || a.ctr); };
+function place(s) {
+  if (Array.isArray(s)) return s;
+  if (s.info) return INFO[s.info];
+  if (s.anchor) return anchorAt(s.anchor, s.at);
+  if (s.mid) { const a = anchorAt(s.mid[0]), b = anchorAt(s.mid[1]); return [(a[0] + b[0]) / 2, 0, (a[2] + b[2]) / 2]; }
+  if (s.mean) { const L = s.mean[1].map(j => INFO[s.mean[0]][j]); return L.reduce((a, p) => [a[0] + p[0] / L.length, 0, a[2] + p[2] / L.length], [0, 0, 0]); }
+  if (s.fx) return FX[s.fx].obj.position.toArray();
+  return [0, 0, 0];
+}
+
+// ---------- effects: the lights that come on when a part is chosen. Each is described in listing.json under "fx" ----------
+const FX = {};
+const MAKE = {
+  // one light above each item of a list, lit one by one (boat docks, cabins, RV sites)
+  dots(c) { const L = INFO[c.list], g = new THREE.SphereGeometry(c.r ?? 1.5, c.seg ?? 12, 8), m = glowM(c.k ?? 4, c.depth ? { depthWrite: true } : null), mesh = new THREE.InstancedMesh(g, m, L.length), m4 = new THREE.Matrix4();
+    L.forEach((p, i) => { m4.makeTranslation(p[0], Math.max(p[1], c.minY ?? 1) + (c.lift ?? 4.5), p[2]); mesh.setMatrixAt(i, m4); }); mesh.frustumCulled = false;
+    return { obj: mesh, mat: m, tick: (t, k) => { m.opacity = k; mesh.count = Math.min(L.length, Math.floor(t * (c.rate ?? 9))); } }; },
+  // a glowing line along a traced outline (a beach, a shoreline)
+  outline(c) { let pts = INFO[c.pts]; if (c.clip != null) pts = pts.filter(p => Math.hypot(p[0], p[1]) < R - c.clip);
+    const v = pts.map(p => c.fmt === 'xzy' ? new THREE.Vector3(p[0], p[2] + (c.lift ?? 0.4), p[1]) : new THREE.Vector3(p[0], c.y ?? 0.9, p[1]));
+    const m = glowM(c.k ?? 3, { depthWrite: true }), mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(v, !!c.closed, 'catmullrom', c.tension ?? 0.2), c.seg ?? 120, c.r ?? 0.7, 6, !!c.closed), m);
+    return { obj: mesh, mat: m }; },
+  // a glowing ring on the ground (a fire pit, a gate)
+  ring(c) { const m = glowM(c.k ?? 4), p = place(c.at), mesh = new THREE.Mesh(new THREE.TorusGeometry(c.r ?? 4.2, c.tube ?? 0.45, 6, c.seg ?? 48), m); mesh.rotation.x = -Math.PI / 2; mesh.position.set(p[0], c.y ?? 1, p[2]);
+    return { obj: mesh, mat: m }; },
+  // a glowing outline round each rectangle of a list (RV pads)
+  rects(c) { const g = new THREE.Group(), m = glowM(c.k ?? 3), L = c.len ?? 18, w = c.wid ?? 5;
+    INFO[c.list].forEach((ct, i) => { const ry = INFO[c.rot][i], pts = [[-w / 2, -L / 2], [w / 2, -L / 2], [w / 2, L / 2], [-w / 2, L / 2]].map(([x, z]) => new THREE.Vector3(x * Math.cos(ry) + z * Math.sin(ry) + ct[0], c.y ?? 0.9, -x * Math.sin(ry) + z * Math.cos(ry) + ct[2]));
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'catmullrom', 0), 24, c.r ?? 0.35, 5, true), m)); });
+    return { obj: g, mat: m }; },
+  // an arrow on the rim of the base pointing off the model (toward a town or a park)
+  rimArrow(c) { const m = glowM(c.k ?? 4), s = new THREE.Shape([new THREE.Vector2(0, 7), new THREE.Vector2(-5, -3), new THREE.Vector2(0, -0.5), new THREE.Vector2(5, -3)]), ag = new THREE.ShapeGeometry(s);
+    ag.rotateX(-Math.PI / 2); ag.rotateY(c.dir > 0 ? -Math.PI / 2 : Math.PI / 2); const a = new THREE.Mesh(ag, m); a.position.set(c.dir * (R - (c.inset ?? 12)), c.y ?? 1.4, place(c.z)[2] * (c.zK ?? 1));
+    return { obj: a, mat: m }; },
+  // arcs of light from each item of one list to the matching item of another (an idea: wagons into the barn)
+  arcs(c) { const g = new THREE.Group(), m = glowM(c.k ?? 2.8), bc = place(c.centre), arcs = [];
+    INFO[c.from].forEach((wp, i) => { const d = INFO[c.to][i]; if (!d) return; const out = new THREE.Vector3(d[0] - bc[0], 0, d[2] - bc[2]).normalize();
+      const p0 = new THREE.Vector3(wp[0], wp[1] + 1, wp[2]), p3 = new THREE.Vector3(d[0] + out.x * 6, 2.5, d[2] + out.z * 6), mid = p0.clone().lerp(p3, 0.5); mid.y = (c.height ?? 34) + i * 3;
+      const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([p0, mid, p3, new THREE.Vector3(d[0], 2.5, d[2])]), 90, 0.55, 6, false), m); g.add(mesh); arcs.push(mesh); });
+    return { obj: g, mat: m, tick: (t) => { m.opacity = 0.7 + 0.3 * Math.sin(t * 3); const f = Math.min(1, t / 1.4);
+      arcs.forEach((a, i) => a.geometry.setDrawRange(0, Math.floor(a.geometry.index.count * Math.min(1, Math.max(0, f * 1.4 - i * 0.08)) / 6) * 6)); } }; },
+  // a 12 month ring round the base: months open now are lit, concept months are dashed in the brand colour
+  season(c) { const g = new THREE.Group(), rr = R + 9, y = 2;
+    const at = (m, r) => { const t = m / 12 * Math.PI * 2; return [Math.sin(t) * r, -Math.cos(t) * r]; };   // January at north, clockwise seen from above
+    const seg = (m0, m1, mat, w = 3.2) => { const n = Math.max(4, Math.round((m1 - m0) * 14)), p = [], ix = [];
+      for (let i = 0; i <= n; i++) { const m = m0 + (m1 - m0) * i / n, [xa, za] = at(m, rr - w / 2), [xb, zb] = at(m, rr + w / 2); p.push(xa, 0, za, xb, 0, zb); if (i < n) { const k = i * 2; ix.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); } }
+      const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); bg.setIndex(ix); const m = new THREE.Mesh(bg, mat); m.position.y = y; g.add(m); };
+    const dark = new THREE.MeshBasicMaterial({ color: 0x8a7f80, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+    const lit = new THREE.MeshBasicMaterial({ color: new THREE.Color(c.lit || '#f2ece9').multiplyScalar(1.6), toneMapped: false, side: THREE.DoubleSide });
+    const idea = new THREE.MeshBasicMaterial({ color: HERO.clone().multiplyScalar(2.6), toneMapped: false, transparent: true, opacity: 1, side: THREE.DoubleSide });
+    for (let mo = 0; mo < 12; mo++) seg(mo + 0.04, mo + 0.96, dark, 2.2);
+    seg(c.now[0], c.now[1], lit, 3.6); for (const [a, b] of c.idea) seg(a, b, idea, 3.6);
+    const L = 'JFMAMJJASOND';
+    for (let mo = 0; mo < 12; mo++) { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.font = `700 44px ${D.font}, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(L[mo], 32, 34);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, color: c.nowMonths.includes(mo) ? 0xffffff : c.ideaMonths.includes(mo) ? 0xff8090 : 0x9a8f8c }));
+      const [lx, lz] = at(mo + 0.5, rr + 13); sp.position.set(lx, y + 3, lz); sp.scale.setScalar(15); g.add(sp); }
+    return { obj: g, mat: idea, tick: (t) => { idea.opacity = 0.65 + 0.35 * Math.sin(t * 3); } }; },
+};
+// ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
+let LIFE = null;
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=90f2001063'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
+for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
+const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
+const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
+const tickFx = (ids, t, k, pulse) => { for (const id of ids || []) { const f = FX[id]; if (f.tick) f.tick(t, k, pulse); else f.mat.opacity = pulse * k; } };
+
+// ---------- camera: start pose and smooth moves ----------
+const HOME = SC.home;
+for (const h of HOT) { const a = h.parts.length ? A[h.parts[0]] : null;
+  if (!h.view) h.view = { at: a.ctr, dist: Math.max((h.near || 60) * 2, a.span * 1.7), el: h.el || 0.6, az: SC.az ?? 0.45 };
+  if (!h.tagAt) h.tagAt = a && !Array.isArray(a) ? (a.top || a.ctr) : h.view.at; }
+const target = new THREE.Vector3(); let anim = null;
+// fit: keep the whole round model (radius R + fit metres) inside the screen width, so a portrait phone sees the full desk model
+function poseOf(v) { const at = W(...place(v.at)); let d = v.dist * S * (camera.aspect < 0.8 ? 1.35 : 1); const ph = Math.PI / 2 - v.el;
+  if (v.fit) { const hh = Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect); d = Math.max(v.dist * S, (R + v.fit) * S / Math.sin(hh) * 1.02); }
+  const p = new THREE.Vector3().setFromSphericalCoords(d, ph, v.az).add(at); return { at, p }; }
+// orbit: swing round the model instead of cutting straight across it (used when turning to face a place that is near)
+function goView(v, dur = 1.1, orbit) { const to = poseOf(v); if (NV.reduced) { controls.target.copy(to.at); camera.position.copy(to.p); anim = null; return; }
+  anim = { t0: performance.now(), dur: dur * 1000, a0: controls.target.clone(), p0: camera.position.clone(), a1: to.at, p1: to.p };
+  if (orbit) { const s0 = new THREE.Spherical().setFromVector3(anim.p0.clone().sub(anim.a0)), s1 = new THREE.Spherical().setFromVector3(to.p.clone().sub(to.at)), d = s1.theta - s0.theta;
+    anim.s0 = s0; anim.s1 = s1; anim.dth = Math.atan2(Math.sin(d), Math.cos(d)); } }
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+  bloom.resolution.set(w / 2, h / 2); }
+addEventListener('resize', resize); resize();
+{ const p = poseOf(HOME); camera.position.copy(p.p); controls.target.copy(p.at); controls.update(); }
+
+// ---------- hotspots ----------
+let sel = null, growOn = false, nearOn = false, glowT = 0;
+const chips = document.getElementById('chips'), card = document.getElementById('card');
+const NEAR = D.near && D.near.items.length ? D.near : null, NEARC = NEAR ? { k: "What's near", h: "What's <em>near</em>", p: NEAR.p, s: NEAR.s } : null;
+if (NEAR) { const b = document.createElement('button'); b.className = 'chip nearc'; b.id = 'nearchip'; b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="currentColor"/></svg>What\u2019s near';
+  b.onclick = () => { stopTour(); if (nearOn) { if (card.style.display === 'none') showCard(NEARC, 'near'); else setNear(false); } else { T('tap', 'near'); setNear(true); } }; chips.appendChild(b); }
+// tap a chip: choose it. Tap the chosen chip again: bring its info back if it was hidden, otherwise let go of it.
+HOT.forEach(h => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = h.chip; b.dataset.id = h.id; b.setAttribute('aria-pressed', 'false');
+  b.onclick = () => { if (sel && sel.id === h.id) { if (card.style.display === 'none') showCard(h); else choose(null); } else choose(h); }; chips.appendChild(b); });
+const mini = document.getElementById('mini'), resetBtn = document.getElementById('reset');
+const bottomBox = document.getElementById('bottom');
+function hideCard() { const c = growOn ? GROW : nearOn ? NEARC : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
+mini.onclick = () => showCard(growOn ? GROW : nearOn ? NEARC : sel, growOn ? 'concept' : nearOn ? 'near' : '');
+function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept === true ? 'concept' : (concept || ''); card.style.display = 'block';
+  { const all = [...HOT, ...(NEARC ? [NEARC] : []), ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
+  { const ck = document.getElementById('ck'), parts = String(c.k).split(' · '); ck.textContent = parts[0]; if (parts.length > 1) { const sm = document.createElement('small'); sm.textContent = parts.slice(1).join(' · '); ck.appendChild(sm); } } document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
+  const cs = document.getElementById('cs'); cs.textContent = c.s;
+  for (const k of c.links || []) { const a = document.createElement('a'); a.href = k.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = k.t; cs.append(' · ', a); }
+  if (c.links && c.links.length && D.checked) cs.append(' · checked ' + D.checked); }
+function resetMats() { MATS.forEach(m => { m.color.copy(m.userData.c0); m.emissive.copy(m.userData.e0); m.emissiveIntensity = 1; }); }
+function choose(h, quiet) {
+  if (h && !quiet) T('tap', h.id);
+  if (!quiet) stopTour();
+  sel = h; stopSpin();
+  chips.querySelectorAll('.chip').forEach(b => { const on = !!h && b.dataset.id === h.id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  if (h && growOn) setGrow(false, true);
+  if (h && nearOn) setNear(false, true);
+  showCard(h); hideFx(); glowT = 0;
+  if (h) showFx(h.fx);
+  goView(h ? h.view : HOME);
+  if (!h) resetMats();
+}
+document.getElementById('cx').onclick = hideCard;   // hide the words, keep the view (Adam, 09-11-2026)
+resetBtn.onclick = () => { T('tap', 'reset'); if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null); };
+const growBtn = document.getElementById('grow');
+function setGrow(on, quiet) { growOn = on; growBtn.classList.toggle('on', on); growBtn.setAttribute('aria-pressed', on); glowT = 0; hideFx();
+  if (on) { if (nearOn) setNear(false, true); sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); showFx(GROW.fx);
+    showCard(GROW, true); stopSpin(); goView(GROW.view); }
+  else { resetMats(); if (!quiet) { showCard(null); goView(HOME); } } }
+growBtn.onclick = () => { stopTour(); if (!growOn) T('tap', 'grow'); setGrow(!growOn); };
+
+// ---------- what's near: sourced places round the rim of the base, one arrow per direction (listing.json "near") ----------
+// Each place has a compass bearing from the property (worked out from its position when the page is built), a drive time or
+// distance, and its source. Places in nearly the same direction share one arrow, so the rim never gets crowded.
+const nlist = document.getElementById('nlist'), nearG = new THREE.Group(); nearG.visible = false; model.add(nearG);
+const NG = [], NROW = []; let nearSel = null, NEARV = null;
+const fmtMin = (m) => m >= 60 ? Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') : m + ' min';
+const nearD = (it) => it.min != null ? fmtMin(it.min) : it.mi + ' mi';
+const COMP = [['N', 'north'], ['NE', 'north-east'], ['E', 'east'], ['SE', 'south-east'], ['S', 'south'], ['SW', 'south-west'], ['W', 'west'], ['NW', 'north-west']];
+const comp = (b) => COMP[Math.round((((b % 360) + 360) % 360) / 45) % 8];
+if (NEAR) {
+  const u = R / 140, rad = (b) => (b - (SC.north || 0)) * Math.PI / 180, far = (it) => it.min != null ? it.min : it.mi * 1.5;
+  const its = NEAR.items.map((it, i) => ({ ...it, i })).sort((a, b) => a.b - b.b), groups = [];
+  for (const it of its) { const g = groups[groups.length - 1]; if (g && it.b - g[g.length - 1].b <= 14) g.push(it); else groups.push([it]); }
+  if (groups.length > 1 && groups[0][0].b + 360 - groups[groups.length - 1].slice(-1)[0].b <= 14) groups[0] = groups.pop().concat(groups[0]);   // north wraps round
+  const shape = new THREE.Shape([new THREE.Vector2(0, 8), new THREE.Vector2(-5.5, -3), new THREE.Vector2(0, -0.5), new THREE.Vector2(5.5, -3)]);
+  for (const g of groups) { const a = Math.atan2(g.reduce((s, it) => s + Math.sin(rad(it.b)), 0), g.reduce((s, it) => s + Math.cos(rad(it.b)), 0));
+    const geo = new THREE.ShapeGeometry(shape); geo.rotateX(-Math.PI / 2); geo.scale(u, 1, u); geo.rotateY(-a);
+    const mat = glowM(4), mesh = new THREE.Mesh(geo, mat), rr = R + 12 * u; mesh.position.set(Math.sin(a) * rr, 1.4, -Math.cos(a) * rr); nearG.add(mesh);
+    const el = document.getElementById('tags').appendChild(Object.assign(document.createElement('div'), { className: 'tag nt' })); el.style.display = 'none';
+    const G = { a, mat, el, items: g.slice().sort((x, y) => far(x) - far(y)), at: new THREE.Vector3(Math.sin(a) * (rr + 4 * u), 7 * u, -Math.cos(a) * (rr + 4 * u)) };
+    el.onclick = () => { stopTour(); const k = G.items.indexOf(nearSel); pickNear(G.items[(k + 1) % G.items.length].i); };   // tap again: the next place that way
+    G.items.forEach(it => { it.g = G; }); NG.push(G); }
+  // the list in the card, nearest first
+  its.sort((x, y) => far(x) - far(y)).forEach(it => { const b = document.createElement('button'); b.className = 'nr'; b.type = 'button'; const c = comp(it.b);
+    const i = document.createElement('i'), n = document.createElement('span'), d = document.createElement('b'), s = document.createElement('small');
+    i.textContent = c[0]; n.textContent = it.n; d.textContent = nearD(it);
+    s.textContent = (it.mi != null && it.min != null ? it.mi + ' miles by road, ' : 'By road, ') + 'to the ' + c[1] + '. Source: ' + it.s;
+    b.append(i, n, d, s); b.onclick = () => { stopTour(); pickNear(it.i); }; nlist.appendChild(b); NROW[it.i] = { it, b }; });
+  NEARV = { at: [0, -50 * u, 0], dist: HOME.dist, el: 0.95, az: HOME.az, fit: 34 * u };
+}
+// choose one place: the model swings round so that place comes to the front, just above the card (on a wide screen the card sits over the front, so it goes to the back)
+function pickNear(i) { const row = NROW[i]; if (!row) return; const same = nearSel === row.it; nearSel = same ? null : row.it;
+  NROW.forEach(r => r && r.b.classList.toggle('on', r.it === nearSel)); controls.autoRotate = false;
+  if (nearSel) { T('tap', 'near ' + nearSel.n); if (card.style.display !== 'none') row.b.scrollIntoView({ block: 'nearest' }); goView({ ...NEARV, az: innerWidth < 760 ? Math.PI - nearSel.g.a : -nearSel.g.a }, 1.2, true); } }
+function setNear(on, quiet) { if (!NEAR) return; nearOn = on; nearSel = null; nearG.visible = on; glowT = 0;
+  const nc = document.getElementById('nearchip'); NROW.forEach(r => r && r.b.classList.remove('on'));
+  if (on) { if (growOn) setGrow(false, true); sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); hideFx();
+    nc.classList.add('on'); nc.setAttribute('aria-pressed', 'true'); showCard(NEARC, 'near'); nlist.scrollTop = 0; stopSpin(); goView(NEARV); controls.autoRotate = !NV.reduced; controls.autoRotateSpeed = 0.35; }
+  else { nc.classList.remove('on'); nc.setAttribute('aria-pressed', 'false'); NG.forEach(g => { g.el.style.display = 'none'; }); controls.autoRotateSpeed = 0.55; if (!quiet) { showCard(null); goView(HOME); } } }
+const nearV = new THREE.Vector3();
+function tickNear(t) { const pulse = NV.reduced ? 1 : 0.8 + 0.2 * Math.sin(t * 3), k = Math.min(1, t / 0.5), placed = [];
+  // the chosen direction is placed first, so it keeps its spot and the others step out of its way
+  for (const g of NG.slice().sort((x, y) => (nearSel && nearSel.g === y) - (nearSel && nearSel.g === x))) { const mine = nearSel && nearSel.g === g, it = mine ? nearSel : g.items[0];
+    g.mat.opacity = k * (mine ? 1 : nearSel ? 0.3 : pulse);
+    nearV.copy(g.at); model.localToWorld(nearV); nearV.project(camera); const el = g.el;
+    if (nearV.z > 1) { el.style.display = 'none'; continue; }
+    const c = comp(g.a * 180 / Math.PI + (SC.north || 0))[1], text = mine || g.items.length === 1 ? (it.t || it.n) + ' · ' + nearD(it) : c[0].toUpperCase() + c.slice(1) + ' · ' + g.items.length + ' places'; if (el.textContent !== text) el.textContent = text;
+    el.className = 'tag nt' + (mine ? ' on' : nearSel ? ' off' : ''); el.style.display = 'block';
+    const hw = el.offsetWidth / 2 + 8, x = Math.min(innerWidth - hw, Math.max(hw, (nearV.x * 0.5 + 0.5) * innerWidth)), h = el.offsetHeight + 6;
+    let y = Math.max(h + (innerWidth < 760 ? 150 : 70), (-nearV.y * 0.5 + 0.5) * innerHeight - 8);   // stay below the header and its buttons
+    for (let n = 0; n < 6 && placed.some(q => Math.abs(q.x - x) < q.hw + hw - 10 && Math.abs(q.y - y) < h); n++) y += h;   // two labels never sit on top of each other
+    placed.push({ x, y, hw }); el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`; } }
+
+// ---------- guided tour: flies round the property and stops on each fact, in the film's order ----------
+const tourBtn = document.getElementById('tourbtn'), tourBar = document.getElementById('tourbar');
+const STOPS = [...HOT, ...(NEAR ? ['near'] : []), ...(GROW ? ['grow'] : [])], STOP_S = 6.5;
+// go to one stop: a fact, What's near, or Room to grow
+function goStop(s, quiet) {
+  if (s === 'grow') { if (!quiet) T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); }
+  else if (s === 'near') { if (!quiet) T('tap', 'near'); if (sel) choose(null, true); setNear(true); }
+  else choose(s, quiet); }
+let tour = null;   // { i, t } while playing
+function tourGo(i) { tour.i = i; tour.t = 0; goStop(STOPS[i], true); }
+function startTour(how) { if (tour) return; T('tour', how); tour = { i: 0, t: 0 }; tourBtn.classList.add('on'); tourBtn.setAttribute('aria-pressed', 'true'); tourBtn.lastElementChild.textContent = 'Stop'; tourGo(0); }
+function stopTour(finished) { if (!tour) return; tour = null; tourBtn.classList.remove('on'); tourBtn.setAttribute('aria-pressed', 'false'); tourBtn.lastElementChild.textContent = 'Tour'; tourBar.style.width = '0';
+  if (finished) { if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null, true); controls.autoRotate = !NV.reduced; } }
+function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (tour.i + Math.min(1, tour.t / STOP_S)) / STOPS.length) + '%';
+  if (tour.t >= STOP_S) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
+tourBtn.onclick = () => { if (tour) stopTour(); else startTour('tap'); };
+// arrows on the card: step to the next or previous fact (Room to grow is the last one)
+function step(d) { stopTour(); const n = STOPS.length, i = growOn ? STOPS.indexOf('grow') : nearOn ? STOPS.indexOf('near') : HOT.indexOf(sel); goStop(STOPS[((i < 0 ? 0 : i + d) + n) % n]); }
+document.getElementById('cprev').onclick = () => step(-1); document.getElementById('cnext').onclick = () => step(1);
+
+// ---------- share: each share gets its own code, so a forwarded view is not mistaken for the first person ----------
+const toastEl = document.getElementById('toast'); let toastT = 0;
+function toast(m) { toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2600); }
+async function shareUrl() { const u = new URL(location.href); u.search = ''; u.hash = '';
+  try { const r = await Promise.race([fetch(NV.api + '_share', { method: 'POST', body: JSON.stringify({ l: NV.id, r: NV.rcpt }) }).then(x => x.json()), new Promise((_, no) => setTimeout(no, 2500))]); if (r && r.c) u.searchParams.set('r', r.c); } catch (e) {}
+  return u.toString(); }
+async function copyText(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { const i = document.createElement('input'); i.value = t; document.body.appendChild(i); i.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} i.remove(); return ok; } }
+document.getElementById('sharebtn').onclick = async () => { stopTour(); const url = await shareUrl();
+  if (navigator.share && mobile) { try { await navigator.share({ title: document.title, url }); T('share', 'sheet'); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  if (await copyText(url)) { T('share', 'copied'); toast('Link copied. Paste it into an email or message.'); } else prompt('Copy this link', url); };
+
+// ---------- ask about this listing ----------
+const $ = (id) => document.getElementById(id), F = { name: $('qn'), email: $('qe'), phone: $('qp'), msg: $('qm'), role: $('qr') };
+const ask = document.getElementById('ask'), askf = document.getElementById('askf'), askst = document.getElementById('askst'), askgo = document.getElementById('askgo'), askNote = askst.textContent;
+document.getElementById('askbtn').onclick = () => { stopTour(); T('tap', 'ask'); ask.style.display = 'flex'; if (sel && !F.msg.value) F.msg.placeholder = 'About ' + sel.k.toLowerCase() + '…'; setTimeout(() => F.name.focus(), 50); };
+const closeAsk = () => { ask.style.display = 'none'; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); };
+document.getElementById('askno').onclick = closeAsk; document.getElementById('askx').onclick = closeAsk;
+ask.addEventListener('pointerdown', (e) => { if (e.target === ask) closeAsk(); });
+{ const ac = document.getElementById('arcard'); ac.addEventListener('pointerdown', (e) => { if (e.target === ac) ac.style.display = 'none'; }); }
+// Where a question goes: if the listing has the broker's email (or WhatsApp), the visitor's own email app (or WhatsApp) opens with the
+// question written and addressed to the broker, so it arrives from the buyer, straight to the broker. We only note that it happened.
+// With no contact on file, the question is saved for us to pass on.
+const CT = D.contact || {}, DIRECT = !!(CT.email || CT.whatsapp);
+if (DIRECT) { $('qown').style.display = 'none'; askgo.textContent = CT.email ? 'Open my email to send it' : 'Send on WhatsApp'; if (CT.email && CT.whatsapp) $('askwa').style.display = 'block'; }
+function question() { const q = { l: NV.id, r: NV.rcpt, name: F.name.value.trim(), email: F.email.value.trim(), phone: F.phone.value.trim(), role: F.role.value, msg: F.msg.value.trim(), website: askf.querySelector('.hp').value };
+  const okMail = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(q.email);
+  if (q.name.length < 2 || q.msg.length < 5 || (!DIRECT && !okMail)) { askst.textContent = DIRECT ? 'Please add your name and your question.' : 'Please add your name, a working email and your question.'; askst.style.color = 'var(--hero)'; return null; }
+  return q; }
+const ROLE = { buyer: 'a buyer', seller: 'a business owner', agent: 'a broker or agent', other: '' };
+function letter(q) { return `${q.msg}\n\n${q.name}${ROLE[q.role] ? ' (' + ROLE[q.role] + ')' : ''}\n\nSent from the 3D viewer of ${D.name}: ${location.origin + location.pathname}`; }
+function sentDirect(q, via) { fetch(NV.api + '_enquiry', { method: 'POST', keepalive: true, body: JSON.stringify({ ...q, via }) }).catch(() => {}); T('enquiry', q.role + ' ' + via);
+  askst.style.color = ''; askst.textContent = askNote; closeAsk(); toast(via === 'email' ? 'Your email app has it ready. Press send there.' : 'WhatsApp has it ready. Press send there.'); }
+$('askwa').onclick = () => { const q = question(); if (!q) return; sentDirect(q, 'whatsapp'); window.open('https://wa.me/' + String(CT.whatsapp).replace(/\D/g, '') + '?text=' + encodeURIComponent(letter(q)), '_blank', 'noopener'); };
+askf.onsubmit = async (e) => { e.preventDefault(); const q = question(); if (!q) return;
+  if (DIRECT && !CT.email) { $('askwa').onclick(); return; }
+  if (DIRECT) { sentDirect(q, 'email'); location.href = 'mailto:' + CT.email + '?subject=' + encodeURIComponent('Question about ' + D.name) + '&body=' + encodeURIComponent(letter(q)); return; }
+  askgo.disabled = true; askst.style.color = ''; askst.textContent = 'Sending…';
+  try { const r = await fetch(NV.api + '_enquiry', { method: 'POST', body: JSON.stringify(q) }).then(x => x.json());
+    if (!r.ok) throw new Error(r.why || 'not sent');
+    T('enquiry', q.role); askf.reset(); closeAsk(); askst.textContent = askNote; toast('Sent. Thank you, you will hear back by email.');
+  } catch (err) { askst.textContent = 'Sorry, that did not send. Please try again in a moment.'; askst.style.color = 'var(--hero)'; }
+  askgo.disabled = false; };
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); if (ask.style.display === 'flex') ask.style.display = 'none'; else if (arcard.style.display === 'flex') arcard.style.display = 'none'; else if (card.style.display === 'block') hideCard(); else if (growOn) setGrow(false); else if (nearOn) setNear(false); else if (sel) choose(null); } });
+
+// ---------- spin hint ----------
+const hint = document.getElementById('hint');
+function stopSpin() { controls.autoRotate = false; hint.style.opacity = 0; }
+canvas.addEventListener('pointerdown', () => { stopTour(); stopSpin(); anim = null; });
+controls.addEventListener('start', () => { resetBtn.hidden = false; });
+// double-tap or double-click: fly in to that spot on the plate
+{ const rc = new THREE.Raycaster(), ndc = new THREE.Vector2(), hitM = []; BASEP.forEach(n => part[n] && part[n].traverse(o => { if (o.isMesh && n !== 'plinth') hitM.push(o); }));
+  let lastT = 0, lastP = [0, 0], downP = [0, 0];
+  const flyTo = (x, y) => { const r = canvas.getBoundingClientRect(); ndc.set((x - r.left) / r.width * 2 - 1, -((y - r.top) / r.height) * 2 + 1); rc.setFromCamera(ndc, camera);
+    const h = rc.intersectObjects(hitM, false)[0]; if (!h) return; const off = camera.position.clone().sub(controls.target); off.setLength(Math.max(controls.minDistance * 1.5, off.length() * 0.45));
+    stopTour(); stopSpin(); resetBtn.hidden = false; T('tap', 'fly');
+    if (NV.reduced) { controls.target.copy(h.point); camera.position.copy(h.point).add(off); return; }
+    anim = { t0: performance.now(), dur: 900, a0: controls.target.clone(), p0: camera.position.clone(), a1: h.point.clone(), p1: h.point.clone().add(off) }; };
+  canvas.addEventListener('pointerdown', (e) => { if (e.isPrimary) downP = [e.clientX, e.clientY]; });
+  canvas.addEventListener('pointerup', (e) => { if (!e.isPrimary || Math.hypot(e.clientX - downP[0], e.clientY - downP[1]) > 10) return; const now = performance.now();
+    if (now - lastT < 350 && Math.hypot(e.clientX - lastP[0], e.clientY - lastP[1]) < 40) { lastT = 0; flyTo(e.clientX, e.clientY); } else { lastT = now; lastP = [e.clientX, e.clientY]; } }); }
+// trackpad: two fingers move the plate (like a phone), pinch zooms; a mouse wheel still zooms
+{ // the browser doesn't say which device sent a scroll, so judge each gesture once, at its start (the Mapbox method)
+  let last = 0, pad = false; const log = window.__wheelLog = [];
+  const judge = (e) => { const dy = Math.abs(e.deltaY), dx = Math.abs(e.deltaX);
+    if (e.deltaMode !== 0) return false;                                        // lines or pages: a mouse wheel (Firefox)
+    if (dy && Math.abs(dy / 4.000244140625 - Math.round(dy / 4.000244140625)) < 1e-6) return false;   // Mac mouse wheel: exact steps of 4.000244
+    if (Number.isInteger(dy) && dy >= 50 && !dx) return false;                  // Windows mouse wheel: 100 or 120 a notch
+    return true; };                                                             // smooth, uneven amounts: a trackpad
+  canvas.parentElement.addEventListener('wheel', (e) => { if (e.target !== canvas || !controls.enabled) return;
+    const now = performance.now(); if (log.length < 60) log.push([+e.deltaX.toFixed(3), +e.deltaY.toFixed(3), e.deltaMode, e.ctrlKey ? 1 : 0]);
+    if (e.ctrlKey) { last = now; return; }                                      // pinch: the browser sends it as zoom
+    if (now - last > 250) pad = judge(e); else if (!pad && Math.abs(e.deltaX) > 0.5) pad = true;
+    last = now; if (!pad) return;                                               // mouse wheel: let the zoom handle it
+    e.preventDefault(); e.stopPropagation(); stopTour(); stopSpin(); anim = null; resetBtn.hidden = false;
+    controls._pan(-e.deltaX, -e.deltaY); }, { capture: true, passive: false }); }
+// keep the middle of the view on the plate, so it can never be lost off the edge
+const keepOnPlate = () => { const t = controls.target, lim = R * S * 0.95, r = Math.hypot(t.x, t.z); let dx = 0, dy = 0, dz = 0;
+  if (r > lim) { dx = t.x * (lim / r - 1); dz = t.z * (lim / r - 1); } const ty = Math.min(0.03, Math.max(-0.01, t.y)); dy = ty - t.y;
+  if (dx || dy || dz) { t.x += dx; t.y += dy; t.z += dz; camera.position.x += dx; camera.position.y += dy; camera.position.z += dz; } };
+
+// ---------- AR ----------
+const mv = document.getElementById('mv'), arcard = document.getElementById('arcard'), arst = document.getElementById('arst'), argo = document.getElementById('argo');
+const arcopy = document.getElementById('arcopy');
+arcopy.onclick = async () => { const u = new URL(location.href); if (await copyText(u.toString())) { arcopy.textContent = 'Copied. Now paste it into Safari or Chrome'; T('share', 'copied for ar'); } };
+document.getElementById('ar').onclick = () => { stopTour(); arcard.style.display = 'flex';
+  T('ar-button', mobile ? 'phone' : 'computer');
+  if (!mobile) { const a = document.getElementById('arqr'); a.style.display = 'block'; NV.qr(a); arst.textContent = 'Scan this with your phone camera. The model opens on your phone, then tap View on your desk.'; argo.style.display = 'none'; }
+  else { arst.textContent = NV.inapp ? 'You are inside an app\'s own browser, where the camera view often cannot start. If it does not, copy the link and open it in Safari (iPhone) or Chrome (Android).' : ''; arcopy.style.display = NV.inapp ? 'block' : 'none'; argo.disabled = false; } };
+argo.onclick = async () => {
+  T('ar-launch'); if (mv.canActivateAR) { mv.activateAR(); return; }
+  arst.textContent = 'Getting the model ready…'; argo.disabled = true;
+  mv.loading = 'eager'; await mv.updateComplete; await new Promise(r => setTimeout(r, 400));
+  argo.disabled = false;
+  if (mv.canActivateAR) { arst.textContent = ''; mv.activateAR(); } else arst.textContent = "This phone can't place it in your room, but the 3D view here works. On Android, Google Play Services for AR is needed.";
+};
+document.getElementById('arno').onclick = () => { arcard.style.display = 'none'; };
+if (mobile) { mv.loading = 'eager'; }
+
+// ---------- floating labels ----------
+const tagBox = document.getElementById('tags'); const TAGS = [];
+const tagEl = (i) => TAGS[i] || (TAGS[i] = tagBox.appendChild(Object.assign(document.createElement('div'), { className: 'tag' })));
+const tmpV = new THREE.Vector3();
+function tagAt(i, v, text, concept) { const el = tagEl(i); tmpV.copy(v); model.localToWorld(tmpV); tmpV.project(camera);
+  if (tmpV.z > 1) { el.style.display = 'none'; return; }
+  el.textContent = text; el.className = 'tag' + (concept ? ' c' : ''); el.style.display = 'block';
+  const hw = el.offsetWidth / 2 + 8, x = Math.min(innerWidth - hw, Math.max(hw, (tmpV.x * 0.5 + 0.5) * innerWidth));
+  el.style.transform = `translate(${x}px, ${(-tmpV.y * 0.5 + 0.5) * innerHeight - 8}px) translate(-50%, -100%)`; }
+function hideTags(from = 0) { TAGS.slice(from).forEach(t => t.style.display = 'none'); }
+function showTags(list, concept) { list.forEach((t, i) => tagAt(i, V(place(t.at), t.dy ?? 0), t.text, concept)); hideTags(list.length); }
+
+// ---------- loop ----------
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const bottomEl = document.getElementById('bottom'); let lift = 0, baseH = 0, lw = 0, lh = 0;
+function liftView(dt) { if (!baseH && card.style.display !== 'block' && mini.hidden) baseH = bottomEl.offsetHeight;
+  const want = innerWidth < 760 && baseH ? Math.max(0, (bottomEl.offsetHeight - baseH) / 2) : 0;
+  if (lift === want && lw === innerWidth && lh === innerHeight) return; lw = innerWidth; lh = innerHeight; lift = NV.reduced ? want : lift + (want - lift) * Math.min(1, dt * 6); if (Math.abs(want - lift) < 0.5) lift = want;
+  if (lift) camera.setViewOffset(innerWidth, innerHeight, 0, lift, innerWidth, innerHeight); else camera.clearViewOffset(); }
+const G = SC.glow;
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (anim) { const k = Math.min(1, (now - anim.t0) / anim.dur), e = ease(k); controls.target.lerpVectors(anim.a0, anim.a1, e);
+    if (anim.s0) camera.position.setFromSphericalCoords(anim.s0.radius + (anim.s1.radius - anim.s0.radius) * e, anim.s0.phi + (anim.s1.phi - anim.s0.phi) * e, anim.s0.theta + anim.dth * e).add(controls.target);
+    else camera.position.lerpVectors(anim.p0, anim.p1, e);
+    if (k >= 1) anim = null; }
+  controls.update(); keepOnPlate(); liftView(dt); tickTour(dt);
+  if (LIFE) LIFE.tick(dt, { sel, growOn });
+  if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
+  if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
+    const k = Math.min(1, glowT / 0.6);
+    MATS.forEach(m => { const on = sel.parts.includes(m.userData.p), base = BASEP.includes(m.userData.p);
+      if (on) { m.color.copy(m.userData.c0); if (G.lerp) m.color.lerp(HERO, G.lerp * k); m.emissive.copy(HERO); m.emissiveIntensity = (sel.glow ?? (G.base + G.gain * (1 - G.lumk * m.userData.lum))) * pulse * k; }
+      else { m.color.copy(m.userData.c0).multiplyScalar(1 - (base ? 0.25 : 0.45) * k); m.emissive.copy(m.userData.e0); } });
+    tickFx(sel.fx, glowT, k, pulse);
+    showTags(sel.tags || [{ at: sel.tagAt, dy: sel.dy ?? SC.tagDy ?? 8, text: sel.tag }]);
+  } else if (growOn) { glowT += dt; const pulse = NV.reduced ? 1 : 0.7 + 0.3 * Math.sin(glowT * 3);
+    tickFx(GROW.fx, glowT, 1, pulse);
+    if (GROW.glowParts) MATS.forEach(m => { if (GROW.glowParts.includes(m.userData.p)) { m.emissive.copy(HERO); m.emissiveIntensity = 0.5 * (1 - 0.7 * m.userData.lum) * pulse; } });
+    showTags([GROW.tag], true);
+  } else { hideTags(0); if (nearOn) { glowT += dt; tickNear(glowT); } }
+  composer.render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 600);
+hint.textContent = mobile ? 'Drag to spin · two fingers to move and zoom · double-tap to fly in' : 'Drag to spin · two fingers or right-drag to move · pinch or scroll to zoom';
+setTimeout(() => { hint.style.opacity = 0; }, 8000);
+window.__ready = true; window.__cam = () => [controls.target.x, controls.target.z, camera.position.distanceTo(controls.target)]; NV.loaded(); window.__tour = startTour;
+// the tour never starts by itself: it plays only when the Tour button is pressed (Adam, 09-11-2026)
+if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
+// ---------- works with no signal: once opened, this listing is saved on the device (see engine/sw.js) ----------
+if ('serviceWorker' in navigator && !NV.qs.has('nosw')) {
+  navigator.serviceWorker.addEventListener('message', (e) => { if (!e.data || !e.data.nvSaved) return; window.__saved = e.data.nvSaved;
+    let told = true; try { told = localStorage.getItem('nvsaved:' + NV.id) === '1'; localStorage.setItem('nvsaved:' + NV.id, '1'); } catch (err) {}
+    if (NV.app && !told) toast('Saved on this device. It now opens with no signal.'); });
+  navigator.serviceWorker.register('sw.js', { scope: './' }).then(() => navigator.serviceWorker.ready).then((reg) => {
+    const save = () => { const list = [location.href, ...performance.getEntriesByType('resource').map(x => x.name)].filter(u => u.startsWith(location.origin + '/'));
+      if (reg.active) reg.active.postMessage({ cache: [...new Set(list)], page: location.href }); };
+    save(); setTimeout(save, 15000); }).catch(() => {});
+}
+window.__choose = (id) => choose(HOT.find(h => h.id === id) || null); window.__grow = setGrow; window.__near = (on, i) => { setNear(on); if (on && i != null) pickNear(i); };
+</script>
+</body>
+</html>

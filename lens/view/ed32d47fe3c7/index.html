@@ -401,7 +401,7 @@ const MAKE = {
 };
 // ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
 let LIFE = null;
-if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=27e70a3139'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=90f2001063'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
 for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
 const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
 const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
