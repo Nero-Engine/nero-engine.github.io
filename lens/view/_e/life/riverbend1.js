@@ -15,6 +15,8 @@ export async function init(X) {
   // cabins join the site list before life1 builds Find your site (numbers only there; letters are swapped in on the way through, below)
   const CAB = INFO.cabinsWF || [], cab0 = (INFO.pads || []).length;
   if (INFO.pads && SC.wayfind) CAB.forEach((c, k) => { INFO.pads.push(c.at); INFO.padRot.push(c.rot); INFO.padNo.push(9001 + k); });
+  const L0 = INFO.life || {}, DEER = L0.bear || null, CAMPER = (L0.still || [])[0] || null;
+  if (DEER) { delete L0.bear; if (CAMPER) L0.still = L0.still.slice(1); }
   const base = await (await import('./life1.js' + (v ? '?v=' + v : ''))).init(X);
   const { model, part, MATS, D, camera, glowM, NV } = X;
   const reduced = !!NV.reduced, R = INFO.R, HERO = new THREE.Color(D.theme.hero);
@@ -60,10 +62,11 @@ export async function init(X) {
       sh.vertexShader = 'varying vec2 vWxz;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vWxz = transformed.xz;');
       sh.fragmentShader = 'uniform float uWT;\nvarying vec2 vWxz;\n' + sh.fragmentShader
         .replace('#include <color_fragment>', `#include <color_fragment>
-  { float h = wN(vWxz * 0.08 + vec2(uWT * 0.03, 0.0)); diffuseColor.rgb *= 0.88 + 0.2 * h; }`)
+  { float h = wN(vWxz * 0.08 + vec2(uWT * 0.12, uWT * 0.05)); float sw = wN(vWxz * 0.025 + vec2(uWT * 0.05, -uWT * 0.03)); diffuseColor.rgb *= 0.82 + 0.2 * h + 0.14 * sw; }`)
         .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
   { vec2 p = vWxz; float t = uWT, e = 0.15, fw = length(fwidth(p));
-    vec2 g = wGrad(p * 0.22 + vec2(t * 0.08, t * 0.03), e) * 0.22;
+    vec2 g = wGrad(p * 0.035 + vec2(t * 0.06, -t * 0.04), e) * 0.035 * 2.2;
+    g += wGrad(p * 0.22 + vec2(t * 0.16, t * 0.06), e) * 0.22;
     g += wGrad(p * 0.55 + vec2(-t * 0.09, t * 0.11), e) * 0.55 * clamp(1.6 - fw * 1.2, 0.0, 1.0);
     g += wGrad(p * 1.40 + vec2(t * 0.2, -t * 0.12), e) * 1.40 * 0.45 * clamp(1.4 - fw * 3.0, 0.0, 1.0);
     g += wGrad(p * 3.20 + vec2(-t * 0.25, -t * 0.3), e) * 3.20 * 0.18 * clamp(1.2 - fw * 7.0, 0.0, 1.0);
@@ -73,7 +76,72 @@ float wN(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(wH(i), wH(i + vec2(1.0, 0.0)), f.x), mix(wH(i + vec2(0.0, 1.0)), wH(i + vec2(1.0, 1.0)), f.x), f.y); }
 vec2 wGrad(vec2 p, float e) { float c = wN(p); return vec2(wN(p + vec2(e, 0.0)) - c, wN(p + vec2(0.0, e)) - c) / e; }
 void main() {`); };
-    m.customProgramCacheKey = () => 'riverbendWater1'; m.needsUpdate = true; });
+    m.customProgramCacheKey = () => 'riverbendWater2'; m.needsUpdate = true; });
+
+  // RV roofs and white sides: the sun sheen was too bright (Adam, 11-11-2026: "needs to come down like 20%")
+  MATS.forEach(m => { if (m.userData.p !== 'rvs') return; const l = (m.color.r + m.color.g + m.color.b) / 3; if (l < 0.6 && !m.map) return;
+    m.color.multiplyScalar(0.84); if (m.userData.c0) m.userData.c0.copy(m.color); m.roughness = Math.max(m.roughness, 0.45); m.envMapIntensity = (m.envMapIntensity ?? 1) * 0.8; if (m.userData.lum) m.userData.lum *= 0.84; });
+
+  // ---------- the funny touch: the deer eats the camper's pancakes (Adam, 11-11-2026: faces the table, head down, the stack goes; the camper turns and jumps) ----------
+  const DV = { c: 0, on: false };
+  if (DEER && part.proto_bear_body && part.proto_bear_head && part.proto_bear_leg && INFO.deer) try {
+    const PY = (INFO.protoAt || [0, -8, 0])[1], Y = DEER.y ?? 0.2;
+    const kid = (name) => { const g = new THREE.Group(), inner = part[name].clone(true); inner.visible = true; inner.position.set(0, -PY, 0); g.add(inner); return g; };
+    const deer = new THREE.Group(), body = kid('proto_bear_body'), head = kid('proto_bear_head'); deer.add(body); head.position.set(0, 0.92, 0.78); deer.add(head);
+    const HIPS = [[0.19, -0.5, 0], [0.19, 0.48, 0.25], [-0.19, -0.5, 0.5], [-0.19, 0.48, 0.75]];
+    const legs = HIPS.map(([x, z]) => { const l = kid('proto_bear_leg'); l.position.set(x, 0.62, z); deer.add(l); return l; });
+    deer.traverse(o => { if (o.isMesh) o.castShadow = true; }); root.add(deer);
+    // the pancakes: five on the plate, eaten from the top
+    const cakeM = new THREE.MeshStandardMaterial({ color: '#d9a35a', roughness: 0.7 }), syrupM = new THREE.MeshStandardMaterial({ color: '#7a3d12', roughness: 0.3 });
+    const P = INFO.deer.plate, cakes = [];
+    for (let i = 0; i < 5; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 16), i === 4 ? syrupM : cakeM); m.position.set(P[0], P[1] + 0.016 + i * 0.03, P[2]); root.add(m); cakes.push(m); }
+    // the camper (yellow shirt), back to the table, coffee in hand
+    let camper = null, cry0 = 0, cAt = null;
+    if (CAMPER && part.proto_person) { camper = kid('proto_person'); camper.traverse(o => { if (o.isMesh && o.material.name === 'shirt') { o.material = o.material.clone(); o.material.color.set(CAMPER.shirt || '#f2c230'); } });
+      cAt = new THREE.Vector3(CAMPER.at[0], CAMPER.y ?? Y, CAMPER.at[1]); { const tb = new THREE.Vector3(INFO.deerTable[0], cAt.y, INFO.deerTable[1]); cAt.sub(tb).setLength(3.0).add(tb); }   /* close enough to share the shot */ camper.position.copy(cAt); cry0 = CAMPER.ry || 0; camper.rotation.y = cry0; root.add(camper); }
+    // the path (model metres): the first stopD metres come from the trees to the table, the rest goes back
+    const pts = DEER.path.map(([x, z]) => new THREE.Vector3(x, 0, z)), cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + pts[i].distanceTo(pts[i - 1]));
+    const LEN = cum[cum.length - 1], STOP = DEER.stopD, o = new THREE.Vector3();
+    const at = (d) => { d = cl(d, 0, LEN); let i = 1; while (i < cum.length - 1 && cum[i] < d) i++; const f = (d - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1); o.lerpVectors(pts[i - 1], pts[i], f); return Math.atan2(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z); };
+    at(STOP); const stopP = o.clone(), T = new THREE.Vector3(INFO.deerTable[0], 0, INFO.deerTable[1]), faceT = Math.atan2(T.x - stopP.x, T.z - stopP.z);
+    const faceCam = cAt ? Math.atan2(T.x - cAt.x, T.z - cAt.z) : cry0;
+    // one loop, seconds: walk in, turn to the table, eat (the stack goes), the camper turns round and jumps, the deer looks up and bolts, the camper stares, a fresh stack
+    const WALK = 15, EAT0 = 15.6, EAT1 = 24, TURN_C = 20.5, LOOK = 24, BOLT = 25, PERIOD = 36, VW = STOP / WALK, VB = 3.2;
+    const angTo = (a, b, k) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * k; };
+    let h = at(0), ph = 0, pitch = 0.15, yaw = 0;
+    // the close-up: low, from the lane side, the table a little above the middle of the screen (the fact card covers the bottom)
+    DV.view = () => { const ou = INFO.deer.out, la = 0.75, lb = -0.66, az = Math.atan2(la * Math.cos(ou) - lb * Math.sin(ou), la * Math.sin(ou) + lb * Math.cos(ou)), ph = innerWidth < 760 ? 1.0 : 1.6;
+      const mx = cAt ? (T.x * 0.65 + cAt.x * 0.35) : T.x, mz = cAt ? (T.z * 0.65 + cAt.z * 0.35) : T.z;
+      return { at: [mx + Math.sin(az) * ph, 0.5, mz + Math.cos(az) * ph], dist: innerWidth < 760 ? 9 : 11, el: 0.55, az }; };
+    DV.on = true; DV.table = T; DV.face = faceT; DV.set = (c) => { DV.c = c; };
+    DV.tick = (dt, t) => { DV.c = (DV.c + dt) % PERIOD; const c = reduced ? EAT0 + 4 : DV.c; let d, want, moving = 0, wp = 0.15, wy = 0;
+      if (c < WALK) { d = c * VW; want = at(d + 0.6); moving = VW; }
+      else if (c < BOLT) { d = STOP; want = faceT; at(STOP);
+        if (c >= EAT0 && c < EAT1) { wp = 0.62 + 0.05 * Math.sin(t * 9); wy = 0.08 * Math.sin(t * 1.3); }
+        else if (c >= LOOK) { wp = -0.15; wy = cAt ? angTo(0, Math.atan2(cAt.x - stopP.x, cAt.z - stopP.z) - h, 1) * 0.8 : 0; } }
+      else { d = STOP + Math.min(LEN - STOP, (c - BOLT) * VB); want = at(d + 0.8); moving = d < LEN - 0.05 ? VB : 0; }
+      at(d); h = angTo(h, want, Math.min(1, (c >= WALK && c < BOLT ? 4 : 6) * dt));
+      ph += moving * dt / 1.3; const sw = moving > 2 ? 0.55 : 0.35;
+      deer.position.set(o.x, Y + (moving ? 0.02 * Math.abs(Math.sin(ph * Math.PI * 2)) : 0), o.z); deer.rotation.y = h;
+      legs.forEach((l, i) => { l.rotation.x = moving ? sw * Math.sin(2 * Math.PI * (ph + HIPS[i][2])) : 0; });
+      pitch += (wp - pitch) * Math.min(1, 6 * dt); yaw += (wy - yaw) * Math.min(1, 6 * dt); head.rotation.set(pitch, yaw, 0, 'YXZ');
+      // the stack: full until she starts, one pancake every 1.5 s, back (a fresh breakfast) once she has gone and the camper has turned away
+      const eaten = c < EAT0 + 0.8 ? 0 : c < BOLT ? Math.min(5, Math.floor((c - EAT0 - 0.8) / 1.5) + 1) : (c > PERIOD - 1.2 ? 0 : 5);
+      cakes.forEach((m, i) => { m.visible = i < 5 - eaten; });
+      if (camper) { let ry = cry0, y = cAt.y, rz = 0;
+        if (c > TURN_C && c < PERIOD - 3) { const k = sm((c - TURN_C) / 0.45); ry = angTo(cry0, faceCam, k); }
+        else if (c >= PERIOD - 3) ry = angTo(faceCam, cry0, sm((c - (PERIOD - 3)) / 0.8));
+        if (c > TURN_C + 0.6 && c < TURN_C + 1.8) { const u = (c - TURN_C - 0.6) / 1.2; y += 0.4 * Math.abs(Math.sin(u * Math.PI * 2)); rz = 0.12 * Math.sin(u * Math.PI * 6); }
+        camper.position.y = y; camper.rotation.set(0, ry, rz, 'YXZ'); } };
+    DV.c = 2;
+  } catch (err) { console.warn('deer', err); }
+  // the tour stops on it once: on the 'Open all year' stop, glide in close while she eats (Adam: "most people won't be looking for it")
+  let tourSel = null, tourSelT = 0, tourDone = false;
+  function tourTick(dt, state) { const tb = document.getElementById('tourbtn'), touring = !!(tb && tb.classList.contains('on'));
+    if (!touring) { tourDone = false; tourSel = null; return; }
+    const id = state.sel && state.sel.id; if (id !== tourSel) { tourSel = id; tourSelT = 0; } tourSelT += dt;
+    if (id === 'year' && !tourDone && tourSelT > 2.4 && DV.on) { tourDone = true; DV.set(12); X.goView(DV.view(), 2.2); } }
+  window.__deer = { get c() { return DV.c; }, set: (c) => DV.set && DV.set(c), look: () => DV.view && X.goView(DV.view(), 0.01) };
 
   // the big shops' flat roofs read as white blocks under the bloom: a calmer grey
   MATS.forEach(m => { if (m.name === 'flat_roof' || m.name === 'shop_wall') { m.color.set(m.name === 'flat_roof' ? '#8e8c86' : '#b4b0a6'); if (m.userData.c0) m.userData.c0.copy(m.color); m.userData.lum = 0.5; } });
@@ -158,7 +226,8 @@ void main() {`); };
   let clock = 0;
   function tick(dt, state = {}) { base.tick(dt, state); clock += dt;
     if (part.growtrees) part.growtrees.visible = !state.growOn;
-    waterT.value = reduced ? 0 : clock;
+    waterT.value = reduced ? 0 : clock * 1.8;
+    if (DV.tick) DV.tick(dt, clock); tourTick(dt, state);
     if (FX._ringTick) FX._ringTick(clock);
     valleyTick(dt); }
   window.__riverbend = { part, get vP() { return vP; }, get clock() { return clock; } };
