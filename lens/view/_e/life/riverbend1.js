@@ -92,9 +92,10 @@ void main() {`); };
     const legs = HIPS.map(([x, z]) => { const l = kid('proto_bear_leg'); l.position.set(x, 0.62, z); deer.add(l); return l; });
     deer.traverse(o => { if (o.isMesh) o.castShadow = true; }); root.add(deer);
     // the pancakes: five on the plate, eaten from the top
-    const cakeM = new THREE.MeshStandardMaterial({ color: '#d9a35a', roughness: 0.7 }), syrupM = new THREE.MeshStandardMaterial({ color: '#7a3d12', roughness: 0.3 });
+    const cakeM = new THREE.MeshStandardMaterial({ color: '#c98a3e', roughness: 0.75 }), syrupM = new THREE.MeshStandardMaterial({ color: '#7a3d12', roughness: 0.3 });
+    MATS.forEach(m => { if (m.name === 'plate') { m.color.set('#bdb8ae'); if (m.userData.c0) m.userData.c0.copy(m.color); m.userData.lum = 0.4; } if (m.name === 'fruit') { m.color.set('#5f9e3a'); if (m.userData.c0) m.userData.c0.copy(m.color); } });   // the white plate bloomed and the yellow bowl read as pancakes
     const P = INFO.deer.plate, cakes = [];
-    for (let i = 0; i < 5; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 16), i === 4 ? syrupM : cakeM); m.position.set(P[0], P[1] + 0.016 + i * 0.03, P[2]); root.add(m); cakes.push(m); }
+    for (let i = 0; i < 5; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.042, 16), i === 4 ? syrupM : cakeM); m.position.set(P[0], P[1] + 0.022 + i * 0.042, P[2]); root.add(m); cakes.push(m); }
     // the camper (yellow shirt), back to the table, coffee in hand
     let camper = null, cry0 = 0, cAt = null;
     if (CAMPER && part.proto_person) { camper = kid('proto_person'); camper.traverse(o => { if (o.isMesh && o.material.name === 'shirt') { o.material = o.material.clone(); o.material.color.set(CAMPER.shirt || '#f2c230'); } });
