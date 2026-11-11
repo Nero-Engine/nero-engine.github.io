@@ -5,7 +5,7 @@
 //      are kept on the phone and reused.
 //   3. With no signal, a listing that was opened before still opens: page, 3D model, fonts and libraries from the saved copy.
 // Tracking notes, share codes and enquiries are never saved or replayed.
-const BUILD = '2888c625e9', CACHE = 'nv-5104917c50a8';
+const BUILD = 'c64cbf0287', CACHE = 'nv-5104917c50a8';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 const skip = (u) => /\/_(t|share|enquiry|dash|admin)(\/|$)/.test(u.pathname);

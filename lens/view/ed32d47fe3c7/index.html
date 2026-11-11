@@ -113,7 +113,7 @@
   #cnav { position:absolute; right:44px; top:4px; display:flex; align-items:center; gap:2px; color:var(--muted2); font-size:12px; font-weight:600; }
   #cnav button { width:38px; height:40px; border:0; background:none; color:var(--ink); font-size:24px; line-height:1; padding:0 0 3px; }
   @media (max-width: 759px) {
-    #bottom.reading #chips, #bottom.reading .row, #bottom.reading #legal .extra { display:none; }
+    #bottom.reading #chipwrap, #bottom.reading .row, #bottom.reading #legal .extra { display:none; }
     #bottom.reading #card { margin-bottom:6px; padding:10px 14px 10px; } #bottom.reading #legal { padding-top:2px; }
     #bottom.reading #card h2 { font-size:19px; margin:2px 0 3px; } #bottom.reading #card p { font-size:13px; line-height:1.35; }
     #bottom.reading #card .src { margin-top:4px; }
@@ -123,6 +123,13 @@
   #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 108px); z-index:4; }
   #chips { display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
   #chips::-webkit-scrollbar { display:none; }
+  /* arrows for mouse users, so the chips hidden off the edge can be reached (Adam, 11-11-2026); phones swipe as before */
+  #chipwrap { position:relative; }
+  .chipnav { display:none; position:absolute; top:0; bottom:10px; width:46px; border:0; padding:0; z-index:2; color:var(--ink); font:700 22px var(--font), sans-serif; cursor:pointer; }
+  .chipnav span { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:var(--panel); border:1px solid rgba(var(--lc),.22); box-shadow:0 2px 8px rgba(0,0,0,.25); line-height:1; padding-bottom:2px; }
+  #chipl { left:0; background:linear-gradient(90deg, var(--bg, rgba(0,0,0,.6)) 40%, transparent); text-align:left; padding-left:6px; }
+  #chipr { right:0; background:linear-gradient(270deg, var(--bg, rgba(0,0,0,.6)) 40%, transparent); text-align:right; padding-right:6px; }
+  @media (hover: hover) and (pointer: fine) { .chipnav.show { display:block; } }
   .chip { flex:0 0 auto; border:1px solid rgba(var(--lc),.18); background:rgba(var(--lc),.07); color:var(--ink); font:600 13.5px var(--font), sans-serif; padding:9px 14px; border-radius:22px; }
   .chip.on { background:var(--hero); border-color:var(--hero); color:var(--onhero); }
   .row { display:flex; gap:8px; padding:0 16px; align-items:stretch; }
@@ -231,7 +238,7 @@
 <div id="bottom">
   <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div id="nlist"></div><div id="season"><div class="m"><i></i><i></i><i></i><i class="idea"></i><i class="half"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="now"></i><i class="half2"></i><i class="idea"></i><i></i></div><div class="l"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div><div class="k2"><b>Open now</b> · <em>Concept: longer season</em></div></div><div class="src" id="cs"></div></div>
   <button id="mini" hidden><span id="minit"></span><em>Show info</em></button>
-  <div id="chips"></div>
+  <div id="chipwrap"><button class="chipnav" id="chipl" aria-label="Scroll the tabs left"><span>‹</span></button><div id="chips"></div><button class="chipnav" id="chipr" aria-label="Scroll the tabs right"><span>›</span></button></div>
   <div class="row">
     <button id="grow" aria-pressed="false"><span><small>CONCEPT</small>Room to grow</span><span class="sw"></span></button>
     <button id="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>View on your desk</button>
@@ -441,6 +448,12 @@ if (NEAR) { const b = document.createElement('button'); b.className = 'chip near
 // tap a chip: choose it. Tap the chosen chip again: bring its info back if it was hidden, otherwise let go of it.
 HOT.forEach(h => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = h.chip; b.dataset.id = h.id; b.setAttribute('aria-pressed', 'false');
   b.onclick = () => { if (sel && sel.id === h.id) { if (card.style.display === 'none') showCard(h); else choose(null); } else choose(h); }; chips.appendChild(b); });
+{ const L = document.getElementById('chipl'), Rb = document.getElementById('chipr');
+  const upd = () => { const m = chips.scrollWidth - chips.clientWidth; L.classList.toggle('show', chips.scrollLeft > 4); Rb.classList.toggle('show', m > 4 && chips.scrollLeft < m - 4); };
+  const go = (d) => chips.scrollBy({ left: d * Math.max(160, chips.clientWidth * 0.7), behavior: 'smooth' });
+  L.onclick = () => go(-1); Rb.onclick = () => go(1); chips.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd);
+  chips.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && chips.scrollWidth > chips.clientWidth) { chips.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+  setTimeout(upd, 50); setTimeout(upd, 800); }
 const mini = document.getElementById('mini'), resetBtn = document.getElementById('reset');
 const bottomBox = document.getElementById('bottom');
 function hideCard() { const c = growOn ? GROW : nearOn ? NEARC : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
@@ -635,8 +648,11 @@ const keepOnPlate = () => { const t = controls.target, lim = R * S * 0.95, r = M
 const mv = document.getElementById('mv'), arcard = document.getElementById('arcard'), arst = document.getElementById('arst'), argo = document.getElementById('argo');
 const arcopy = document.getElementById('arcopy');
 arcopy.onclick = async () => { const u = new URL(location.href); if (await copyText(u.toString())) { arcopy.textContent = 'Copied. Now paste it into Safari or Chrome'; T('share', 'copied for ar'); } };
-document.getElementById('ar').onclick = () => { stopTour(); arcard.style.display = 'flex';
+document.getElementById('ar').onclick = () => { stopTour();
   T('ar-button', mobile ? 'phone' : 'computer');
+  // phones go straight into the camera view, no card first (Adam, 11-11-2026: "remove friction"); the card only shows if the camera cannot start
+  if (mobile && !NV.inapp) { arcopy.style.display = 'none'; argo.onclick().then(() => { if (arst.textContent) arcard.style.display = 'flex'; }); return; }
+  arcard.style.display = 'flex';
   if (!mobile) { const a = document.getElementById('arqr'); a.style.display = 'block'; NV.qr(a); arst.textContent = 'Scan this with your phone camera. The model opens on your phone, then tap View on your desk.'; argo.style.display = 'none'; }
   else { arst.textContent = NV.inapp ? 'You are inside an app\'s own browser, where the camera view often cannot start. If it does not, copy the link and open it in Safari (iPhone) or Chrome (Android).' : ''; arcopy.style.display = NV.inapp ? 'block' : 'none'; argo.disabled = false; } };
 argo.onclick = async () => {
@@ -699,6 +715,7 @@ requestAnimationFrame(frame);
 const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 600);
 hint.textContent = mobile ? 'Drag to spin · two fingers to move and zoom · double-tap to fly in' : 'Drag to spin · two fingers or right-drag to move · pinch or scroll to zoom';
 setTimeout(() => { hint.style.opacity = 0; }, 8000);
+window.__look = (at, dist, el, az) => { controls.autoRotate = false; anim = null; const to = poseOf({ at, dist, el, az }); controls.target.copy(to.at); camera.position.copy(to.p); controls.update(); };   // test hook: the checking scripts film any spot
 window.__ready = true; window.__cam = () => [controls.target.x, controls.target.z, camera.position.distanceTo(controls.target)]; NV.loaded(); window.__tour = startTour;
 // the tour never starts by itself: it plays only when the Tour button is pressed (Adam, 09-11-2026)
 if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
