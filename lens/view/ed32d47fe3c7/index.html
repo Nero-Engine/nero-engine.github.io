@@ -663,7 +663,11 @@ argo.onclick = async () => {
   if (mv.canActivateAR) { arst.textContent = ''; mv.activateAR(); } else arst.textContent = "This phone can't place it in your room, but the 3D view here works. On Android, Google Play Services for AR is needed.";
 };
 document.getElementById('arno').onclick = () => { arcard.style.display = 'none'; };
-if (mobile) { mv.loading = 'eager'; }
+// iPhones and iPads open Apple's own AR viewer straight from the USDZ file, so the hidden AR helper never needs the 3D model there.
+// Loading it anyway put a second copy in the phone's graphics memory and caused a shader error on an older iPhone (Casey Thom, 11-11-2026).
+// Android still loads it early so the camera view starts at once.
+const IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+if (mobile && !IOS) { mv.loading = 'eager'; }
 
 // ---------- floating labels ----------
 const tagBox = document.getElementById('tags'); const TAGS = [];
