@@ -119,3 +119,6 @@ c.onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(m.to):Promise.
 box.classList.add('on');box.querySelector('[data-k=gmail]').focus()};
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="mailto:"]');if(!a||(box&&box.contains(a)))return;e.preventDefault();open(q(a.getAttribute('href')))});
 })();
+
+/* Copy buttons: <button data-copy="text"> (Nero Work connector link, 12-11-2026) */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-copy]');if(!b)return;const t=b.getAttribute('data-copy'),o=b.textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{b.textContent='Copied'}).catch(()=>{b.textContent='Select and copy'});setTimeout(()=>{b.textContent=o},2000)});

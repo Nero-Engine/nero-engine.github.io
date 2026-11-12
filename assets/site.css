@@ -696,3 +696,20 @@ body[data-chat] .wa svg{width:27px;height:27px}
 .ghub p{color:var(--dim);margin:0 0 12px}
 .ghub a.more{color:var(--text);text-decoration:underline}
 @media(max-width:860px){.ghub{grid-template-columns:1fr}}
+
+/* Nero Work page (12-11-2026) */
+.wtest{margin-top:18px;padding:14px 18px;border-radius:14px;border:1px solid rgba(232,0,16,.5);background:rgba(232,0,16,.08);color:var(--text);font-size:16px}
+.wcopy{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 10px 10px 18px;border-radius:14px;background:var(--bg,#0a0a0a);border:1px solid var(--line2);margin-bottom:22px}
+.wcopy code{flex:1 1 240px;min-width:0;overflow-wrap:anywhere;font-size:15px;color:var(--text);font-family:ui-monospace,Menlo,monospace}
+.wcopy .btn{flex:none}
+.wlinks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.wlinks a{color:var(--text);font-weight:600}
+.wlinks a:hover{color:var(--red)}
+.gcards.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1100px){.gcards.g4{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.gcards.g4{grid-template-columns:1fr}}
+.ghub.g4h{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1100px){.ghub.g4h{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.ghub.g4h{grid-template-columns:1fr}}
+.lpack>div{min-width:0}
+@media(max-width:640px){.wcopy code{font-size:12.5px}}
