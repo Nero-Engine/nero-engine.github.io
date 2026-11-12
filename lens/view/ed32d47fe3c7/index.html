@@ -331,6 +331,12 @@ const [gltf, INFO] = await Promise.all([
 ]);
 const model = gltf.scene.getObjectByName(SC.root) || gltf.scene;
 scene.add(gltf.scene);
+// Library models (Model Kit/Library, placed by Desk Viewer Kit/Build/libparts.js): the copies of one boat, tree or car share one stored shape and are
+// flagged userData.lib. Draw each shape and colour once, as instances, so hundreds of copies cost a phone almost nothing. Models built before the
+// library have no flagged meshes, so nothing changes for them.
+{ const G = new Map(); model.traverse(o => { if (o.isMesh && o.userData.lib && o.parent) { const k = o.parent.uuid + '|' + o.geometry.uuid + '|' + o.material.uuid; if (!G.has(k)) G.set(k, []); G.get(k).push(o); } });
+  for (const L of G.values()) { const o0 = L[0], par = o0.parent, im = new THREE.InstancedMesh(o0.geometry, o0.material, L.length); im.name = o0.name;
+    L.forEach((o, i) => { o.updateMatrix(); im.setMatrixAt(i, o.matrix); par.remove(o); }); im.instanceMatrix.needsUpdate = true; im.computeBoundingBox(); im.computeBoundingSphere(); par.add(im); } }
 const S = INFO.scale, R = INFO.R, A = INFO.anchors || {};
 const BASEP = SC.baseParts || ['ground', 'plinth'];
 // own copy of every material per part, so one part can glow while the rest dim
@@ -656,7 +662,10 @@ document.getElementById('ar').onclick = () => { stopTour();
   if (!mobile) { const a = document.getElementById('arqr'); a.style.display = 'block'; NV.qr(a); arst.textContent = 'Scan this with your phone camera. The model opens on your phone, then tap View on your desk.'; argo.style.display = 'none'; }
   else { arst.textContent = NV.inapp ? 'You are inside an app\'s own browser, where the camera view often cannot start. If it does not, copy the link and open it in Safari (iPhone) or Chrome (Android).' : ''; arcopy.style.display = NV.inapp ? 'block' : 'none'; argo.disabled = false; } };
 argo.onclick = async () => {
-  T('ar-launch'); if (mv.canActivateAR) { mv.activateAR(); return; }
+  T('ar-launch');
+  // live AR (scene.arLive, Android): the viewer itself runs in the camera view. If it cannot start, show the card: its button then takes the old route
+  if (XRL && XRL.can()) { if (await XRL.start()) return; mv.loading = 'eager'; arst.textContent = ''; arcopy.style.display = 'none'; argo.style.display = ''; argo.disabled = false; arcard.style.display = 'flex'; return; }
+  if (mv.canActivateAR) { mv.activateAR(); return; }
   arst.textContent = 'Getting the model ready…'; argo.disabled = true;
   mv.loading = 'eager'; await mv.updateComplete; await new Promise(r => setTimeout(r, 400));
   argo.disabled = false;
@@ -667,7 +676,14 @@ document.getElementById('arno').onclick = () => { arcard.style.display = 'none';
 // Loading it anyway put a second copy in the phone's graphics memory and caused a shader error on an older iPhone (Casey Thom, 11-11-2026).
 // Android still loads it early so the camera view starts at once.
 const IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
-if (mobile && !IOS) { mv.loading = 'eager'; }
+if (mobile && !IOS && !SC.arLive) { mv.loading = 'eager'; }
+// Live AR (11-11-2026): only for a listing with "scene": {"arLive": true}, and never on iPhones. On an Android phone that can do it, View on your desk
+// keeps this viewer running in the camera view (boats, people, facts) instead of opening a still model. See public/_e/xr/arlive1.js.
+let XRL = null;
+if (SC.arLive && !IOS) { const old = () => { if (mobile) mv.loading = 'eager'; };
+  if (!navigator.xr) old(); else import('../_e/xr/arlive1.js?v=1').then(m => m.init({ THREE, renderer, scene, camera, root: gltf.scene, model, sun, SC, T, frame, resize,
+    look: () => goView(growOn ? GROW.view : nearOn && NEARV ? NEARV : sel ? sel.view : HOME, 0.01), quiet: () => { stopTour(); stopSpin(); arcard.style.display = 'none'; } }))
+    .then(x => { XRL = x; if (!x) old(); }).catch(e => { console.warn('live AR', e); old(); }); }
 
 // ---------- floating labels ----------
 const tagBox = document.getElementById('tags'); const TAGS = [];
@@ -690,13 +706,14 @@ function liftView(dt) { if (!baseH && card.style.display !== 'block' && mini.hid
   if (lift) camera.setViewOffset(innerWidth, innerHeight, 0, lift, innerWidth, innerHeight); else camera.clearViewOffset(); }
 const G = SC.glow;
 let last = performance.now();
-function frame(now) {
+function frame(now, xr) {
+  if (XRL && XRL.on && !xr) { requestAnimationFrame(frame); return; }   // live AR is drawing: the page's own loop only waits
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (anim) { const k = Math.min(1, (now - anim.t0) / anim.dur), e = ease(k); controls.target.lerpVectors(anim.a0, anim.a1, e);
     if (anim.s0) camera.position.setFromSphericalCoords(anim.s0.radius + (anim.s1.radius - anim.s0.radius) * e, anim.s0.phi + (anim.s1.phi - anim.s0.phi) * e, anim.s0.theta + anim.dth * e).add(controls.target);
     else camera.position.lerpVectors(anim.p0, anim.p1, e);
     if (k >= 1) anim = null; }
-  controls.update(); keepOnPlate(); liftView(dt); tickTour(dt);
+  if (!xr) { controls.update(); keepOnPlate(); liftView(dt); } tickTour(dt);
   if (LIFE) LIFE.tick(dt, { sel, growOn });
   if (SC.dayGlow != null) { const f = SC.dayGlow + (1 - SC.dayGlow) * (LIFE && LIFE.dusk ? LIFE.dusk() : 0); if (f !== DAYF) { DAYF = f; GLOWMATS.forEach(m => m.color.copy(m.userData.gc).multiplyScalar(f)); bloom.strength = BLOOM0 * (0.55 + 0.45 * f); } }
   if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
@@ -712,6 +729,7 @@ function frame(now) {
     if (GROW.glowParts) MATS.forEach(m => { if (GROW.glowParts.includes(m.userData.p)) { m.emissive.copy(GLOWC); m.emissiveIntensity = 0.5 * (1 - 0.7 * m.userData.lum) * pulse * DAYF; } });
     showTags([GROW.tag], true);
   } else { hideTags(0); if (nearOn) { glowT += dt; tickNear(glowT); } }
+  if (xr) { XRL.draw(xr); return; }
   composer.render();
   requestAnimationFrame(frame);
 }
