@@ -344,6 +344,8 @@ const MATS = [], part = {};
 model.children.forEach(c => part[c.name] = c);
 model.traverse(o => { if (!o.isMesh) return; o.castShadow = !BASEP.includes(o.parent.name); o.receiveShadow = true;
   o.material = o.material.clone(); const m = o.material; m.userData.c0 = m.color.clone(); m.userData.lum = Math.min(1, (m.color.r + m.color.g + m.color.b) / 3 * (m.map ? 0.7 : 1) * 1.6); m.userData.e0 = m.emissive.clone(); m.userData.p = o.parent.name; MATS.push(m); });
+// sharp ground detail over the satellite photo, only for listings that ask for it (scene.ground.detail); see _e/ground/ground1.js
+if (SC.ground && SC.ground.detail) { try { await (await import('../_e/ground/ground1.js?v=5')).init({ THREE, part, INFO, SC }); } catch (e) { console.warn('ground detail', e); } }
 for (const w of SC.waterParts || []) part[w] && part[w].traverse(o => { if (o.isMesh) { o.castShadow = false; o.material.depthWrite = false; o.renderOrder = 2; Object.assign(o.material, { polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 4 }); } });   // land wins where it meets the water, so shorelines don't flicker
 const FADEM = MATS.filter(m => (SC.fadeParts || []).includes(m.userData.p)); FADEM.forEach(m => { m.transparent = true; m.opacity = 1; });
 let fadeO = 1;
