@@ -46,7 +46,7 @@ export function initPeople(X, root) {
       if (w.dog >= 0) { const bx = x - dx * 2.0 - dz * 0.8, bz = z - dz * 2.0 + dx * 0.8; dogs.set(w.dog, bx, w.y + (standing ? 0 : Math.abs(Math.sin(t * 11)) * 0.06), bz, w.h); }
     }
     // people standing about turn a little now and then, the way people do
-    ST.forEach((s, j) => stand.set(W.length + j, s.at[0], s.y, s.at[1], (s.ry || 0) + (reduced ? 0 : Math.sin(t * 0.4 + j * 2) * 0.35)));
+    ST.forEach((s, j) => stand.set(W.length + j, s.at[0], s.y, s.at[1], (s.ry || 0) + (reduced || s.fixed ? 0 : Math.sin(t * 0.4 + j * 2) * 0.35)));
     frames.forEach(f => f && f.done()); stand.done(); if (dogs) dogs.done();
   }
   tick(0, 0);

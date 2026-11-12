@@ -7,7 +7,7 @@
 // Room to grow (fx type tmBuild, the film's grow scene, layout illustrative): the spare land outlines in light, 16 cabins build west to east,
 // a waterfront restaurant rises with its deck, a new boardwalk with finger docks rises from the canal and boats glide into the new slips,
 // then a nature education center. Every piece is labelled an idea. It moves in the web viewer only: the AR file stays a still model.
-import { initPeople } from './people1.js?v=1';
+import { initPeople } from './people1.js?v=2';
 let THREE;
 
 export async function init(X) {
@@ -21,10 +21,20 @@ export async function init(X) {
   const back = (k) => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.7, x = k - 1; return 1 + (c + 1) * x * x * x + c * x * x; };
   const root = new THREE.Group(); root.name = 'trafford_life'; model.add(root);
   // the Florida sun makes white roofs, gravel, airboat seats, RVs and gulls bloom into white blobs: a calmer white everywhere
-  (X.MATS || []).forEach(m => { if (m.name === 'ground' && m.color) { m.color.setScalar(0.84); if (m.userData.c0) m.userData.c0.copy(m.color); return; }   // the white sand strip in the aerial photo blooms too
+  (X.MATS || []).forEach(m => { if (m.name === 'ground' && m.color) { m.color.setScalar(CFG.groundK ?? 0.84); if (m.userData.c0) m.userData.c0.copy(m.color); return; }   // the white sand strip in the aerial photo blooms too
     if (!m.color || /^(glass|sign|ground|lake|plinth|band|border)/.test(m.name || '')) return;
+    // 12-11-2026 (Adam: "a glitchy block outside the front of the building"): the metal roofs and boat seats were mirrors, so the sun flashed them into a white slab. Matt everywhere.
+    if (m.metalness > 0.15 || m.roughness < 0.6) { m.roughness = Math.max(m.roughness ?? 1, 0.85); m.metalness = Math.min(m.metalness ?? 0, 0.08); }
     const a = (m.color.r + m.color.g + m.color.b) / 3, cap = m.map ? 0.8 : 0.62;
     if (a > cap) { m.color.multiplyScalar(cap / a); if (m.userData.c0) m.userData.c0.copy(m.color); m.userData.lum = Math.min(m.userData.lum ?? 1, 0.55); } });
+  // 12-11-2026: the aerial photo has parked cars baked into it, which show as red and blue smudges on the gravel by the store. Strong red or blue on bright ground fades to grey.
+  if (part.ground) part.ground.traverse(o => { const m = o.isMesh && o.material; if (!m || !m.map || m.userData.noCars) return; m.userData.noCars = 1; const old = m.onBeforeCompile, key = m.customProgramCacheKey ? m.customProgramCacheKey() : '';
+    const CUT = `{ vec3 c0 = diffuseColor.rgb; float lum = dot(c0, vec3(0.3333));
+      float red = smoothstep(0.05, 0.14, (c0.r - c0.g) / max(c0.r, 0.001)) * (1.0 - smoothstep(0.07, 0.16, (c0.g - c0.b) / max(c0.g, 0.001)));   // pink and red, but not brown dirt (dirt has far more green than blue)
+      float blu = smoothstep(0.05, 0.14, (c0.b - max(c0.r, c0.g)) / max(c0.b, 0.001)), cyn = smoothstep(0.07, 0.16, (min(c0.g, c0.b) - c0.r) / max(min(c0.g, c0.b), 0.001));
+      diffuseColor.rgb = mix(c0, vec3(lum) * vec3(1.0, 0.98, 0.94), max(red, max(blu, cyn)) * smoothstep(0.05, 0.11, lum)); }`;   // colours here are linear, so 'bright ground' starts low
+    m.onBeforeCompile = (sh, r) => { if (old) old(sh, r); sh.fragmentShader = sh.fragmentShader.includes('vec3 pc = diffuseColor.rgb;') ? sh.fragmentShader.replace('{ vec3 pc = diffuseColor.rgb;', CUT + '\n{ vec3 pc = diffuseColor.rgb;') : sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n' + CUT); };
+    m.customProgramCacheKey = () => key + '-nocars3'; m.needsUpdate = true; });
   const PEOPLE = initPeople(X, root);
 
   // ---------- instanced copies of a hidden piece, and plain copies (same idea as walnut2) ----------
@@ -76,7 +86,9 @@ export async function init(X) {
   window.__airboat = (d, dist = 60) => { if (tour) { tour.wait = 0; tour.d = d ?? tour.d; moveTour(tour, 0.001, 0); if (X.goView) X.goView({ at: [tour.x, 0, tour.z], dist, el: 0.5, az: SC.az ?? 0.6 }, 0.01); } };
 
   // ---------- the alligator: lies on the bank, slides in, a little swim, climbs out, turns to face the canal again ----------
-  const GA = TM.gator, gator = GA ? kid('proto_gator') : null, GP = 46; let gT = 9; if (gator) gator.scale.setScalar(1.15);
+  const GA = TM.gator, gator = GA ? kid('proto_gator') : null, GP = 46; let gT = 9; if (gator) gator.scale.setScalar(GA.s || 1.7);
+  // 12-11-2026 (Adam: "I can't see an alligator anywhere"): a lighter olive hide and a bigger animal, so it reads against dark grass and water on a desk-sized model
+  if (part.proto_gator) { const seen = new Set(); part.proto_gator.traverse(m => { if (m.isMesh && m.material && !seen.has(m.material)) { seen.add(m.material); const c = m.material.color; if (c && c.r + c.g + c.b < 1.2) { c.set(c.g >= c.r ? '#5f8038' : '#8a7a4a'); if (m.material.userData.c0) m.material.userData.c0.copy(c); } m.material.roughness = 0.9; } }); }
   const swim = GA && GA.swim ? path(GA.swim) : null;
   const AT = GA ? { x: GA.at[0], z: GA.at[1] } : null, bankY = LAND - 0.03, swimY = WY - 0.22;
   function moveGator(dt, t) { if (!gator || !swim) return; gT += reduced ? 0 : dt; const c = reduced ? 2 : gT % GP;
@@ -89,6 +101,28 @@ export async function init(X) {
     else { const k = ease((c - 41) / 2.5); h = angTo(Math.atan2(AT.x - s1.x, AT.z - s1.z), toWater, k); }
     gator.position.set(x, y, z); gator.rotation.set(0, (gator.userData.h = gator.userData.h == null ? h : angTo(gator.userData.h, h, Math.min(1, 3 * dt))) + tail, 0, 'YXZ'); }
   window.__gator = { set: (c) => { gT = c; }, at: () => AT, get g() { return gator; } };
+  // more alligators (Adam, 12-11-2026: "a few roaming around just in the trees, in the landscape"): model_info tm.gators = [{ pts, speed, swim, t0 }].
+  // On land they amble along their path, stop for a long rest at each end and amble back; a swimmer cruises its loop with only its back showing.
+  const ROAM = (TM.gators || []).map((G, i) => { const g = kid('proto_gator'); if (!g) return null; g.scale.setScalar(G.s || 1.6); const p = path(G.swim ? [...G.pts, G.pts[0]] : G.pts);
+    return { g, p, swim: !!G.swim, d: (G.t0 || 0) * p.len, dir: 1, sp: G.speed || 0.45, wait: G.swim ? 0 : 3 + i * 4, h: null }; }).filter(Boolean);
+  function moveRoam(dt, t) { for (const r of ROAM) { let moving = false;
+      if (r.swim) { if (!reduced) r.d = (r.d + r.sp * dt * TS) % r.p.len; moving = !reduced; }
+      else if (!reduced) { if (r.wait > 0) r.wait -= dt; else { r.d += r.dir * r.sp * dt * TS; moving = true; if (r.d >= r.p.len) { r.d = r.p.len; r.dir = -1; r.wait = 14; } else if (r.d <= 0) { r.d = 0; r.dir = 1; r.wait = 10; } } }
+      r.p.at(r.d, o); const want = Math.atan2(o.dx * r.dir, o.dz * r.dir); r.h = r.h == null || reduced ? want : angTo(r.h, want, Math.min(1, 1.2 * dt));
+      r.g.position.set(o.x, r.swim ? WY - 0.1 : bankY, o.z); r.g.rotation.set(0, r.h + (moving ? Math.sin(t * (r.swim ? 3.2 : 4.2) + r.p.len) * (r.swim ? 0.16 : 0.09) : 0), 0, 'YXZ'); } }
+  // yoga on the end of the pier (Adam, 12-11-2026: "It'd be funny if they were doing yoga"): tree pose on a mat, a slow sway, and a wobble now and then
+  const YG = TM.yoga, yogi = YG ? (() => { const g = new THREE.Group(), M = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9 });
+    const skin = M('#d9a47f'), top = M(YG.shirt || '#ff7aa0'), legs = M('#22262e'), hair = M('#3a2a1e'), mat = M(YG.mat || '#6b4fd0'), up = new THREE.Vector3(0, 1, 0), body = new THREE.Group();
+    const limb = (a, b, r, m) => { const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), dv = B.clone().sub(A), L = dv.length(); const k = new THREE.Mesh(new THREE.CapsuleGeometry(r, L, 3, 8), m);
+      k.position.copy(A).addScaledVector(dv, 0.5); k.quaternion.setFromUnitVectors(up, dv.normalize()); k.castShadow = true; body.add(k); };
+    const ball = (at, r, m) => { const k = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), m); k.position.set(...at); k.castShadow = true; body.add(k); };
+    limb([0.07, 0.08, 0], [0.07, 0.86, 0], 0.07, legs); limb([-0.07, 0.86, 0], [-0.4, 0.66, 0.05], 0.07, legs); limb([-0.4, 0.66, 0.05], [0.0, 0.56, 0.04], 0.06, legs);   // standing leg, bent thigh, shin with the foot on the knee
+    limb([0, 0.95, 0], [0, 1.36, 0], 0.13, top); ball([0, 1.6, 0], 0.11, skin); ball([0, 1.7, -0.07], 0.06, hair);
+    for (const sx of [-1, 1]) { limb([0.17 * sx, 1.4, 0], [0.24 * sx, 1.74, 0], 0.045, skin); limb([0.24 * sx, 1.74, 0], [0.02 * sx, 2.02, 0], 0.04, skin); }   // arms up, palms together overhead
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.03, 1.8), mat); m.position.y = 0.015; m.receiveShadow = true; g.add(m, body); g.userData.body = body;
+    g.position.set(YG.at[0], YG.y ?? LAND + 0.81, YG.at[1]); g.rotation.y = YG.ry || 0; root.add(g); return g; })() : null;
+  function moveYogi(t) { if (!yogi || reduced) return; const c = t % 19, wob = c > 15 && c < 17.2 ? Math.sin((c - 15) * 9) * 0.13 * Math.sin((c - 15) / 2.2 * Math.PI) : 0;
+    yogi.userData.body.rotation.z = Math.sin(t * 0.8) * 0.025 + wob; yogi.userData.body.rotation.x = Math.sin(t * 0.55) * 0.012; }
 
   // gulls wheeling over the lake
   const GU = INFO.gulls, gulls = GU ? inst('proto_gull', GU.n || 3) : null;
@@ -171,10 +205,33 @@ export async function init(X) {
     } };
   };
 
+  // 12-11-2026 (Adam, twice: "the glitchy block is still there"): the store sign is taller than the gap under the little porch gable, so its teal top corners
+  // poked out through the gable roof on both sides. The sign hangs lower now, clear of the roof. model_info tm.signDy.
+  if (part.store) part.store.traverse(o => { if (o.isMesh && o.material && o.material.name === 'sign' && !o.userData.dropped) { o.userData.dropped = 1; o.position.y += TM.signDy ?? -0.7; } });
+  // 12-11-2026 (Adam, with a picture: "right in the middle of the road, outside the front"): the gravel entry lane runs out over the tarmac at the same height,
+  // so the two fought for the same pixels and the lane broke into flickering stripes. The tarmac and its yellow lines now always win where they overlap.
+  if (part.yard) part.yard.traverse(o => { const m = o.isMesh && o.material; if (!m) return; const k = m.name === 'site_asphalt' ? 1 : m.name === 'site_yellow' ? 2 : 0;
+    if (k) { m.polygonOffset = true; m.polygonOffsetFactor = -3 * k; m.polygonOffsetUnits = -6 * k; m.needsUpdate = true; } });
+  // the angler at the end of the boardwalk (a library piece, one copy): model_info tm.angler = { dy, s } lifts or resizes him without a new model
+  const ANG = (() => { let m = null; model.traverse(o => { if (o.isInstancedMesh && /^lib_angler/.test(o.name || '')) m = o; }); return m; })(), ANG0 = ANG ? ANG.instanceMatrix.array.slice() : null;
+  const setAngler = (dy = 0, sc = 1) => { if (!ANG) return; const M = new THREE.Matrix4().fromArray(ANG0), p = new THREE.Vector3(), q = new THREE.Quaternion(), k = new THREE.Vector3(); M.decompose(p, q, k);
+    p.y += dy; k.multiplyScalar(sc); ANG.setMatrixAt(0, M.compose(p, q, k)); ANG.instanceMatrix.needsUpdate = true; };
+  if (TM.angler && TM.angler.hide) { if (ANG) ANG.visible = false; } else if (TM.angler) setAngler(TM.angler.dy || 0, TM.angler.s || 1); window.__angler = setAngler;
+  // the library angler is a wading model with no legs below the knee, so on a dock he always looks sunk in the planks. tm.rod = { at, y, ry } puts a rod and line
+  // in the hands of a standing library person (people.still) instead.
+  if (TM.rod) { const g = new THREE.Group(), dark = new THREE.MeshStandardMaterial({ color: '#2a2a2a', roughness: 0.8 }), rod = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.03, 3.0, 6).translate(0, 1.5, 0), dark);
+    rod.rotation.x = 0.95; rod.position.set(0.18, 1.05, 0.2); rod.castShadow = true; g.add(rod);
+    const tipY = 1.05 + Math.cos(0.95) * 3.0, tipZ = 0.2 + Math.sin(0.95) * 3.0, drop = tipY + (TM.rod.y - WY);
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, drop, 4).translate(0, -drop / 2, 0), new THREE.MeshBasicMaterial({ color: '#e8eef2' })); line.position.set(0.18, tipY, tipZ); g.add(line);
+    const flo = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), new THREE.MeshStandardMaterial({ color: '#e63a2a', roughness: 0.6 })); flo.position.set(0.18, tipY - drop + 0.05, tipZ); g.add(flo);
+    g.position.set(TM.rod.at[0], TM.rod.y, TM.rod.at[1]); g.rotation.y = TM.rod.ry || 0; root.add(g); }
+
   // ---------- each frame ----------
-  let clock = 0;
+  let clock = 0, gSel = false;
   function tick(dt, state = {}) { base.tick(dt, state); clock += dt;
-    PEOPLE.tick(dt, clock); moveTour(tour, dt, clock, false); moveTour(loop2, dt, clock, true); moveGator(dt, clock); moveGulls(clock);
+    PEOPLE.tick(dt, clock); moveTour(tour, dt, clock, false); moveTour(loop2, dt, clock, true); // the Watch out card: the alligator by the docks slides in a moment after the camera gets there
+    if (state.sel && state.sel.id === 'gators') { if (!gSel) { gSel = true; gT = 17; } } else gSel = false;
+    moveGator(dt, clock); moveRoam(dt, clock); moveYogi(clock); moveGulls(clock);
     ribU.uT.value = clock; ribU.uK.value = 0.85 + 0.6 * (base.dusk ? base.dusk() : 0);
     // the idea labels show only while Room to grow plays, once each piece is there
     if (state.growOn && growTags.length) {
@@ -185,6 +242,6 @@ export async function init(X) {
       if (GR.nature && gt > T.nat[0] + 1.2) tagTo(growTags[2], GR.nature.at[0] - 16, 6, GR.nature.at[1] - 4, 'Idea: a nature education center'); else growTags[2].style.display = 'none'; }
     else growTags.forEach(el => el.style.display = 'none');
   }
-  window.__trafford = { part, get clock() { return clock; }, tour, gator };
+  window.__trafford = { part, get clock() { return clock; }, tour, gator, ROAM, yogi };
   return { fx: FX, tick, dusk: base.dusk };
 }
