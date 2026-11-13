@@ -119,7 +119,7 @@
     #bottom.reading #card .src { margin-top:4px; }
   }
   #mini { display:flex; align-items:center; justify-content:space-between; gap:10px; width:calc(100% - 32px); margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.14); border-radius:12px; padding:9px 12px; color:var(--ink); font:700 13.5px var(--font), sans-serif; text-align:left; }
-  #mini[hidden], #reset[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
+  #mini[hidden], #reset[hidden], #grow[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
   #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 108px); z-index:4; }
   #chips { display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
   #chips::-webkit-scrollbar { display:none; }
@@ -402,6 +402,20 @@ const MAKE = {
       const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([p0, mid, p3, new THREE.Vector3(d[0], 2.5, d[2])]), 90, 0.55, 6, false), m); g.add(mesh); arcs.push(mesh); });
     return { obj: g, mat: m, tick: (t) => { m.opacity = 0.7 + 0.3 * Math.sin(t * 3); const f = Math.min(1, t / 1.4);
       arcs.forEach((a, i) => a.geometry.setDrawRange(0, Math.floor(a.geometry.index.count * Math.min(1, Math.max(0, f * 1.4 - i * 0.08)) / 6) * 6)); } }; },
+  // a compass round the base (Adam 12-11-2026: "compass style, north, south, east, west, with arrows pointing in the direction"): N E S W on a ring,
+  // and one glowing arrow from the business out past the rim toward each place in c.items [{b: bearing in degrees from north}], drawn in one after another
+  compass(c) { const g = new THREE.Group(), m = glowM(c.k ?? 4), rr = R + (c.out ?? 8), y = c.y ?? 2, arrows = [];
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(rr, c.ring ?? 0.5, 6, 160), m); ring.rotation.x = -Math.PI / 2; ring.position.y = y; g.add(ring);
+    [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(([t, d]) => { const cv = document.createElement('canvas'); cv.width = cv.height = 96; const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.font = `800 70px ${D.font}, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t, 48, 52);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, color: t === 'N' ? HERO.clone().multiplyScalar(1.8) : 0xffffff }));
+      const r = rr + (c.lab ?? R * 0.09), a_ = d * Math.PI / 180; sp.position.set(Math.sin(a_) * r, y + 4, -Math.cos(a_) * r); sp.scale.setScalar(c.size ?? R * 0.09); g.add(sp); });
+    const head = new THREE.Shape([new THREE.Vector2(0, 1), new THREE.Vector2(-0.6, 0), new THREE.Vector2(0.6, 0)]);
+    (c.items || []).forEach((it, i) => { const a_ = it.b * Math.PI / 180, dx = Math.sin(a_), dz = -Math.cos(a_), r0 = R * (c.from ?? 0.2), r1 = rr + R * 0.06, hs = c.head ?? R * 0.06;
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(new THREE.Vector3(dx * r0, y + 1, dz * r0), new THREE.Vector3(dx * r1, y + 1, dz * r1)), 40, c.r ?? R * 0.006, 6, false), m);
+      const hg = new THREE.ShapeGeometry(head); hg.scale(hs, hs * 1.5, 1); hg.rotateX(-Math.PI / 2); const hm = new THREE.Mesh(hg, m); hm.rotation.y = -a_; hm.position.set(dx * r1, y + 1, dz * r1); hm.material = m;
+      g.add(tube, hm); arrows.push([tube, hm]); });
+    return { obj: g, mat: m, tick: (t) => { m.opacity = 0.75 + 0.25 * Math.sin(t * 3);
+      arrows.forEach(([tb, hm], i) => { const f = Math.min(1, Math.max(0, (t - 0.3 - i * 0.35) / 0.8)); tb.geometry.setDrawRange(0, Math.floor(tb.geometry.index.count * f / 6) * 6); hm.visible = f >= 1; }); } }; },
   // a 12 month ring round the base: months open now are lit, concept months are dashed in the brand colour
   season(c) { const g = new THREE.Group(), rr = R + 9, y = 2;
     const at = (m, r) => { const t = m / 12 * Math.PI * 2; return [Math.sin(t) * r, -Math.cos(t) * r]; };   // January at north, clockwise seen from above
@@ -421,7 +435,7 @@ const MAKE = {
 };
 // ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
 let LIFE = null;
-if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=d227c962b4'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM, GLOWMATS }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=01f244a22f'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM, GLOWMATS }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
 for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
 const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
 const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
@@ -457,6 +471,7 @@ if (NEAR) { const b = document.createElement('button'); b.className = 'chip near
 // tap a chip: choose it. Tap the chosen chip again: bring its info back if it was hidden, otherwise let go of it.
 HOT.forEach(h => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = h.chip; b.dataset.id = h.id; b.setAttribute('aria-pressed', 'false');
   b.onclick = () => { if (sel && sel.id === h.id) { if (card.style.display === 'none') showCard(h); else choose(null); } else choose(h); }; chips.appendChild(b); });
+{ const nc = document.getElementById('nearchip'); if (nc) chips.appendChild(nc); }   // What's near is the last button, as in the tour (Adam, 13-11-2026)
 { const L = document.getElementById('chipl'), Rb = document.getElementById('chipr');
   const upd = () => { const m = chips.scrollWidth - chips.clientWidth; L.classList.toggle('show', chips.scrollLeft > 4); Rb.classList.toggle('show', m > 4 && chips.scrollLeft < m - 4); };
   const go = (d) => chips.scrollBy({ left: d * Math.max(160, chips.clientWidth * 0.7), behavior: 'smooth' });
@@ -489,7 +504,8 @@ function choose(h, quiet) {
 document.getElementById('cx').onclick = hideCard;   // hide the words, keep the view (Adam, 09-11-2026)
 resetBtn.onclick = () => { T('tap', 'reset'); if (growOn) setGrow(false); else if (nearOn) setNear(false); else choose(null); };
 const growBtn = document.getElementById('grow');
-function setGrow(on, quiet) { growOn = on; growBtn.classList.toggle('on', on); growBtn.setAttribute('aria-pressed', on); glowT = 0; hideFx();
+if (!GROW) growBtn.hidden = true; // no Room to grow card: hide the toggle (Tin Cup froze on it, 12-11-2026)
+function setGrow(on, quiet) { if (on && !GROW) return; growOn = on; growBtn.classList.toggle('on', on); growBtn.setAttribute('aria-pressed', on); glowT = 0; hideFx();
   if (on) { if (nearOn) setNear(false, true); sel = null; chips.querySelectorAll('.chip').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }); resetMats(); showFx(GROW.fx);
     showCard(GROW, true); stopSpin(); goView(GROW.view); }
   else { resetMats(); if (!quiet) { showCard(null); goView(HOME); } } }
@@ -736,6 +752,8 @@ function frame(now, xr) {
   composer.render();
   requestAnimationFrame(frame);
 }
+// build every shader in the background before the first frame, so Chrome never freezes while it makes them (13-11-2026: Tin Cup froze 1.7 s on load)
+try { await renderer.compileAsync(scene, camera); } catch (e) {}
 requestAnimationFrame(frame);
 const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 600);
 hint.textContent = mobile ? 'Drag to spin · two fingers to move and zoom · double-tap to fly in' : 'Drag to spin · two fingers or right-drag to move · pinch or scroll to zoom';

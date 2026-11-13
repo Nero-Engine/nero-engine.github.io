@@ -32,15 +32,42 @@ export async function init(X) {
     for (let i = 0; i < n; i++) I.set(i, 0, PY, 0, 0, 0.0001); I.done(); return I;
   }
 
-  // ---------- ground height under a point (once, at start) ----------
-  const ray = new THREE.Raycaster(), groundM = []; (part.ground || model).traverse(o => { if (o.isMesh) groundM.push(o); });
+  // ---------- ground height under a point ----------
+  // A height grid read off the ground triangles once (about a metre a cell), then every lookup is four reads. It replaced one raycast per point
+  // (Cotton Country 13-11-2026: about 7,000 raycasts into the ground mesh froze the page for 30 s and Chrome offered to kill it). Same answer as
+  // the raycast it replaced (the highest ground under the point, model metres); handed to the listing's own life file as X.groundY / base.groundY.
+  const groundM = []; (part.ground || model).traverse(o => { if (o.isMesh) groundM.push(o); });
   model.updateMatrixWorld(true);
-  const groundY = (x, z, fall = LAND) => { const o = model.localToWorld(new THREE.Vector3(x, 60, z)); ray.set(o, new THREE.Vector3(0, -1, 0)); const h = ray.intersectObjects(groundM, false)[0];
-    return h ? model.worldToLocal(h.point.clone()).y : fall; };
+  let HG = null;
+  function buildHG() {
+    const inv = new THREE.Matrix4().copy(model.matrixWorld).invert(), m = new THREE.Matrix4(), v = new THREE.Vector3(), T = [];
+    let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+    for (const o of groundM) { m.multiplyMatrices(inv, o.matrixWorld); const pa = o.geometry.attributes.position, P = new Float32Array(pa.count * 3);
+      for (let i = 0; i < pa.count; i++) { v.fromBufferAttribute(pa, i).applyMatrix4(m); P[i * 3] = v.x; P[i * 3 + 1] = v.y; P[i * 3 + 2] = v.z; if (v.x < x0) x0 = v.x; if (v.x > x1) x1 = v.x; if (v.z < z0) z0 = v.z; if (v.z > z1) z1 = v.z; }
+      T.push({ P, ix: o.geometry.index ? o.geometry.index.array : null, n: pa.count }); }
+    if (!T.length || !isFinite(x0)) return (HG = { none: true });
+    const C = Math.max(0.5, Math.max(x1 - x0, z1 - z0) / 1400), nx = Math.ceil((x1 - x0) / C) + 1, nz = Math.ceil((z1 - z0) / C) + 1, H = new Float32Array(nx * nz).fill(-1e9);
+    for (const { P, ix, n } of T) { const nt = ix ? ix.length / 3 : n / 3;
+      for (let t = 0; t < nt; t++) { const a = (ix ? ix[t * 3] : t * 3) * 3, b = (ix ? ix[t * 3 + 1] : t * 3 + 1) * 3, c = (ix ? ix[t * 3 + 2] : t * 3 + 2) * 3;
+        const ax = P[a], az = P[a + 2], bx = P[b], bz = P[b + 2], cx = P[c], cz = P[c + 2], det = (bz - cz) * (ax - cx) + (cx - bx) * (az - cz); if (Math.abs(det) < 1e-9) continue;
+        const i0 = Math.max(0, Math.ceil((Math.min(ax, bx, cx) - x0) / C - 0.5)), i1 = Math.min(nx - 1, Math.floor((Math.max(ax, bx, cx) - x0) / C - 0.5));
+        const j0 = Math.max(0, Math.ceil((Math.min(az, bz, cz) - z0) / C - 0.5)), j1 = Math.min(nz - 1, Math.floor((Math.max(az, bz, cz) - z0) / C - 0.5));
+        for (let j = j0; j <= j1; j++) { const pz = z0 + (j + 0.5) * C; for (let i = i0; i <= i1; i++) { const px = x0 + (i + 0.5) * C;
+          const l1 = ((bz - cz) * (px - cx) + (cx - bx) * (pz - cz)) / det, l2 = ((cz - az) * (px - cx) + (ax - cx) * (pz - cz)) / det, l3 = 1 - l1 - l2;
+          if (l1 < -1e-4 || l2 < -1e-4 || l3 < -1e-4) continue; const y = l1 * P[a + 1] + l2 * P[b + 1] + l3 * P[c + 1], k = j * nx + i; if (y > H[k]) H[k] = y; } } } }
+    return (HG = { x0, z0, C, nx, nz, H });
+  }
+  const groundY = (x, z, fall = LAND) => { if (!HG) buildHG(); if (HG.none) return fall; const { x0, z0, C, nx, nz, H } = HG;
+    const gx = (x - x0) / C - 0.5, gz = (z - z0) / C - 0.5, i = Math.floor(gx), j = Math.floor(gz), fx = gx - i, fz = gz - j; let s = 0, w = 0;
+    for (const [di, dj, ww] of [[0, 0, (1 - fx) * (1 - fz)], [1, 0, fx * (1 - fz)], [0, 1, (1 - fx) * fz], [1, 1, fx * fz]]) { const ii = i + di, jj = j + dj; if (ii < 0 || jj < 0 || ii >= nx || jj >= nz) continue; const h = H[jj * nx + ii]; if (h > -1e8 && ww > 0) { s += h * ww; w += ww; } }
+    return w > 1e-6 ? s / w : fall; };
+  X.groundY = groundY;
 
   // ---------- paths ----------
   function path(pts, closed, withY) {
-    const P = pts.map(p => ({ x: p[0], z: p[1], y: withY ? groundY(p[0], p[1]) : null })); if (closed) P.push({ ...P[0] });
+    // with the ground followed, the path is resampled every 4 m so a car or walker never floats or sinks between far apart points (Tin Cup 13-11-2026)
+    let Q = pts; if (withY) { Q = []; for (let i = 0; i < pts.length; i++) { Q.push(pts[i]); const n = pts[i + 1]; if (!n) break; const k = Math.floor(Math.hypot(n[0] - pts[i][0], n[1] - pts[i][1]) / 4); for (let j = 1; j < k; j++) Q.push([pts[i][0] + (n[0] - pts[i][0]) * j / k, pts[i][1] + (n[1] - pts[i][1]) * j / k]); } }
+    const P = Q.map(p => ({ x: p[0], z: p[1], y: withY ? groundY(p[0], p[1]) : null })); if (closed) P.push({ ...P[0] });
     const cum = [0]; for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].z - P[i - 1].z));
     const len = cum[cum.length - 1] || 1;
     return { len, P, at(d, o) { let i = 1; while (i < cum.length - 1 && cum[i] < d) i++; const a = P[i - 1], b = P[i], t = clamp((d - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1));
@@ -96,7 +123,7 @@ export async function init(X) {
   // highway cars: each carriageway one way, gentle fade in and out at the rim
   const CARC = ['#ffffff', '#c9302c', '#2b2f36', '#9aa3ad', '#2d5fa8', '#f2f0ea', '#4a4f57'];
   const nCars = (L.cars || []).reduce((a, c) => a + (c.n || 3), 0), cars = inst('proto_car', nCars, { tint: 'car_body' }); let ci = 0;
-  (L.cars || []).forEach((c) => { for (let j = 0; j < (c.n || 3); j++) { mover(cars, ci, c.pts, { mode: 'wrap', speed: c.speed * (0.9 + 0.2 * Math.random()), t0: (j + Math.random() * 0.5) / (c.n || 3), side: 0, y: LAND + 0.05, extra: { turn: 8 } }); cars.color(ci, CARC[ci % CARC.length]); ci++; } });
+  (L.cars || []).forEach((c) => { for (let j = 0; j < (c.n || 3); j++) { mover(cars, ci, c.pts, { mode: 'wrap', speed: c.speed * (0.9 + 0.2 * Math.random()), t0: (j + Math.random() * 0.5) / (c.n || 3), side: 0, y: LAND + 0.05, ground: !!(c.ground || CFG.carsGround), extra: { turn: 8, lift: (c.ground || CFG.carsGround) ? 0.08 : 0 } }); cars.color(ci, CARC[ci % CARC.length]); ci++; } });
   [carts, people, dogs, mower, pelSit, pels, cars].forEach(I => I && I.done());
 
   // ---------- the bear (Montana Basecamp 10-11-2026, Adam's funny touch): only when model_info life.bear exists, so other listings are unchanged ----------
@@ -396,5 +423,23 @@ export async function init(X) {
     if (!reduced) { swayU.value = t; for (const w of waterTex) { w.t.offset.x = t * 0.018; w.t.offset.y = t * 0.011; w.m.normalScale.copy(w.n0).multiplyScalar(0.85 + 0.15 * Math.sin(t * 0.8)); } tickSurf(t); }
     const want = dusk ? 1 : 0; if (dk !== want || dusk) { dk = reduced ? want : dk + Math.sign(want - dk) * Math.min(Math.abs(want - dk), dt / 2.4); applyDusk(dk, (m) => !!sel && sel.parts.includes(m.userData.p)); }
   }
-  return { fx: FX, tick, dusk: () => dk };
+  // ---------- gravel lanes and pads sit cleanly on the land: drawn in front of the ground so it never flickers through (Tin Cup, Adam 13-11-2026: "very bad and glitchy"). listing.json scene.life.front = the part names, e.g. ["drive", "roads", "pads"] ----------
+  (CFG.front || []).forEach(n => { if (part[n]) part[n].traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -6; m.needsUpdate = true; }); o.renderOrder = 2; } }); });
+
+  // ---------- tap a thing to open its card, the same as pressing its button; tap again to let go (Adam, 13-11-2026) ----------
+  // listing.json scene.life.tap maps a model part to a card id, e.g. { "office_roof": "office", "rvs": "sites", "playground": "play" }
+  const TAP = CFG.tap || {}, partOf = new Map(); Object.entries(part).forEach(([n, o]) => partOf.set(o, n));
+  if (Object.keys(TAP).length && renderer) { const el = renderer.domElement, rc = new THREE.Raycaster(), nd = new THREE.Vector2(); let down = null, tapT = 0;
+    const shown = (o) => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
+    el.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+    el.addEventListener('pointerup', (e) => { if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null; if (moved > 8 || dt > 450) return;
+      if (tapT) { clearTimeout(tapT); tapT = 0; return; }   // a double tap is the engine's fly-in, not a card
+      const cx = e.clientX, cy = e.clientY; tapT = setTimeout(() => { tapT = 0; pick(cx, cy); }, 360); });
+    function pick(x, y) {
+      const r = el.getBoundingClientRect(); nd.set((x - r.left) / r.width * 2 - 1, -((y - r.top) / r.height) * 2 + 1); rc.setFromCamera(nd, X.camera);
+      const hits = rc.intersectObject(model, true);
+      for (const h of hits) { if (!shown(h.object)) continue; let id = null; for (let p = h.object; p && !id; p = p.parent) { const n = partOf.get(p); if (n) id = TAP[n] || (n === 'ground' || n === 'plinth' ? '' : null); }
+        if (id === null) continue; if (!id) return; const b = document.querySelector('#chips .chip[data-id="' + id + '"]'); if (b) b.click(); return; } } }
+
+  return { fx: FX, tick, dusk: () => dk, groundY };
 }
