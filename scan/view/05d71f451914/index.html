@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
@@ -110,6 +111,11 @@
   .card .x { position:absolute; top:6px; right:6px; background:none; padding:8px 10px; color:var(--dim); }
   .card .acts { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
   .card .acts button { font-size:13px; padding:8px 12px; background:#2b2d33; }
+  /* 13-11-2026 (DRD3D): on a phone the card covered the skull: shorter card, first paragraph only, the rest behind Read more */
+  .card .rest { display:none; } .card .rest.open { display:block; }
+  .card .morebtn { background:none; padding:2px 0; color:var(--acc); font-size:13px; font-weight:700; }
+  @media (min-width:900px) { .card { right:auto; width:460px; } }
+  @media (max-width:560px) { .card { padding:12px 14px 10px; max-height:38vh; } .card p { font-size:13.5px; line-height:1.4; } .card h3 { font-size:16px; } }
   .steps { display:none; }
   .steps.on { display:flex; }
   .steps button { flex:1; }
@@ -154,7 +160,7 @@
 <canvas id="c"></canvas>
 <div id="load"><img src="logo.png?v=1adf9245" alt=""><span data-t="load">Cargando tu tomografía…</span></div>
 <div id="hs"></div>
-<model-viewer id="mv" loading="eager" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"></model-viewer>
+<model-viewer id="mv" loading="eager" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor"></model-viewer>
 <div class="tag" id="tagA"></div>
 <div class="tag lab" id="lab0"></div><div class="tag lab" id="lab1"></div>
 
@@ -227,7 +233,7 @@ const T = {
     nUp: 'Its nerve comes from the <b>superior alveolar nerves</b>, which run down past your sinus.', nLow: 'Its nerve comes from the <b>nerve canal</b> that runs through the jaw below its roots.',
     sideL: 'your left side', sideR: 'your right side', showMap: 'Show the nerve map', hideMap: 'Hide the nerve map',
     earMM: (l, r) => `In your scan, the top of your jaw bone sits about <b>${l} mm from your left ear canal and ${r} mm from your right</b>.`, earNone: 'Your jaw joint sits just in front of it.',
-    lang: 'ES' },
+    lang: 'ES', readmore: 'Read more', less: 'Read less' },
   es: { load: 'Cargando tu tomografía…', hint: 'Girá · pellizcá · tocá cualquier parte', bone: 'Hueso real', xray: 'Rayos X', ghost: 'Fantasma', reset: 'Reiniciar',
     l_teeth: 'Dientes', l_canal: 'Canal del nervio', l_nervemap: 'Mapa de nervios', l_sinus: 'Senos maxilares', l_skull: 'Cráneo', l_ear: 'Oídos', l_muscle: 'Músculos', l_airway: 'Vía aérea', l_dots: 'Puntos',
     pbtn: 'Mostrar mi problema', arbtn: 'Verlo en mi mesa', back: 'Atrás', next: 'Siguiente', done: 'Listo', exit: 'Salir', ar: 'RA',
@@ -239,7 +245,7 @@ const T = {
     nUp: 'Su nervio viene de los <b>nervios alveolares superiores</b>, que bajan por la pared de tu seno maxilar.', nLow: 'Su nervio viene del <b>canal del nervio</b> que recorre la mandíbula por debajo de sus raíces.',
     sideL: 'tu lado izquierdo', sideR: 'tu lado derecho', showMap: 'Mostrar el mapa de nervios', hideMap: 'Ocultar el mapa de nervios',
     earMM: (l, r) => `En tu tomografía, la parte de arriba de tu mandíbula queda a unos <b>${l} mm de tu conducto auditivo izquierdo y ${r} mm del derecho</b>.`, earNone: 'Tu articulación de la mandíbula está justo delante.',
-    lang: 'EN' },
+    lang: 'EN', readmore: 'Leer más', less: 'Leer menos' },
 };
 const t = (k, ...a) => { const v = (T[LANG] && T[LANG][k] !== undefined) ? T[LANG][k] : T.en[k]; return typeof v === 'function' ? v(...a) : v; };
 
@@ -770,7 +776,6 @@ function runStep(i) {
   glowSet = new Set(s.glow || []); jointMode = s.joints || null; glowCol.set(s.joints === 'ok' ? 0x20ff70 : 0xff1020);
   stopAnim();
   lineShow = !!s.lines;
-  setLook(s.look || 'ghost');
   goView(s.view, 1.4);
   if (s.anim) setTimeout(() => { if (inSteps && step === i) playAnim(s.anim); }, 1500);
   stepCard(i);
@@ -778,11 +783,14 @@ function runStep(i) {
 function stepCard(i) {
   const s = PATIENT.steps[i];
   const ex = s.anim && s.anim.x > 1 ? `<p class="exl">${t('exl', LANG === 'es' ? String(s.anim.x).replace('.', ',') : s.anim.x)}</p>` : '';
-  showCard(tr(s.sub), tr(s.title), tr(s.text) + ex + `<p style="font-size:11px;color:#888;margin-top:8px">${tr(PATIENT.source)}</p>`);
+  const parts = tr(s.text).split('</p>').filter(x => x.trim()).map(x => x + '</p>');
+  const note = i === 0 ? `<p style="font-size:11px;color:#888;margin-top:8px">${tr(PATIENT.source)}</p>` : '';
+  const rest = parts.slice(1).join('') + ex + note;
+  showCard(tr(s.sub), tr(s.title), parts[0] + (rest ? `<div class="rest">${rest}</div><button class="morebtn" onclick="event.stopPropagation(); NV.beacon('tap', 'read more'); this.previousElementSibling.classList.toggle('open'); this.textContent = this.previousElementSibling.classList.contains('open') ? '${t('less')}' : '${t('readmore')}'">${t('readmore')}</button>` : ''));
   document.getElementById('scount').textContent = `${i + 1} / ${PATIENT.steps.length}`;
   document.getElementById('sprev').disabled = i === 0; document.getElementById('snext').textContent = t(i === PATIENT.steps.length - 1 ? 'done' : 'next');
 }
-function enterSteps() { inSteps = true; savedState = { look, layers: { ...layers } }; stepsRow.classList.add('on'); mainRow.style.display = 'none'; if (look === 'bone') setLook('ghost'); runStep(0); }
+function enterSteps() { inSteps = true; savedState = { look, layers: { ...layers } }; stepsRow.classList.add('on'); mainRow.style.display = 'none'; runStep(0); }
 function exitSteps(goHome = true) {
   inSteps = false; stepsRow.classList.remove('on'); mainRow.style.display = 'flex'; glowSet.clear(); jointMode = null; lineShow = false; stopAnim(); hideCard();
   if (savedState) { Object.assign(layers, savedState.layers); setLayer('teeth', layers.teeth); setLook(savedState.look); savedState = null; }
