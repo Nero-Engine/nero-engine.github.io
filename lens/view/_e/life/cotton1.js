@@ -156,6 +156,7 @@ export async function init(X) {
       x.fillStyle = '#ffffff'; x.textAlign = 'center'; let fs = b ? 104 : 72; x.font = '700 ' + fs + 'px Arial, sans-serif'; const tw = x.measureText(a).width; if (tw > 440) { fs = Math.floor(fs * 440 / tw); x.font = '700 ' + fs + 'px Arial, sans-serif'; } x.fillText(a, 256, b ? 150 : 152); if (b) { x.font = '600 36px Arial, sans-serif'; x.fillStyle = '#' + HERO.getHexString(); x.fillText(b, 256, 198); } t.needsUpdate = true; };
     s.userData.draw(txt, sub); return s; };
   // the 48 pads light one by one (a frame of light round each, at floor height), a counter above the barns counts 1 to 48
+  // NOT FOR COPYING: Adam 13-11-2026 wants the glow only, never a counting number on screen (kept here because Cotton was approved with it; ./lens check fails new models with a counter)
   FX.ccpads = (c) => { const g = new THREE.Group(), n = pads.length, m = lightM(c.k ?? 2.4), sides = [];
     const bar = new THREE.BoxGeometry(1, 0.14, 1); for (let s = 0; s < 4; s++) { const im = new THREE.InstancedMesh(bar, m, n); im.frustumCulled = false; im.renderOrder = 5; for (let i = 0; i < n; i++) im.setColorAt(i, new THREE.Color(0, 0, 0)); g.add(im); sides.push(im); }
     const pv = new THREE.Vector3(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), col = new THREE.Color(), m4 = new THREE.Matrix4();
