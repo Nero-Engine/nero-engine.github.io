@@ -252,7 +252,7 @@ export async function init(X) {
   const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/></svg>';
   const DAY_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M1.5 12H4M20 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>';
   const label = () => { btn.innerHTML = dusk ? DAY_SVG + '<span>Daytime</span>' : SUN_SVG + '<span>Sunset</span>'; btn.classList.toggle('on', dusk); btn.setAttribute('aria-pressed', dusk); btn.setAttribute('aria-label', dusk ? 'Back to daytime' : 'Show the park at sunset'); };
-  label(); btn.onclick = () => { dusk = !dusk; label(); }; (tb && tb.parentNode ? tb.parentNode : document.body).insertBefore(btn, tb ? tb.nextSibling : null);
+  label(); btn.onclick = () => { dusk = !dusk; label(); if (NV.beacon) NV.beacon('tap', dusk ? 'sunset' : 'daytime'); }; (tb && tb.parentNode ? tb.parentNode : document.body).insertBefore(btn, tb ? tb.nextSibling : null);   // Sunset presses tracked per recipient (Adam 14-11-2026)
   window.__sunset = (on) => { dusk = on == null ? !dusk : !!on; label(); if (reduced) dk = dusk ? 1 : 0; };
 
   // ---------- Room to grow: the lawn builds itself, out of light ----------

@@ -174,6 +174,25 @@
   #askbtn { border-color:var(--hero) !important; }
   #tourbtn { position:fixed; left:14px; top:calc(env(safe-area-inset-top) + 64px); z-index:4; }
   #tourbtn.on { background:var(--hero); color:var(--onhero); border-color:var(--hero); }
+  /* Adam 14-11-2026 (Wilderness RV Park): on a computer the buttons were too small and people clicked the model before ever seeing them.
+     Wide screens: bigger text and tap area. First open: Tour and Sunset pulse for a few seconds and a "Take the tour" hint sits over the tabs
+     until anything is clicked. Phones keep their sizes. */
+  @media (min-width: 900px) {
+    #acts button, #reset, #tourbtn, #sunbtn, #wfbtn { font-size:15.5px !important; padding:11px 18px !important; min-height:46px !important; border-radius:24px !important; gap:8px !important; }
+    #acts svg, #tourbtn svg, #sunbtn svg, #wfbtn svg { width:19px !important; height:19px !important; }
+    #tourbtn { top:calc(env(safe-area-inset-top) + 70px); left:18px; }
+    #sunbtn { top:calc(env(safe-area-inset-top) + 126px) !important; left:18px !important; }
+    #wfbtn { top:calc(env(safe-area-inset-top) + 182px) !important; left:18px !important; }
+    #acts { top:calc(env(safe-area-inset-top) + 70px); right:18px; gap:10px; }
+    .chip { font-size:14.5px; padding:9px 15px; }
+  }
+  @keyframes nvpulse { 0%, 100% { box-shadow:0 0 0 0 rgba(var(--lc),0), 0 0 0 0 var(--hero); } 50% { box-shadow:0 0 0 2px var(--hero), 0 0 22px 4px var(--hero); } }
+  body.hello #tourbtn, body.hello #sunbtn { animation:nvpulse 1.4s ease-in-out 4; border-color:var(--hero) !important; }
+  #tourhint { display:block; width:max-content; margin:0 auto 10px; border:1px solid var(--hero); background:rgba(var(--bgc),.82); color:var(--ink); font:700 14px var(--font), sans-serif; padding:9px 16px; border-radius:22px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:opacity .5s; box-shadow:0 2px 14px rgba(0,0,0,.35); cursor:pointer; }
+  #tourhint[hidden] { display:none; } #tourhint.gone { opacity:0; pointer-events:none; }
+  #tourhint svg { width:13px; height:13px; vertical-align:-1px; margin-right:6px; fill:var(--hero); }
+  @media (min-width: 900px) { #tourhint { font-size:16px; padding:11px 20px; } }
   #tourbar { position:fixed; left:0; top:0; height:3px; width:0; background:var(--hero); z-index:6; }
   #toast { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 112px); transform:translateX(-50%); background:var(--sky); color:var(--navy); font:700 13px var(--font), sans-serif; padding:9px 14px; border-radius:20px; z-index:12; opacity:0; pointer-events:none; transition:opacity .3s; white-space:nowrap; }
   #toast.on { opacity:1; }
@@ -231,6 +250,7 @@
 <div id="qrbox"><div id="qr"></div>Scan with your phone<br>to put it on your desk</div>
 <div id="bottom">
   <div id="card" aria-live="polite"><div id="cnav"><button id="cprev" aria-label="Previous fact">‹</button><span id="cnum"></span><button id="cnext" aria-label="Next fact">›</button></div><button class="x" id="cx" aria-label="Close">×</button><div class="k" id="ck"></div><h2 id="ch"></h2><p id="cp"></p><div id="nlist"></div><div class="src" id="cs"></div></div>
+  <button id="tourhint" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>Take the tour</button>
   <button id="mini" hidden><span id="minit"></span><em>Show info</em></button>
   <div id="chipwrap"><button class="chipnav" id="chipl" aria-label="Scroll the tabs left"><span>‹</span></button><div id="chips"></div><button class="chipnav" id="chipr" aria-label="Scroll the tabs right"><span>›</span></button></div>
   <div class="row">
@@ -428,7 +448,7 @@ const MAKE = {
 };
 // ---------- life layer (moving pieces, sunset, build animation): only when the listing asks for it (scene.life) ----------
 let LIFE = null;
-if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=01f244a22f'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM, GLOWMATS }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
+if (SC.life) { try { const mod = await import(SC.life.src || '../_e/life/life1.js?v=7577d6a064'); LIFE = await mod.init({ THREE, goView, model, part, MATS, INFO, SC, D, GROW, scene, sun, renderer, camera, controls, NV, HERO, glowM, GLOWMATS }); Object.assign(MAKE, LIFE.fx || {}); } catch (e) { console.warn('life layer', e); } }
 for (const [id, c] of Object.entries(D.fx || {})) { const f = MAKE[c.type](c); f.obj.visible = false; model.add(f.obj); FX[id] = f; }
 const hideFx = () => { for (const f of Object.values(FX)) f.obj.visible = false; };
 const showFx = (ids) => { for (const id of ids || []) FX[id].obj.visible = true; };
@@ -571,13 +591,19 @@ function goStop(s, quiet) {
   else if (s === 'near') { if (!quiet) T('tap', 'near'); if (sel) choose(null, true); setNear(true); }
   else choose(s, quiet); }
 let tour = null;   // { i, t } while playing
-function tourGo(i) { tour.i = i; tour.t = 0; goStop(STOPS[i], true); }
+function tourGo(i) { tour.i = i; tour.t = 0; T('tour', 'stop ' + (typeof STOPS[i] === 'string' ? STOPS[i] : STOPS[i].id)); goStop(STOPS[i], true); }
 function startTour(how) { if (tour) return; T('tour', how); tour = { i: 0, t: 0 }; tourBtn.classList.add('on'); tourBtn.setAttribute('aria-pressed', 'true'); tourBtn.lastElementChild.textContent = 'Stop'; tourGo(0); }
 function stopTour(finished) { if (!tour) return; tour = null; tourBtn.classList.remove('on'); tourBtn.setAttribute('aria-pressed', 'false'); tourBtn.lastElementChild.textContent = 'Tour'; tourBar.style.width = '0';
   if (finished) { /* stay on the last stop (Adam, 10-11-2026) */ } }
 function tickTour(dt) { if (!tour) return; tour.t += dt; tourBar.style.width = (100 * (STOP_DUR.slice(0, tour.i).reduce((a, b) => a + b, 0) + Math.min(tour.t, STOP_DUR[tour.i])) / STOP_DUR.reduce((a, b) => a + b, 0)) + '%';
   if (tour.t >= STOP_DUR[tour.i]) { if (tour.i + 1 < STOPS.length) tourGo(tour.i + 1); else stopTour(true); } }
-tourBtn.onclick = () => { if (tour) stopTour(); else startTour('tap'); };
+tourBtn.onclick = () => { if (tour) { T('tour', 'stopped'); stopTour(); } else startTour('tap'); };
+// first open (Adam 14-11-2026): Tour and Sunset pulse a few times, and the hint over the tabs starts the tour; both go at the first click anywhere
+{ const hint = document.getElementById('tourhint'); let done = false;
+  const bye = () => { if (done) return; done = true; document.body.classList.remove('hello'); hint.classList.add('gone'); setTimeout(() => { hint.hidden = true; }, 600); };
+  window.__hello = () => { if (done) return; document.body.classList.add('hello'); hint.hidden = false; setTimeout(() => document.body.classList.remove('hello'), 6000); };
+  hint.onclick = (e) => { e.stopPropagation(); T('tap', 'hint tour'); bye(); startTour('hint'); };
+  addEventListener('pointerdown', (e) => { if (e.target !== hint && !hint.contains(e.target)) bye(); }, { capture: true }); addEventListener('keydown', bye, { capture: true }); }
 // arrows on the card: step to the next or previous fact (Room to grow is the last one)
 function step(d) { stopTour(); const n = STOPS.length, i = growOn ? STOPS.indexOf('grow') : nearOn ? STOPS.indexOf('near') : HOT.indexOf(sel); goStop(STOPS[((i < 0 ? 0 : i + d) + n) % n]); }
 document.getElementById('cprev').onclick = () => step(-1); document.getElementById('cnext').onclick = () => step(1);
@@ -752,7 +778,7 @@ const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() 
 hint.textContent = mobile ? 'Drag to spin · two fingers to move and zoom · double-tap to fly in' : 'Drag to spin · two fingers or right-drag to move · pinch or scroll to zoom';
 setTimeout(() => { hint.style.opacity = 0; }, 8000);
 window.__look = (at, dist, el, az) => { controls.autoRotate = false; anim = null; const to = poseOf({ at, dist, el, az }); controls.target.copy(to.at); camera.position.copy(to.p); controls.update(); };   // test hook: the checking scripts film any spot
-window.__ready = true; window.__cam = () => [controls.target.x, controls.target.z, camera.position.distanceTo(controls.target)]; NV.loaded(); window.__tour = startTour;
+if (window.__hello && !NV.qs.get('nohello')) window.__hello(); window.__ready = true; window.__cam = () => [controls.target.x, controls.target.z, camera.position.distanceTo(controls.target)]; NV.loaded(); window.__tour = startTour;
 // the tour never starts by itself: it plays only when the Tour button is pressed (Adam, 09-11-2026)
 if (!mobile) { NV.qr(document.getElementById('qr')); document.getElementById('qrbox').classList.add('on'); }
 // ---------- works with no signal: once opened, this listing is saved on the device (see engine/sw.js) ----------
