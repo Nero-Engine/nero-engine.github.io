@@ -32,6 +32,13 @@ Nero Work is a UK job exchange for electricians, plumbers and every other trade,
 - MCP connector: https://nero-work.nerolabs.workers.dev/mcp
 - [Nero Work](https://neroengine.com/work), [demo](https://nero-work-web.nerolabs.workers.dev/demo), [trust](https://nero-work-web.nerolabs.workers.dev/trust), [privacy](https://nero-work-web.nerolabs.workers.dev/privacy), [terms](https://nero-work-web.nerolabs.workers.dev/terms)
 
+## Nero Labs, data and AI tools for people and AI agents (https://neroengine.com/labs)
+Nero Labs builds more than 70 pay-per-result tools on the Apify Store (https://apify.com/nerolabs), run from a browser, the Apify API or an AI agent.
+- Kinds of tool: dataset tools (filter, clean, join, group), bulk files and pages (OCR, PageSpeed, downloads, logos), AI search visibility (AI Visibility Tracker for ChatGPT, Claude, Gemini, Grok and Perplexity; AI Crawler Access Checker), scoring scraped data (ads, Reddit, reviews), official records (UK Companies House, Ireland CRO, Grants.gov), AI on your lists (AI Enrich, Email List Cleaner).
+- Priced per result, usually a fraction of a cent per row; failed or empty rows are not charged; AI model costs billed by Apify at cost.
+- Listed on the official MCP Registry, with a Nero Labs plugin for ChatGPT and Claude, and free tool packs for UK trades.
+- [Nero Labs](https://neroengine.com/labs), [all tools on Apify](https://apify.com/nerolabs)
+
 # Nero Engine for trades (https://neroengine.com/trades)
 
 > Nero Engine (Nero Engine Group Ltd, company 16521432) builds websites and AI call answering for UK trade businesses on a monthly subscription. £299 a month for the full system, no setup fee, no contract, live inside a week, full refund if not happy after the first 30 days.

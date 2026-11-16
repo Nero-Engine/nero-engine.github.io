@@ -715,3 +715,11 @@ body[data-chat] .wa svg{width:27px;height:27px}
 @media(max-width:640px){.wcopy code{font-size:12.5px}}
 .gcards.g4 .gin h2{font-size:clamp(30px,2.7vw,44px)}
 .gcards.g4 .gin p{font-size:16px}
+.gcards.g5,.ghub.g5h{grid-template-columns:repeat(6,1fr)}
+.gcards.g5>*,.ghub.g5h>*{grid-column:span 2}
+.gcards.g5>:nth-child(n+4),.ghub.g5h>:nth-child(n+4){grid-column:span 3}
+@media (max-width:1100px){.gcards.g5,.ghub.g5h{grid-template-columns:1fr 1fr}.gcards.g5>*,.ghub.g5h>*,.gcards.g5>:nth-child(n+4),.ghub.g5h>:nth-child(n+4){grid-column:auto}.gcards.g5>:last-child,.ghub.g5h>:last-child{grid-column:1/-1}}
+@media (max-width:640px){.gcards.g5,.ghub.g5h{grid-template-columns:1fr}}
+.lval.l3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:1080px){.lval.l3{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.lval.l3{grid-template-columns:1fr}}
