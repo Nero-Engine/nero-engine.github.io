@@ -218,6 +218,7 @@
   .nr small { grid-column:2 / 4; display:none; font-size:12px; font-weight:500; line-height:1.35; color:var(--muted); white-space:normal; padding:1px 0 2px; }
   .nr.on { background:rgba(var(--lc),.09); } .nr.on i { background:var(--hero); color:var(--onhero); } .nr.on small { display:block; } .nr.on span { white-space:normal; }
   .tag.nt { pointer-events:auto; cursor:pointer; padding:5px 10px; } .tag.nt.on { background:var(--hero); color:var(--onhero); } .tag.nt.off { opacity:.6; }
+  #card .src .stog { background:none; border:0; padding:4px 0; margin:0; font:inherit; font-size:12px; color:var(--muted); text-decoration:underline; text-underline-offset:2px; cursor:pointer; } #card .src .stxt { display:none; } #card .src.open .stxt { display:block; margin-top:2px; max-height:30vh; overflow:auto; }
   #card .src a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
   button:focus-visible, a:focus-visible { outline:2px solid var(--hero); outline-offset:2px; }
   /* the facts as a plain list: read by screen readers always, shown to everyone if the 3D view cannot load */
@@ -498,9 +499,14 @@ mini.onclick = () => showCard(growOn ? GROW : nearOn ? NEARC : sel, growOn ? 'co
 function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept === true ? 'concept' : (concept || ''); card.style.display = 'block';
   { const all = [...HOT, ...(NEARC ? [NEARC] : []), ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
   { const ck = document.getElementById('ck'), parts = String(c.k).split(' · '); ck.textContent = parts[0]; if (parts.length > 1) { const sm = document.createElement('small'); sm.textContent = parts.slice(1).join(' · '); ck.appendChild(sm); } } document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
-  const cs = document.getElementById('cs'); cs.textContent = c.s;
-  for (const k of c.links || []) { const a = document.createElement('a'); a.href = k.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = k.t; cs.append(' · ', a); }
-  if (c.links && c.links.length && D.checked) cs.append(' · checked ' + D.checked); }
+  // Source stays on every card but folded behind one small tap (Adam 16-11-2026: the source filled the screen and blocked the model)
+  const cs = document.getElementById('cs'); cs.textContent = ''; cs.classList.remove('open');
+  const sb = document.createElement('button'); sb.className = 'stog'; sb.type = 'button'; sb.textContent = 'Source'; sb.setAttribute('aria-expanded', 'false');
+  const st = document.createElement('span'); st.className = 'stxt'; st.textContent = c.s;
+  for (const k of c.links || []) { const a = document.createElement('a'); a.href = k.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = k.t; st.append(' · ', a); }
+  if (c.links && c.links.length && D.checked) st.append(' · checked ' + D.checked);
+  sb.onclick = (e) => { e.stopPropagation(); const o = cs.classList.toggle('open'); sb.setAttribute('aria-expanded', String(o)); sb.textContent = o ? 'Hide source' : 'Source'; };
+  if (c.s) cs.append(sb, st); }
 function resetMats() { MATS.forEach(m => { m.color.copy(m.userData.c0); m.emissive.copy(m.userData.e0); m.emissiveIntensity = 1; }); }
 function choose(h, quiet) {
   if (h && !quiet) T('tap', h.id);
