@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>A reel for Three Pillar Communities</title>
+<link rel="icon" href="/favicon.ico">
+<meta property="og:title" content="A reel for Three Pillar Communities">
+<meta property="og:image" content="https://neroengine.com/lens/reel/bce0ee931129/poster.jpg">
+<style>
+  :root { --acc: #d9d9d9; --ink: #f4f4f4; --dim: #a7adb8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #07090d; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+         display: flex; align-items: center; justify-content: center; }
+  main { width: min(1040px, 100%); padding: 28px 16px 36px; }
+  .k { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--acc); margin: 0 0 8px; filter: brightness(1.25); }
+  h1 { font-size: clamp(22px, 3.6vw, 34px); margin: 0 0 8px; font-weight: 650; letter-spacing: -.01em; }
+  p { color: var(--dim); margin: 0 0 18px; line-height: 1.55; font-size: 15px; max-width: 720px; }
+  .frame { border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 18px 60px rgba(0,0,0,.6); border-top: 3px solid var(--acc); }
+  video { width: 100%; display: block; aspect-ratio: 16 / 9; background: #000; }
+  .by { font-size: 12px; color: #6c7380; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="k">Nero Lens</div>
+  <h1>A reel for Three Pillar Communities</h1>
+  <p>Our demo reel, rebuilt in your colours. Every film we make is built only from public data: where the property is, who can reach it, why people come, and a 3D model your investors can open on any phone.</p>
+  <div class="frame"><video id="v" src="reel.mp4" poster="poster.jpg" controls playsinline preload="metadata"></video></div>
+  <p style="margin-top:18px">Questions or a property in mind? Reply to the email this link came in.</p>
+  <div class="by">Nero Lens, a trading name of Nero Engine Group Ltd, London. Scenes shown are from earlier films.</div>
+</main>
+<script>
+(function () {
+  // Visits go to the viewer platform's tracker (Lens dashboard), like a desk viewer: no cookies, no outside companies.
+  var L = "51fe127be9b8", OWN = "3ce526", T = "https://nero-viewer.nerolabs.workers.dev/lens/view/_t", qs = new URLSearchParams(location.search), done = {};
+  var r = (qs.get("r") || "").replace(/[^\w-]/g, "").slice(0, 24);
+  try { if (qs.get("me") === "1") localStorage.setItem("nvme", "1"); if (localStorage.getItem("nvme") === "1") r = "adam"; } catch (e) {}
+  r = r || OWN;
+  var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  function send(e, x) { try { var s = JSON.stringify({ l: L, r: r, e: e, x: String(x == null ? "" : x).slice(0, 80) });
+    if (!(navigator.sendBeacon && navigator.sendBeacon(T, s))) fetch(T, { method: "POST", body: s, keepalive: true, mode: "no-cors" }); } catch (err) {} }
+  function once(w) { if (!done[w]) { done[w] = 1; send("tap", w); } }
+  send("open", "reel page on " + (mobile ? "phone" : "computer"));
+  var v = document.getElementById("v"), marks = {};
+  v.addEventListener("play", function () { once("played the reel"); });
+  v.addEventListener("timeupdate", function () { if (!v.duration) return; var pc = v.currentTime / v.duration;
+    [25, 50, 75].forEach(function (m) { if (pc >= m / 100 && !marks[m]) { marks[m] = 1; send("tap", "watched " + m + "% of the reel"); } }); });
+  v.addEventListener("ended", function () { once("watched all of the reel"); });
+  v.addEventListener("webkitbeginfullscreen", function () { once("full screen"); });
+  document.addEventListener("fullscreenchange", function () { if (document.fullscreenElement) once("full screen"); });
+  var shown = 0, last = Date.now(), sent = 0;
+  setInterval(function () { var now = Date.now(); if (!document.hidden) shown += now - last; last = now;
+    var s = Math.round(shown / 1000); if (s - sent >= 10) { sent = s; send("time", s); } }, 2000);
+  window.addEventListener("error", function (ev) { if (!done.err) { done.err = 1; send("err", "reel page: " + (ev.message || "error")); } });
+})();
+</script>
+</body>
+</html>
