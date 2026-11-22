@@ -119,7 +119,7 @@
     #bottom.reading #card .src { margin-top:4px; }
   }
   #mini { display:flex; align-items:center; justify-content:space-between; gap:10px; width:calc(100% - 32px); margin:0 16px 10px; background:var(--panel); border:1px solid rgba(var(--lc),.14); border-radius:12px; padding:9px 12px; color:var(--ink); font:700 13.5px var(--font), sans-serif; text-align:left; }
-  #mini[hidden], #reset[hidden], #grow[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
+  #mini[hidden], #reset[hidden], #grow[hidden], #glass[hidden] { display:none; } #mini em { font-style:normal; color:var(--hero); font-size:12px; white-space:nowrap; }
   #reset { position:fixed; right:14px; top:calc(env(safe-area-inset-top) + 108px); z-index:4; }
   #chips { display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
   #chips::-webkit-scrollbar { display:none; }
@@ -134,12 +134,13 @@
   .chip { flex:0 0 auto; border:1px solid rgba(var(--lc),.3); background:rgba(var(--bgc),.66); backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); box-shadow:0 2px 10px rgba(0,0,0,.28); color:var(--ink); font:600 13.5px var(--font), sans-serif; padding:9px 14px; border-radius:22px; }
   .chip.on { background:var(--hero); border-color:var(--hero); color:var(--onhero); }
   .row { display:flex; gap:8px; padding:0 16px; align-items:stretch; }
-  #grow { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid rgba(var(--lc),.3); background:rgba(var(--bgc),.66); backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); box-shadow:0 2px 10px rgba(0,0,0,.28); color:var(--ink);
+  #grow, #glass { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid rgba(var(--lc),.3); background:rgba(var(--bgc),.66); backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); box-shadow:0 2px 10px rgba(0,0,0,.28); color:var(--ink);
           font:600 13px var(--font), sans-serif; padding:8px 10px; border-radius:12px; text-align:left; white-space:nowrap; }
-  #grow small { display:block; font-size:12px; letter-spacing:.1em; color:var(--hero); font-weight:700; }
+  #grow small, #glass small { display:block; font-size:12px; letter-spacing:.1em; color:var(--hero); font-weight:700; }
   .sw { width:38px; height:22px; border-radius:11px; background:var(--sw); position:relative; flex:0 0 auto; transition:background .2s; }
   .sw::after { content:""; position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .2s; }
-  #grow.on .sw { background:var(--swon); } #grow.on .sw::after { left:19px; }
+  #grow.on .sw, #glass.on .sw { background:var(--swon); } #grow.on .sw::after, #glass.on .sw::after { left:19px; }
+  #card.pick p { white-space:pre-line; }
   #ar { flex:1.25 1 0; border:0; border-radius:12px; background:var(--sky); color:var(--navy); font:800 14.5px var(--font), sans-serif; padding:10px 12px; display:flex; align-items:center; justify-content:center; gap:8px; }
   #ar svg { width:20px; height:20px; }
   #legal { text-align:center; font-size:12px; color:var(--muted2); padding:9px 16px 0; line-height:1.3; }
@@ -256,6 +257,7 @@
   <div id="chipwrap"><button class="chipnav" id="chipl" aria-label="Scroll the tabs left"><span>‹</span></button><div id="chips"></div><button class="chipnav" id="chipr" aria-label="Scroll the tabs right"><span>›</span></button></div>
   <div class="row">
     <button id="grow" aria-pressed="false"><span><small>CONCEPT</small>Room to grow</span><span class="sw"></span></button>
+    <button id="glass" aria-pressed="false" hidden><span><small id="glassk">GROUND</small><span id="glasst">See through</span></span><span class="sw"></span></button>
     <button id="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>View on your desk</button>
   </div>
   <div id="legal">Illustrative model made from public data. Not to scale, not a survey.<span class="extra"> Preview prepared for REV Real Estate. · <a href="../_e/legal/privacy.html" target="_blank" rel="noopener">Privacy</a></span></div>
@@ -497,7 +499,7 @@ const bottomBox = document.getElementById('bottom');
 function hideCard() { const c = growOn ? GROW : nearOn ? NEARC : sel; card.style.display = 'none'; bottomBox.classList.remove('reading'); if (c) { document.getElementById('minit').textContent = (c.h || '').replace(/<[^>]+>/g, ''); mini.hidden = false; } }
 mini.onclick = () => showCard(growOn ? GROW : nearOn ? NEARC : sel, growOn ? 'concept' : nearOn ? 'near' : '');
 function showCard(c, concept) { mini.hidden = true; resetBtn.hidden = !c; bottomBox.classList.toggle('reading', !!c); if (!c) { card.style.display = 'none'; return; } card.className = concept === true ? 'concept' : (concept || ''); card.style.display = 'block';
-  { const all = [...HOT, ...(NEARC ? [NEARC] : []), ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = (i + 1) + ' / ' + all.length; }
+  { const all = [...HOT, ...(NEARC ? [NEARC] : []), ...(GROW ? [GROW] : [])], i = all.indexOf(c); document.getElementById('cnum').textContent = i < 0 ? '' : (i + 1) + ' / ' + all.length; }
   { const ck = document.getElementById('ck'), parts = String(c.k).split(' · '); ck.textContent = parts[0]; if (parts.length > 1) { const sm = document.createElement('small'); sm.textContent = parts.slice(1).join(' · '); ck.appendChild(sm); } } document.getElementById('ch').innerHTML = c.h; document.getElementById('cp').textContent = c.p;
   // Source stays on every card but folded behind one small tap (Adam 16-11-2026: the source filled the screen and blocked the model)
   const cs = document.getElementById('cs'); cs.textContent = ''; cs.classList.remove('open');
@@ -515,8 +517,9 @@ function choose(h, quiet) {
   chips.querySelectorAll('.chip').forEach(b => { const on = !!h && b.dataset.id === h.id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   if (h && growOn) setGrow(false, true);
   if (h && nearOn) setNear(false, true);
-  showCard(h); hideFx(); glowT = 0;
+  showCard(h, h && h.cls); hideFx(); glowT = 0;
   if (h) showFx(h.fx);
+  if (h && h.glass && SC.glass) setGlass(true, true);
   goView(h ? h.view : HOME);
   if (!h) resetMats();
 }
@@ -529,6 +532,31 @@ function setGrow(on, quiet) { if (on && !GROW) return; growOn = on; growBtn.clas
     showCard(GROW, true); stopSpin(); goView(GROW.view); }
   else { resetMats(); if (!quiet) { showCard(null); goView(HOME); } } }
 growBtn.onclick = () => { stopTour(); if (!growOn) T('tap', 'grow'); setGrow(!growOn); };
+// ---------- see-through ground (scene.glass, 21-11-2026, Brixton Langis): a switch fades the fadeParts (the glass lid) from solid ground to glass and back.
+// scene.glass = {o: opacity when glass, start: true (glass from the first frame) | "reveal" (solid, then turns to glass after a moment), label, kicker}; a card with "glass": true turns it on
+let glassOn = false; const glassBtn = document.getElementById('glass');
+function setGlass(on, quiet) { if (!SC.glass) return; glassOn = on; glassBtn.classList.toggle('on', on); glassBtn.setAttribute('aria-pressed', on); if (!quiet) T('tap', on ? 'glass' : 'solid'); }
+if (SC.glass) { glassBtn.hidden = false; if (SC.glass.label) document.getElementById('glasst').textContent = SC.glass.label; if (SC.glass.kicker) document.getElementById('glassk').textContent = SC.glass.kicker;
+  glassBtn.onclick = () => { stopTour(); setGlass(!glassOn); };
+  if (SC.glass.start === true) { setGlass(true, true); fadeO = SC.glass.o ?? 0.12; } else if (SC.glass.start === 'reveal') setTimeout(() => { if (!sel || !sel.parts.length) setGlass(true, true); }, 1600); }
+// ---------- tap a drill hole (scene.pick, 21-11-2026): model_info.json[scene.pick.list] = [{n, a: [x,y,z], b: [x,y,z], u: 1 if under the ground, k, p, s, url}].
+// One tap near a line on screen opens that hole's own card (its published values and the release link) and lights it; under-ground lines only while the ground is glass.
+const PICKS = SC.pick ? INFO[SC.pick.list || 'picks'] || [] : [];
+if (PICKS.length) { const pm = glowM(SC.pick.k ?? 4), pg = new THREE.Mesh(new THREE.BufferGeometry(), pm); pg.renderOrder = 40; pg.visible = false; model.add(pg); FX._pick = { obj: pg, mat: pm };
+  const va = new THREE.Vector3(), vb = new THREE.Vector3(), scr = (v) => { v.applyMatrix4(model.matrixWorld).project(camera); return v; };
+  const near = (x, y) => { const r = canvas.getBoundingClientRect(), px = (x - r.left) / r.width * 2 - 1, py = -((y - r.top) / r.height) * 2 + 1, kx = r.width / 2, ky = r.height / 2; let best = null, bd = (SC.pick.px ?? 22);
+    for (const it of PICKS) { if (it.u && SC.glass && !glassOn) continue; scr(va.set(...it.a)); scr(vb.set(...it.b)); if (va.z > 1 || vb.z > 1) continue;
+      const ax = va.x * kx, ay = va.y * ky, bx = vb.x * kx, by = vb.y * ky, qx = px * kx, qy = py * ky, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+      const t = L2 ? Math.max(0, Math.min(1, ((qx - ax) * dx + (qy - ay) * dy) / L2)) : 0, d = Math.hypot(qx - ax - t * dx, qy - ay - t * dy); if (d < bd) { bd = d; best = it; } }
+    return best; };
+  const openPick = (it) => { const a = new THREE.Vector3(...it.a), b = new THREE.Vector3(...it.b); pg.geometry.dispose(); pg.geometry = new THREE.TubeGeometry(new THREE.LineCurve3(a, b), 8, SC.pick.r ?? 3, 8, false);
+    const sp = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target)), mid = a.clone().lerp(b, 0.5);
+    const h = { id: 'hole ' + it.n, chip: it.n, k: it.k, h: it.n, p: it.p, s: it.s, links: it.url ? [{ u: it.url, t: SC.pick.linkText || 'The release' }] : [], parts: [], fx: ['_pick'], cls: 'pick', tag: it.n, tagAt: it.a, dy: 10,
+      view: { at: mid.toArray(), dist: Math.min(sp.radius / S, Math.max(SC.pick.dist ?? 420, a.distanceTo(b) * 1.8)), el: Math.PI / 2 - sp.phi, az: sp.theta } };
+    if (it.u) setGlass(true, true); choose(h); };
+  let dp = [0, 0]; canvas.addEventListener('pointerdown', (e) => { if (e.isPrimary) dp = [e.clientX, e.clientY]; });
+  canvas.addEventListener('pointerup', (e) => { if (!e.isPrimary || Math.hypot(e.clientX - dp[0], e.clientY - dp[1]) > 10) return; const it = near(e.clientX, e.clientY); if (it) openPick(it); });
+  window.__pick = (n) => { const it = PICKS.find(p => p.n === n); if (it) openPick(it); }; }
 
 // ---------- what's near: sourced places round the rim of the base, one arrow per direction (listing.json "near") ----------
 // Each place has a compass bearing from the property (worked out from its position when the page is built), a drive time or
@@ -589,8 +617,8 @@ const STOPS = [...HOT, ...(NEAR ? ['near'] : []), ...(GROW ? ['grow'] : [])];
 // 10-11-2026 (Adam: "the scenes move too fast to read"): each stop stays long enough to read its card (about 3 words a second plus the fly-in),
 // Room to grow stays until its build animation has finished, and the tour ends on the last stop instead of closing it.
 const words = (o) => { const t = [o && o.h, o && o.p, o && o.k].filter(Boolean).join(' ').replace(/<[^>]+>/g, ' '); return t.split(/\s+/).filter(Boolean).length; };
-const STOP_DUR = STOPS.map(s => { const o = s === 'grow' ? GROW : s === 'near' ? (typeof NEARC !== 'undefined' ? NEARC : null) : s; const r = Math.min(16, Math.max(8, 2.5 + words(o) / 3));
-  return s === 'grow' ? Math.max(r, 16) : r; });
+// 22-11-2026 (Adam: "it's too slow. It takes ages to get to the next section, so people don't even know if it's working... just 5 seconds per section"): was 8 to 16 s a stop
+const STOP_DUR = STOPS.map(s => (s === 'grow' ? 6 : 5));
 // go to one stop: a fact, What's near, or Room to grow
 function goStop(s, quiet) {
   if (s === 'grow') { if (!quiet) T('tap', 'grow'); if (sel) choose(null, true); setGrow(true); }
@@ -691,7 +719,7 @@ controls.addEventListener('start', () => { resetBtn.hidden = false; });
     controls._pan(-e.deltaX, -e.deltaY); }, { capture: true, passive: false }); }
 // keep the middle of the view on the plate, so it can never be lost off the edge
 const keepOnPlate = () => { const t = controls.target, lim = R * S * 0.95, r = Math.hypot(t.x, t.z); let dx = 0, dy = 0, dz = 0;
-  if (r > lim) { dx = t.x * (lim / r - 1); dz = t.z * (lim / r - 1); } const ty = Math.min(0.03, Math.max(-0.01, t.y)); dy = ty - t.y;
+  if (r > lim) { dx = t.x * (lim / r - 1); dz = t.z * (lim / r - 1); } const ty = Math.min(0.03, Math.max(SC.floor ? -SC.floor * S : -0.01, t.y)); dy = ty - t.y;
   if (dx || dy || dz) { t.x += dx; t.y += dy; t.z += dz; camera.position.x += dx; camera.position.y += dy; camera.position.z += dz; } };
 
 // ---------- AR ----------
@@ -760,7 +788,7 @@ function frame(now, xr) {
   if (!xr) { controls.update(); keepOnPlate(); liftView(dt); } tickTour(dt);
   if (LIFE) LIFE.tick(dt, { sel, growOn });
   if (SC.dayGlow != null) { const f = SC.dayGlow + (1 - SC.dayGlow) * (LIFE && LIFE.dusk ? LIFE.dusk() : 0); if (f !== DAYF) { DAYF = f; GLOWMATS.forEach(m => m.color.copy(m.userData.gc).multiplyScalar(f)); bloom.strength = BLOOM0 * (0.55 + 0.45 * f); } }
-  if (FADEM.length) { const tO = sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * 5); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
+  if (FADEM.length) { const tO = glassOn ? (SC.glass.o ?? 0.12) : sel && sel.parts.length ? 0.3 : 1; fadeO += (tO - fadeO) * Math.min(1, dt * (SC.glass ? 2.5 : 5)); FADEM.forEach(m => { m.opacity = fadeO; m.depthWrite = fadeO > 0.95; }); }
   if (sel) { glowT += dt; const pulse = NV.reduced ? 1 : 0.75 + 0.25 * Math.sin(glowT * 3.2);
     const k = Math.min(1, glowT / 0.6);
     MATS.forEach(m => { const on = sel.parts.includes(m.userData.p), base = BASEP.includes(m.userData.p);
